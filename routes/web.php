@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CategoryController,DashboardController,ContactController,DesignController,EveryPayController, FoodJunctionController, FrontendController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController};
+use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CategoryController,DashboardController,ContactController,DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController};
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -27,20 +27,10 @@ Route::get('config-clear', function () {
 
 
 
-// Route::get('/', function ()
-// {
-//     dd(1);
-// })->name('home');
-// Frontend
-Route::get('/', [FrontendController::class,'index'])->name('home');
-Route::get('/contact-us', [FrontendController::class,'contactUS'])->name('contact.us');
-Route::post('/contact-us-mail', [FrontendController::class,'contactUSMail'])->name('contact.us.mail');
-Route::get('/qr-guide', [FrontendController::class,'QrGuide'])->name('qr.guide');
-Route::get('/qr-menu', [FrontendController::class,'QrMenu'])->name('qr.menu');
-Route::get('/signup-trial', [FrontendController::class,'signUpTrial'])->name('signup.trial');
-Route::post('/frontend-register-shop', [FrontendController::class,'registerShopFrontend'])->name('frontend.register.shop');
-Route::get('shop-verify/{userID}',[FrontendController::class,'ShopVerify'])->name('shop-verify');
-Route::post('shop-verification',[FrontendController::class,'processShopVerify'])->name('do-shop-verification');
+Route::get('/', function ()
+{
+    dd(1);
+})->name('home');
 
 
 // Auth Routes
@@ -51,93 +41,93 @@ Route::post('/login', [AuthController::class,'login'])->name('doLogin');
 Route::get('/logout', [AuthController::class,'logout'])->name('logout');
 
 
-Route::group(['prefix' => 'admin'], function ()
-{
-    // If Auth Login
-    Route::group(['middleware' => ['auth','is_admin']], function ()
-    {
-        // Admin Dashboard
-        Route::get('dashboard', [DashboardController::class,'index'])->name('admin.dashboard');
+// Route::group(['prefix' => 'admin'], function ()
+// {
+//     // If Auth Login
+//     Route::group(['middleware' => ['auth','is_admin']], function ()
+//     {
+//         // Admin Dashboard
+//         Route::get('dashboard', [DashboardController::class,'index'])->name('admin.dashboard');
 
-        // Admins
-        Route::get('/admins',[UserController::class,'AdminUsers'])->name('admins');
-        Route::get('/new-admins',[UserController::class,'NewAdminUser'])->name('admins.add');
-        Route::post('/store-admins',[UserController::class,'storeNewAdmin'])->name('admins.store');
-        Route::get('/delete-admins/{id}',[UserController::class,'destroyAdminUser'])->name('admins.destroy');
-        Route::get('/edit-admins/{id}',[UserController::class,'editAdmin'])->name('admins.edit');
-        Route::post('/update-admins',[UserController::class,'updateAdmin'])->name('admins.update');
+//         // Admins
+//         Route::get('/admins',[UserController::class,'AdminUsers'])->name('admins');
+//         Route::get('/new-admins',[UserController::class,'NewAdminUser'])->name('admins.add');
+//         Route::post('/store-admins',[UserController::class,'storeNewAdmin'])->name('admins.store');
+//         Route::get('/delete-admins/{id}',[UserController::class,'destroyAdminUser'])->name('admins.destroy');
+//         Route::get('/edit-admins/{id}',[UserController::class,'editAdmin'])->name('admins.edit');
+//         Route::post('/update-admins',[UserController::class,'updateAdmin'])->name('admins.update');
 
-        // Clients
-        Route::get('/clients',[UserController::class,'index'])->name('clients');
-        Route::get('/list-clients/{id?}',[UserController::class,'clientsList'])->name('clients.list');
-        Route::get('/new-clients',[UserController::class,'insert'])->name('clients.add');
-        Route::post('/store-clients',[UserController::class,'store'])->name('clients.store');
-        Route::post('/status-clients',[UserController::class,'changeStatus'])->name('clients.status');
-        Route::post('/status-fav-clients',[UserController::class,'addToFavClients'])->name('clients.addtofav');
-        Route::post('/delete-clients',[UserController::class,'destroy'])->name('clients.destroy');
-        Route::get('/edit-clients/{id}',[UserController::class,'edit'])->name('clients.edit');
-        Route::get('/access-clients/{id}',[UserController::class,'clientAccess'])->name('clients.access');
-        Route::post('/update-clients',[UserController::class,'update'])->name('clients.update');
-        Route::post('/delete-clients-data',[UserController::class,'deleteClientsData'])->name('client.delete.data');
-        Route::post('/delete-clients-orders',[UserController::class,'deleteClientsOrders'])->name('client.delete.orders');
-        Route::post('/clients-verify',[UserController::class,'clientsVerify'])->name('clients.verify');
+//         // Clients
+//         Route::get('/clients',[UserController::class,'index'])->name('clients');
+//         Route::get('/list-clients/{id?}',[UserController::class,'clientsList'])->name('clients.list');
+//         Route::get('/new-clients',[UserController::class,'insert'])->name('clients.add');
+//         Route::post('/store-clients',[UserController::class,'store'])->name('clients.store');
+//         Route::post('/status-clients',[UserController::class,'changeStatus'])->name('clients.status');
+//         Route::post('/status-fav-clients',[UserController::class,'addToFavClients'])->name('clients.addtofav');
+//         Route::post('/delete-clients',[UserController::class,'destroy'])->name('clients.destroy');
+//         Route::get('/edit-clients/{id}',[UserController::class,'edit'])->name('clients.edit');
+//         Route::get('/access-clients/{id}',[UserController::class,'clientAccess'])->name('clients.access');
+//         Route::post('/update-clients',[UserController::class,'update'])->name('clients.update');
+//         Route::post('/delete-clients-data',[UserController::class,'deleteClientsData'])->name('client.delete.data');
+//         Route::post('/delete-clients-orders',[UserController::class,'deleteClientsOrders'])->name('client.delete.orders');
+//         Route::post('/clients-verify',[UserController::class,'clientsVerify'])->name('clients.verify');
 
-        // Subscription
-        Route::get('/subscriptions',[SubscriptionsController::class,'index'])->name('subscriptions');
-        Route::get('/new-subscription',[SubscriptionsController::class,'insert'])->name('subscriptions.add');
-        Route::post('/store-subscription',[SubscriptionsController::class,'store'])->name('subscriptions.store');
-        Route::post('/delete-subscription',[SubscriptionsController::class,'destroy'])->name('subscriptions.destroy');
-        Route::get('/edit-subscription/{id}',[SubscriptionsController::class,'edit'])->name('subscriptions.edit');
-        Route::post('/update-subscription',[SubscriptionsController::class,'update'])->name('subscriptions.update');
+//         // Subscription
+//         Route::get('/subscriptions',[SubscriptionsController::class,'index'])->name('subscriptions');
+//         Route::get('/new-subscription',[SubscriptionsController::class,'insert'])->name('subscriptions.add');
+//         Route::post('/store-subscription',[SubscriptionsController::class,'store'])->name('subscriptions.store');
+//         Route::post('/delete-subscription',[SubscriptionsController::class,'destroy'])->name('subscriptions.destroy');
+//         Route::get('/edit-subscription/{id}',[SubscriptionsController::class,'edit'])->name('subscriptions.edit');
+//         Route::post('/update-subscription',[SubscriptionsController::class,'update'])->name('subscriptions.update');
 
-        // Tutorial
-        Route::get('/tutorial',[TutorialController::class,'index'])->name('tutorial');
-        Route::get('/new-tutorial',[TutorialController::class,'insert'])->name('tutorial.add');
-        Route::post('/store-tutorial',[TutorialController::class,'store'])->name('tutorial.store');
-        Route::get('/delete-tutorial/{id}',[TutorialController::class,'destroy'])->name('tutorial.destroy');
-        Route::get('/edit-tutorial/{id}',[TutorialController::class,'edit'])->name('tutorial.edit');
-        Route::post('/update-tutorial',[TutorialController::class,'update'])->name('tutorial.update');
+//         // Tutorial
+//         Route::get('/tutorial',[TutorialController::class,'index'])->name('tutorial');
+//         Route::get('/new-tutorial',[TutorialController::class,'insert'])->name('tutorial.add');
+//         Route::post('/store-tutorial',[TutorialController::class,'store'])->name('tutorial.store');
+//         Route::get('/delete-tutorial/{id}',[TutorialController::class,'destroy'])->name('tutorial.destroy');
+//         Route::get('/edit-tutorial/{id}',[TutorialController::class,'edit'])->name('tutorial.edit');
+//         Route::post('/update-tutorial',[TutorialController::class,'update'])->name('tutorial.update');
 
-        // Ingredients
-        Route::get('/ingredients',[IngredientController::class,'index'])->name('ingredients');
-        Route::get('/new-ingredients',[IngredientController::class,'insert'])->name('ingredients.add');
-        Route::post('/store-ingredients',[IngredientController::class,'store'])->name('ingredients.store');
-        Route::get('/delete-ingredients/{id}',[IngredientController::class,'destroy'])->name('ingredients.destroy');
-        Route::get('/edit-ingredients/{id}',[IngredientController::class,'edit'])->name('ingredients.edit');
-        Route::post('/update-ingredients',[IngredientController::class,'update'])->name('ingredients.update');
-        Route::post('/status-ingredients',[IngredientController::class,'changeStatus'])->name('ingredients.status');
+//         // Ingredients
+//         Route::get('/ingredients',[IngredientController::class,'index'])->name('ingredients');
+//         Route::get('/new-ingredients',[IngredientController::class,'insert'])->name('ingredients.add');
+//         Route::post('/store-ingredients',[IngredientController::class,'store'])->name('ingredients.store');
+//         Route::get('/delete-ingredients/{id}',[IngredientController::class,'destroy'])->name('ingredients.destroy');
+//         Route::get('/edit-ingredients/{id}',[IngredientController::class,'edit'])->name('ingredients.edit');
+//         Route::post('/update-ingredients',[IngredientController::class,'update'])->name('ingredients.update');
+//         Route::post('/status-ingredients',[IngredientController::class,'changeStatus'])->name('ingredients.status');
 
-        // AdminProfile
-        Route::get('/my-profile/{id}',[UserController::class,'myProfile'])->name('admin.profile.view');
-        Route::get('/edit-profile/{id}',[UserController::class,'editProfile'])->name('admin.profile.edit');
-        Route::post('/update-profile',[UserController::class,'updateProfile'])->name('admin.profile.update');
-
-
-        // Admin Settings
-        Route::get('/settings',[AdminSettingsController::class,'index'])->name('admin.settings');
-        Route::post('/settings-update',[AdminSettingsController::class,'update'])->name('update.admin.settings');
+//         // AdminProfile
+//         Route::get('/my-profile/{id}',[UserController::class,'myProfile'])->name('admin.profile.view');
+//         Route::get('/edit-profile/{id}',[UserController::class,'editProfile'])->name('admin.profile.edit');
+//         Route::post('/update-profile',[UserController::class,'updateProfile'])->name('admin.profile.update');
 
 
-        // Languages
-        Route::post('/save-language',[LanguagesController::class,'saveAjax'])->name('languages.save.ajax');
+//         // Admin Settings
+//         Route::get('/settings',[AdminSettingsController::class,'index'])->name('admin.settings');
+//         Route::post('/settings-update',[AdminSettingsController::class,'update'])->name('update.admin.settings');
 
-        // Import & Export
-        Route::get('/import-export', [ImportExportController::class,'index'])->name('admin.import.export');
-        Route::post('/import-data', [ImportExportController::class,'importData'])->name('admin.import.data');
-        Route::post('/export-data', [ImportExportController::class,'exportData'])->name('admin.export.data');
 
-        // Food Junctions
-        Route::get('/food-junctions',[FoodJunctionController::class,'index'])->name('food.junctions');
-        Route::get('/food-junctions-create',[FoodJunctionController::class,'create'])->name('food.junctions.create');
-        Route::post('/food-junctions-store',[FoodJunctionController::class,'store'])->name('food.junctions.store');
-        Route::post('/food-junctions-status',[FoodJunctionController::class,'changeStatus'])->name('food.junctions.status');
-        Route::get('/food-junctions-edit/{id}',[FoodJunctionController::class,'edit'])->name('food.junctions.edit');
-        Route::post('/food-junctions-update',[FoodJunctionController::class,'update'])->name('food.junctions.update');
-        Route::get('/food-junctions-destroy/{id}',[FoodJunctionController::class,'destroy'])->name('food.junctions.destroy');
+//         // Languages
+//         Route::post('/save-language',[LanguagesController::class,'saveAjax'])->name('languages.save.ajax');
 
-    });
+//         // Import & Export
+//         Route::get('/import-export', [ImportExportController::class,'index'])->name('admin.import.export');
+//         Route::post('/import-data', [ImportExportController::class,'importData'])->name('admin.import.data');
+//         Route::post('/export-data', [ImportExportController::class,'exportData'])->name('admin.export.data');
 
-});
+//         // Food Junctions
+//         Route::get('/food-junctions',[FoodJunctionController::class,'index'])->name('food.junctions');
+//         Route::get('/food-junctions-create',[FoodJunctionController::class,'create'])->name('food.junctions.create');
+//         Route::post('/food-junctions-store',[FoodJunctionController::class,'store'])->name('food.junctions.store');
+//         Route::post('/food-junctions-status',[FoodJunctionController::class,'changeStatus'])->name('food.junctions.status');
+//         Route::get('/food-junctions-edit/{id}',[FoodJunctionController::class,'edit'])->name('food.junctions.edit');
+//         Route::post('/food-junctions-update',[FoodJunctionController::class,'update'])->name('food.junctions.update');
+//         Route::get('/food-junctions-destroy/{id}',[FoodJunctionController::class,'destroy'])->name('food.junctions.destroy');
+
+//     });
+
+// });
 
 
 Route::group(['prefix' => 'client'], function()
