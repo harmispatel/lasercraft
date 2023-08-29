@@ -474,8 +474,8 @@
                                             <div class="item_img">
                                                 <a>
                                                     @if($category->category_type == 'page' || $category->category_type == 'gallery' || $category->category_type == 'link' || $category->category_type == 'check_in' || $category->category_type == 'parent_category' || $category->category_type == 'pdf_page')
-                                                        @if(!empty($category->cover) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover))
-                                                            <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover) }}" class="w-100">
+                                                        @if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
+                                                            <img src="{{ asset('public/client_uploads/categories/'.$category->cover) }}" class="w-100">
                                                         @else
                                                             <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" class="w-100">
                                                         @endif
@@ -484,8 +484,8 @@
                                                             $cat_image = isset($category->categoryImages[0]['image']) ? $category->categoryImages[0]['image'] : '';
                                                         @endphp
 
-                                                        @if(!empty($cat_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image))
-                                                            <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image) }}" class="w-100">
+                                                        @if(!empty($cat_image) && file_exists('public/client_uploads/categories/'.$cat_image))
+                                                            <img src="{{ asset('public/client_uploads/categories/'.$cat_image) }}" class="w-100">
                                                         @else
                                                             <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" class="w-100">
                                                         @endif
