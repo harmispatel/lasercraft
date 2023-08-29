@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CategoryController,DashboardController,ContactController,DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController};
+use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CategoryController,DashboardController,ContactController,DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -29,9 +29,10 @@ Route::get('config-clear', function () {
 
 Route::get('/', function ()
 {
-    dd(1);
+    return redirect('home');
 })->name('home');
 
+Route::get('/welcome',[FrontendController::class,'index'])->name('home');
 
 // Auth Routes
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
