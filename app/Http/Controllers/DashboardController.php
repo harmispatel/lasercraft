@@ -32,9 +32,6 @@ class DashboardController extends Controller
     // Display Client Dashboard
     public function clientDashboard()
     {
-        // Shop ID
-        $data['shop_id'] = isset(Auth::user()->hasOneShop->Shop['id']) ? Auth::user()->hasOneShop->Shop['id'] : '';
-
         // Get Language Settings
         $language_settings = clientLanguageSettings($data['shop_id']);
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
