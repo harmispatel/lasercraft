@@ -1,7 +1,6 @@
 @php
     $client_settings = getClientSettings();
     $logo = isset($client_settings['shop_view_header_logo']) ? $client_settings['shop_view_header_logo'] : '';
-    $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
 @endphp
 
@@ -24,8 +23,8 @@
                             @csrf
                             <div class="add_logo_sec_body_inr position-relative">
                                 <label for="shop_view_header_logo" class="position-relative" style="cursor: pointer;">
-                                    @if(!empty($logo) && file_exists('public/client_uploads/shops/'.$shop_slug.'/top_logos/'.$logo))
-                                        <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/top_logos/'.$logo) }}" width="200px"/>
+                                    @if(!empty($logo) && file_exists('public/client_uploads/top_logos/'.$logo))
+                                        <img src="{{ asset('public/client_uploads/top_logos/'.$logo) }}" width="200px"/>
                                         <a href="{{ route('design.logo.delete') }}" class="btn btn-sm btn-danger" style="position: absolute; top: -35px; right: 0px;"><i class="bi bi-trash"></i></a>
                                     @else
                                         <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" width="200px"/>

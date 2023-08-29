@@ -13,19 +13,7 @@ class ShopBannerController extends Controller
 
     public function index()
     {
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
-        // Subscrption ID
-        $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-        if(!isset($package_permissions['banner']) || empty($package_permissions['banner']) || $package_permissions['banner'] == 0)
-        {
-            return redirect()->route('client.dashboard')->with('error',"You have not access this Menu");
-        }
-
-        $data['banners'] = ShopBanner::where('key','shop_banner')->where('shop_id',$shop_id)->get();
+        $data['banners'] = ShopBanner::where('key','shop_banner')->get();
 
         return view('client.design.banner',$data);
     }
@@ -40,11 +28,8 @@ class ShopBannerController extends Controller
             'image' => 'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
         ]);
 
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Language Details
@@ -60,7 +45,6 @@ class ShopBannerController extends Controller
         try
         {
             $banner = new ShopBanner();
-            $banner->shop_id = $shop_id;
             $banner->key = 'shop_banner';
             $banner->display = $display;
             $banner->background_color = $background_color;
@@ -71,7 +55,7 @@ class ShopBannerController extends Controller
             {
                 // Insert new Image
                 $imgname = "banner_".time().".". $request->file('image')->getClientOriginalExtension();
-                $request->file('image')->move(public_path('client_uploads/shops/'.$shop_slug.'/banners/'), $imgname);
+                $request->file('image')->move(public_path('client_uploads/banners/'), $imgname);
                 $banner->image = $imgname;
                 $banner->$image_key = $imgname;
             }
@@ -99,8 +83,6 @@ class ShopBannerController extends Controller
     public function edit(Request $request)
     {
         $banner_id = $request->id;
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
         $display_arr = [
             'both' => 'Both',
@@ -111,7 +93,7 @@ class ShopBannerController extends Controller
         try
         {
             // Get Language Settings
-            $language_settings = clientLanguageSettings($shop_id);
+            $language_settings = clientLanguageSettings();
             $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
             // Primary Language Details
@@ -122,12 +104,12 @@ class ShopBannerController extends Controller
             $banner_description_key = $primary_lang_code."_description";
 
             // Additional Languages
-            $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+            $additional_languages = AdditionalLanguage::get();
 
             // Banner Details
             $banner_details = ShopBanner::where('id',$banner_id)->first();
             $default_image = asset('public/client_images/not-found/no_image_1.jpg');
-            $banner_image = (isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key])) ? asset('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key]) : $default_image;
+            $banner_image = (isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/banners/'.$banner_details[$banner_image_key])) ? asset('public/client_uploads/banners/'.$banner_details[$banner_image_key]) : $default_image;
             $banner_desc = isset($banner_details[$banner_description_key]) ? $banner_details[$banner_description_key] : '';
             $background_color = isset($banner_details['background_color']) ? $banner_details['background_color'] : '';
 
@@ -168,7 +150,7 @@ class ShopBannerController extends Controller
                                     $html .= '<code>'.__('Banner Dimensions (1140*300)').'</code>';
                                     $html .= '<div class="position-relative mt-2 banner-img">';
                                         $html .= '<img src='.$banner_image.' class="" width="160">';
-                                        if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key]))
+                                        if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/banners/'.$banner_details[$banner_image_key]))
                                         {
                                             $html .= '<a onclick="deleteBannerImage('.$banner_id.',\''.$primary_lang_code.'\')" class="btn btn-sm btn-danger position-absolute" style="top:0;left:0"><i class="bi bi-trash"></i></a>';
                                         }
@@ -236,7 +218,7 @@ class ShopBannerController extends Controller
                                     $html .= '<code>'.__('Banner Dimensions (1140*300)').'</code>';
                                     $html .= '<div class="position-relative mt-2 banner-img">';
                                         $html .= '<img src='.$banner_image.' class="" width="160">';
-                                        if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key]))
+                                        if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/banners/'.$banner_details[$banner_image_key]))
                                         {
                                             $html .= '<a onclick="deleteBannerImage('.$banner_id.',\''.$primary_lang_code.'\')" class="btn btn-sm btn-danger position-absolute" style="top:0;left:0"><i class="bi bi-trash"></i></a>';
                                         }
@@ -299,10 +281,6 @@ class ShopBannerController extends Controller
     // Function for Update Banner By Language Code
     public function updateByLangCode(Request $request)
     {
-        // Shop ID & Slug
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $banner_id = $request->banner_id;
         $description = $request->description;
         $display = $request->display;
@@ -331,14 +309,14 @@ class ShopBannerController extends Controller
             {
                 // Remove Old Image
                 $old_image = isset($banner[$update_image_key]) ? $banner[$update_image_key] : '';
-                if(!empty($old_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$old_image))
+                if(!empty($old_image) && file_exists('public/client_uploads/banners/'.$old_image))
                 {
-                    unlink('public/client_uploads/shops/'.$shop_slug.'/banners/'.$old_image);
+                    unlink('public/client_uploads/banners/'.$old_image);
                 }
 
                 // Insert new Image
                 $imgname = "banner_".time().".". $request->file('image')->getClientOriginalExtension();
-                $request->file('image')->move(public_path('client_uploads/shops/'.$shop_slug.'/banners/'), $imgname);
+                $request->file('image')->move(public_path('client_uploads/banners/'), $imgname);
                 $banner->image = $imgname;
                 $banner->$update_image_key = $imgname;
             }
@@ -368,9 +346,6 @@ class ShopBannerController extends Controller
     // Function for Get Banner Data
     public function getEditBannerData($current_lang_code,$banner_id)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $display_arr = [
             'both' => 'Both',
             'image' => 'Image',
@@ -378,7 +353,7 @@ class ShopBannerController extends Controller
         ];
 
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Primary Language Details
@@ -387,7 +362,7 @@ class ShopBannerController extends Controller
         $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
         // Additional Languages
-        $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+        $additional_languages = AdditionalLanguage::get();
         if(count($additional_languages) > 0)
         {
             $banner_image_key = $current_lang_code."_image";
@@ -402,7 +377,7 @@ class ShopBannerController extends Controller
         // Banner Details
         $banner_details = ShopBanner::where('id',$banner_id)->first();
         $default_image = asset('public/client_images/not-found/no_image_1.jpg');
-        $banner_image = (isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key])) ? asset('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key]) : $default_image;
+        $banner_image = (isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/banners/'.$banner_details[$banner_image_key])) ? asset('public/client_uploads/banners/'.$banner_details[$banner_image_key]) : $default_image;
         $banner_desc = isset($banner_details[$banner_description_key]) ? $banner_details[$banner_description_key] : '';
         $background_color = isset($banner_details['background_color']) ? $banner_details['background_color'] : '';
 
@@ -449,7 +424,7 @@ class ShopBannerController extends Controller
                                 $html .= '<code>'.__('Banner Dimensions (1140*300)').'</code>';
                                 $html .= '<div class="position-relative mt-2 banner-img">';
                                     $html .= '<img src='.$banner_image.' class="" width="160">';
-                                    if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key]))
+                                    if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/banners/'.$banner_details[$banner_image_key]))
                                     {
                                         $html .= '<a onclick="deleteBannerImage('.$banner_id.',\''.$current_lang_code.'\')" class="btn btn-sm btn-danger position-absolute" style="top:0;left:0"><i class="bi bi-trash"></i></a>';
                                     }
@@ -517,7 +492,7 @@ class ShopBannerController extends Controller
                                 $html .= '<code>'.__('Banner Dimensions (1140*300)').'</code>';
                                 $html .= '<div class="position-relative mt-2 banner-img">';
                                     $html .= '<img src='.$banner_image.' class="" width="160">';
-                                    if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_details[$banner_image_key]))
+                                    if(isset($banner_details[$banner_image_key]) && !empty($banner_details[$banner_image_key]) && file_exists('public/client_uploads/banners/'.$banner_details[$banner_image_key]))
                                     {
                                         $html .= '<a onclick="deleteBannerImage('.$banner_id.',\''.$current_lang_code.'\')" class="btn btn-sm btn-danger position-absolute" style="top:0;left:0"><i class="bi bi-trash"></i></a>';
                                     }
@@ -569,10 +544,6 @@ class ShopBannerController extends Controller
     // Function for Update Banners
     public function update(Request $request)
     {
-        // Shop ID & Slug
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $banner_id = $request->banner_id;
         $display = $request->display;
         $background_color = $request->background_color;
@@ -600,14 +571,14 @@ class ShopBannerController extends Controller
             {
                 // Remove Old Image
                 $old_image = isset($banner[$update_image_key]) ? $banner[$update_image_key] : '';
-                if(!empty($old_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$old_image))
+                if(!empty($old_image) && file_exists('public/client_uploads/banners/'.$old_image))
                 {
-                    unlink('public/client_uploads/shops/'.$shop_slug.'/banners/'.$old_image);
+                    unlink('public/client_uploads/banners/'.$old_image);
                 }
 
                 // Insert new Image
                 $imgname = "banner_".time().".". $request->file('image')->getClientOriginalExtension();
-                $request->file('image')->move(public_path('client_uploads/shops/'.$shop_slug.'/banners/'), $imgname);
+                $request->file('image')->move(public_path('client_uploads/banners/'), $imgname);
                 $banner->image = $imgname;
                 $banner->$update_image_key = $imgname;
             }
@@ -635,8 +606,6 @@ class ShopBannerController extends Controller
     {
         $language_code = $request->lang_code;
         $banner_id = $request->banner_id;
-        $shop_id = (isset(Auth::user()->hasOneShop['shop']->id)) ? Auth::user()->hasOneShop['shop']->id : '';
-        $shop_slug = (isset(Auth::user()->hasOneShop['shop']->shop_slug)) ? Auth::user()->hasOneShop['shop']->shop_slug : '';
         $image_key = $language_code."_image";
 
         try
@@ -647,9 +616,9 @@ class ShopBannerController extends Controller
             {
                 $lang_bannner = isset($banner[$image_key]) ? $banner[$image_key] : '';
 
-                if(!empty($lang_bannner) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$lang_bannner))
+                if(!empty($lang_bannner) && file_exists('public/client_uploads/banners/'.$lang_bannner))
                 {
-                    unlink('public/client_uploads/shops/'.$shop_slug.'/banners/'.$lang_bannner);
+                    unlink('public/client_uploads/banners/'.$lang_bannner);
                 }
 
                 $banner->image = "";
@@ -677,11 +646,8 @@ class ShopBannerController extends Controller
     // Function for Delete Banner
     public function destroy(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Language Details
@@ -698,9 +664,9 @@ class ShopBannerController extends Controller
             $banner_img = (isset($banner_dt[$image_key])) ? $banner_dt[$image_key] : '';
 
             // Delete Image
-            if(!empty($banner_img) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_img))
+            if(!empty($banner_img) && file_exists('public/client_uploads/banners/'.$banner_img))
             {
-                unlink('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_img);
+                unlink('public/client_uploads/banners/'.$banner_img);
             }
 
             // Delete Banner

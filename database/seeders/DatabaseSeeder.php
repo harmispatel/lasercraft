@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             AdminSettingSeeder::class,
             IngredientSeeder::class,
             CountrySeeder::class,
+            LanguageSettingSeeder::class,
+            ClientSettingSeeder::class,
         ]);
     }
 }

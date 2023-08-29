@@ -17,7 +17,6 @@ class CategoryController extends Controller
     // Get all Categories
     public function index($uri = NULL)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
         $categories = Category::query();
 
         $cat_type_arr = ['page','link','gallery','check_in','pdf_page'];
@@ -54,11 +53,11 @@ class CategoryController extends Controller
             $categories = $categories->where('parent_id',$uri)->whereIn('category_type',['product_category','parent_category']);
         }
 
-        $categories = $categories->where('shop_id',$shop_id)->orderBy('order_key')->get();
+        $categories = $categories->orderBy('order_key')->get();
         $data['categories'] = $categories;
         $data['parent_cat_id'] = $uri;
         $data['cat_details'] = $cat;
-        $data['parent_categories'] = Category::where('shop_id',$shop_id)->where('parent_category',1)->get();
+        $data['parent_categories'] = Category::where('parent_category',1)->get();
 
         if($uri == 'page' || $uri == 'link' || $uri == 'pdf_page' || $uri == 'check_in')
         {
@@ -101,12 +100,8 @@ class CategoryController extends Controller
 
         $request->validate($rules);
 
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Language Details
@@ -119,7 +114,6 @@ class CategoryController extends Controller
         $name = $request->name;
         $description = $request->description;
         $published = isset($request->published) ? $request->published : 0;
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
 
         $max_category_order_key = Category::max('order_key');
         $category_order = (isset($max_category_order_key) && !empty($max_category_order_key)) ? ($max_category_order_key + 1) : 1;
@@ -160,7 +154,7 @@ class CategoryController extends Controller
                 if($request->hasFile('cover'))
                 {
                     $cover_name = "cover_".time().".". $request->file('cover')->getClientOriginalExtension();
-                    $request->file('cover')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories/'), $cover_name);
+                    $request->file('cover')->move(public_path('client_uploads/categories/'), $cover_name);
                     $category->cover = $cover_name;
                 }
             }
@@ -201,7 +195,7 @@ class CategoryController extends Controller
                 if($request->hasFile('pdf'))
                 {
                     $file_name = "pdf_".time().".". $request->file('pdf')->getClientOriginalExtension();
-                    $request->file('pdf')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories/'), $file_name);
+                    $request->file('pdf')->move(public_path('client_uploads/categories/'), $file_name);
                     $category->file = $file_name;
                 }
             }
@@ -212,7 +206,6 @@ class CategoryController extends Controller
             }
 
             $category->published = $published;
-            $category->shop_id = $shop_id;
             $category->order_key = $category_order;
             $category->save();
 
@@ -232,9 +225,9 @@ class CategoryController extends Controller
                         $image_base64 = base64_decode($image_arr[1]);
 
                         $imgname = "category_".$image_token.".".$image_type_ext[1];
-                        $img_path = public_path('client_uploads/shops/'.$shop_slug.'/categories/'.$imgname);
+                        $img_path = public_path('client_uploads/categories/'.$imgname);
                         file_put_contents($img_path,$image_base64);
-                        // $request->file('image')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories'), $imgname);
+                        // $request->file('image')->move(public_path('client_uploads/categories'), $imgname);
 
                         // Insert Image
                         $new_img = new CategoryImages();
@@ -254,10 +247,10 @@ class CategoryController extends Controller
         }
         catch (\Throwable $th)
         {
-                return response()->json([
-                    'success' => 0,
-                    'message' => "Internal Server Error!",
-                ]);
+            return response()->json([
+                'success' => 0,
+                'message' => "Internal Server Error!",
+            ]);
         }
 
     }
@@ -270,7 +263,6 @@ class CategoryController extends Controller
         try
         {
             $id = $request->id;
-            $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
             // Category Items Count
             $items_count = Items::where('category_id',$id)->count();
@@ -294,9 +286,9 @@ class CategoryController extends Controller
                     foreach($category_images as $cat_image)
                     {
                         // Delete Category Image
-                        if(!empty($cat_image->image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image->image))
+                        if(!empty($cat_image->image) && file_exists('public/client_uploads/categories/'.$cat_image->image))
                         {
-                            unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image->image);
+                            unlink('public/client_uploads/categories/'.$cat_image->image);
                         }
                     }
                 }
@@ -304,17 +296,17 @@ class CategoryController extends Controller
 
                 // PDF file Delete
                 $pdf_file = isset($category_details['file']) ? $category_details['file'] : '';
-                if(!empty($pdf_file) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$pdf_file))
+                if(!empty($pdf_file) && file_exists('public/client_uploads/categories/'.$pdf_file))
                 {
-                    unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$pdf_file);
+                    unlink('public/client_uploads/categories/'.$pdf_file);
                 }
 
 
                 // Cover Image Delete
                 $cover_image = isset($category_details['cover']) ? $category_details['cover'] : '';
-                if(!empty($cover_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cover_image))
+                if(!empty($cover_image) && file_exists('public/client_uploads/categories/'.$cover_image))
                 {
-                    unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cover_image);
+                    unlink('public/client_uploads/categories/'.$cover_image);
                 }
 
 
@@ -349,8 +341,6 @@ class CategoryController extends Controller
     public function edit(Request $request)
     {
         $category_id = $request->id;
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
         try
         {
@@ -358,7 +348,7 @@ class CategoryController extends Controller
             $category = Category::where('id',$category_id)->first();
 
             // Get all Parent Categories
-            $parent_categories = Category::where('shop_id',$shop_id)->where('id','!=',$category_id)->where('parent_category',1)->get();
+            $parent_categories = Category::where('id','!=',$category_id)->where('parent_category',1)->get();
 
             // Category Types
             $category_types = [
@@ -379,16 +369,14 @@ class CategoryController extends Controller
             $category_images = CategoryImages::where('category_id',$category_id)->get();
 
             // Get Language Settings
-            $language_settings = clientLanguageSettings($shop_id);
+            $language_settings = clientLanguageSettings();
             $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
             // Primary Language Details
             $primary_language_detail = Languages::where('id',$primary_lang_id)->first();
             $primary_lang_code = isset($primary_language_detail->code) ? $primary_language_detail->code : '';
-            $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
             $category_name_key = $primary_lang_code."_name";
             $category_desc_key = $primary_lang_code."_description";
-            $primary_input_lang_code = "'$primary_lang_code'";
 
             // Category Details
             $category_status = (isset($category['published']) && $category['published'] == 1) ? 'checked' : '';
@@ -401,7 +389,7 @@ class CategoryController extends Controller
             $root_parent_cat_checked = ($category['parent_category'] == 1) ? 'checked' : '';
 
             // Additional Languages
-            $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+            $additional_languages = AdditionalLanguage::get();
 
             // Check In Page Styles
             $check_page_style = (isset($category['styles']) && !empty($category['styles'])) ? unserialize($category['styles']) : '';
@@ -423,7 +411,6 @@ class CategoryController extends Controller
                         // Additional Language Details
                         $add_lang_detail = Languages::where('id',$value->language_id)->first();
                         $add_lang_code = isset($add_lang_detail->code) ? $add_lang_detail->code : '';
-                        $add_lang_name = isset($add_lang_detail->name) ? $add_lang_detail->name : '';
 
                         $html .= '<a class="text-uppercase" onclick="updateByCode(\''.$add_lang_code.'\')">'.$add_lang_code.'</a>';
                     }
@@ -439,27 +426,6 @@ class CategoryController extends Controller
                             $html .= '<input type="hidden" name="active_lang_code" id="active_lang_code" value="'.$primary_lang_code.'">';
                             $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                             $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
-
-                            // Category Type
-                            // $html .= '<div class="row mb-3">';
-                            //     $html .= '<div class="col-md-12">';
-                            //         $html .= '<label class="form-label" for="category_type">'.__('Type').'</label>';
-                            //         $html .= '<select onchange="changeElements(\'editCategoryModal\')" name="category_type" id="category_type" class="form-select category_type">';
-                            //             foreach($category_types as $cat_type_key => $cat_type)
-                            //             {
-                            //                 $html .= '<option value="'.$cat_type_key.'"';
-
-                            //                     if($cat_type_key == $category->category_type)
-                            //                     {
-                            //                         $html .= 'selected';
-                            //                     }
-
-                            //                 $html.='>'.$cat_type.'</option>';
-                            //             }
-                            //         $html .= '</select>';
-                            //     $html .= '</div>';
-                            //     $html .= '</div>';
-                            // $html .= '</div>';
 
                             // Category
                             $html .= '<div class="row mb-3 cat_div">';
@@ -484,14 +450,6 @@ class CategoryController extends Controller
                                 $html .= '<div class="col-md-12">';
                                 $html .= '<label class="form-label" for="category_name">'.__('Name').'</label>';
                                 $html .= '<input type="text" name="category_name" id="category_name" class="form-control" value="'.$category_name.'">';
-                                $html .= '</div>';
-                            $html .= '</div>';
-
-                            // Sort Order
-                            $html .= '<div class="row mb-3">';
-                                $html .= '<div class="col-md-12">';
-                                $html .= '<label class="form-label" for="sort_order">'.__('Sort Order').'</label>';
-                                $html .= '<input type="text" name="sort_order" id="sort_order" class="form-control" value="'.$category['order_key'].'">';
                                 $html .= '</div>';
                             $html .= '</div>';
 
@@ -557,10 +515,10 @@ class CategoryController extends Controller
                                             {
                                                 $no = $key + 1;
 
-                                                if(!empty($cat_image['image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']))
+                                                if(!empty($cat_image['image']) && file_exists('public/client_uploads/categories/'.$cat_image['image']))
                                                 {
                                                     $html .= '<div class="inner-img edit_img_'.$no.'">';
-                                                        $html .= '<img src="'.asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']).'" class="w-100 h-100">';
+                                                        $html .= '<img src="'.asset('public/client_uploads/categories/'.$cat_image['image']).'" class="w-100 h-100">';
                                                         $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteCategoryImage('.$no.','.$cat_image->id.')"><i class="fa fa-trash"></i></a>';
                                                     $html .= '</div>';
                                                 }
@@ -606,9 +564,9 @@ class CategoryController extends Controller
 
                             // Cover Image
                             $cover_active = ($category->category_type == 'page' || $category->category_type == 'link' || $category->category_type == 'gallery' || $category->category_type == 'check_in' || $category->category_type == 'parent_category' || $category->category_type == 'pdf_page') ? '' : 'none';
-                            if(!empty($category->cover) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover))
+                            if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
                             {
-                                $cover_image = asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover);
+                                $cover_image = asset('public/client_uploads/categories/'.$category->cover);
                             }
                             else
                             {
@@ -783,27 +741,6 @@ class CategoryController extends Controller
                             $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                             $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
 
-                            // Category Type
-                            // $html .= '<div class="row mb-3">';
-                            //     $html .= '<div class="col-md-12">';
-                            //         $html .= '<label class="form-label" for="category_type">'.__('Type').'</label>';
-                            //         $html .= '<select onchange="changeElements(\'editCategoryModal\')" name="category_type" id="category_type" class="form-select category_type">';
-                            //             foreach($category_types as $cat_type_key => $cat_type)
-                            //             {
-                            //                 $html .= '<option value="'.$cat_type_key.'"';
-
-                            //                     if($cat_type_key == $category->category_type)
-                            //                     {
-                            //                         $html .= 'selected';
-                            //                     }
-
-                            //                 $html.='>'.$cat_type.'</option>';
-                            //             }
-                            //         $html .= '</select>';
-                            //     $html .= '</div>';
-                            //     $html .= '</div>';
-                            // $html .= '</div>';
-
                             // Category
                             $html .= '<div class="row mb-3 cat_div">';
                                 $html .= '<div class="col-md-12">';
@@ -827,14 +764,6 @@ class CategoryController extends Controller
                                 $html .= '<div class="col-md-12">';
                                 $html .= '<label class="form-label" for="category_name">'.__('Name').'</label>';
                                 $html .= '<input type="text" name="category_name" id="category_name" class="form-control" value="'.$category_name.'">';
-                                $html .= '</div>';
-                            $html .= '</div>';
-
-                            // Sort Order
-                            $html .= '<div class="row mb-3">';
-                                $html .= '<div class="col-md-12">';
-                                $html .= '<label class="form-label" for="sort_order">'.__('Sort Order').'</label>';
-                                $html .= '<input type="text" name="sort_order" id="sort_order" class="form-control" value="'.$category['order_key'].'">';
                                 $html .= '</div>';
                             $html .= '</div>';
 
@@ -900,10 +829,10 @@ class CategoryController extends Controller
                                             {
                                                 $no = $key + 1;
 
-                                                if(!empty($cat_image['image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']))
+                                                if(!empty($cat_image['image']) && file_exists('public/client_uploads/categories/'.$cat_image['image']))
                                                 {
                                                     $html .= '<div class="inner-img edit_img_'.$no.'">';
-                                                        $html .= '<img src="'.asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']).'" class="w-100 h-100">';
+                                                        $html .= '<img src="'.asset('public/client_uploads/categories/'.$cat_image['image']).'" class="w-100 h-100">';
                                                         $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteCategoryImage('.$no.','.$cat_image->id.')"><i class="fa fa-trash"></i></a>';
                                                     $html .= '</div>';
                                                 }
@@ -949,9 +878,9 @@ class CategoryController extends Controller
 
                             // Cover Image
                             $cover_active = ($category->category_type == 'page' || $category->category_type == 'link' || $category->category_type == 'gallery' || $category->category_type == 'check_in' || $category->category_type == 'parent_category' || $category->category_type == 'pdf_page') ? '' : 'none';
-                            if(!empty($category->cover) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover))
+                            if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
                             {
-                                $cover_image = asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover);
+                                $cover_image = asset('public/client_uploads/categories/'.$category->cover);
                             }
                             else
                             {
@@ -1237,9 +1166,6 @@ class CategoryController extends Controller
     // Function for Update Category
     public function update(Request $request)
     {
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $category_type = $request->category_type;
         $category_id = $request->category_id;
         $category_name = $request->category_name;
@@ -1286,7 +1212,6 @@ class CategoryController extends Controller
                 $category->name = $category_name;
                 $category->$name_key = $category_name;
                 $category->category_type = $category_type;
-                $category->order_key = $request->sort_order;
 
                 // Description
                 if($category_type == 'product_category' || $category_type == 'page' || $category_type == 'check_in')
@@ -1302,13 +1227,13 @@ class CategoryController extends Controller
                     {
                         // Delete Old Cover
                         $old_cover = isset($category->cover) ? $category->cover : '';
-                        if(!empty($old_cover) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_cover))
+                        if(!empty($old_cover) && file_exists('public/client_uploads/categories/'.$old_cover))
                         {
-                            unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_cover);
+                            unlink('public/client_uploads/categories/'.$old_cover);
                         }
 
                         $cover_name = "cover_".time().".". $request->file('cover')->getClientOriginalExtension();
-                        $request->file('cover')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories/'), $cover_name);
+                        $request->file('cover')->move(public_path('client_uploads/categories/'), $cover_name);
                         $category->cover = $cover_name;
                     }
                 }
@@ -1350,13 +1275,13 @@ class CategoryController extends Controller
                     {
                         // Delete Old PDF
                         $old_pdf = isset($category->file) ? $category->file : '';
-                        if(!empty($old_pdf) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_pdf))
+                        if(!empty($old_pdf) && file_exists('public/client_uploads/categories/'.$old_pdf))
                         {
-                            unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_pdf);
+                            unlink('public/client_uploads/categories/'.$old_pdf);
                         }
 
                         $file_name = "pdf_".time().".". $request->file('pdf')->getClientOriginalExtension();
-                        $request->file('pdf')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories/'), $file_name);
+                        $request->file('pdf')->move(public_path('client_uploads/categories/'), $file_name);
                         $category->file = $file_name;
                     }
                 }
@@ -1402,9 +1327,9 @@ class CategoryController extends Controller
                             $image_base64 = base64_decode($image_arr[1]);
 
                             $imgname = "category_".$image_token.".".$image_type_ext[1];
-                            $img_path = public_path('client_uploads/shops/'.$shop_slug.'/categories/'.$imgname);
+                            $img_path = public_path('client_uploads/categories/'.$imgname);
                             file_put_contents($img_path,$image_base64);
-                            // $request->file('image')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories'), $imgname);
+                            // $request->file('image')->move(public_path('client_uploads/categories'), $imgname);
 
                             // Insert Image
                             $new_img = new CategoryImages();
@@ -1439,12 +1364,7 @@ class CategoryController extends Controller
     // Function for Update Category By Language Code
     public function updateByLangCode(Request $request)
     {
-        // Shop ID & Shop Slug
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $category_id = $request->category_id;
-        $sort_order = $request->sort_order;
         $published = isset($request->published) ? $request->published : 0;
         $schedule_arr = $request->schedule_array;
         $schedule = isset($request->schedule) ? $request->schedule : 0;
@@ -1491,7 +1411,6 @@ class CategoryController extends Controller
                 $category->name = $category_name;
                 $category->$act_lang_name_key = $category_name;
                 $category->category_type = $category_type;
-                $category->order_key = $sort_order;
 
                 // Description
                 if($category_type == 'product_category' || $category_type == 'page' || $category_type == 'check_in')
@@ -1507,13 +1426,13 @@ class CategoryController extends Controller
                     {
                         // Delete Old Cover
                         $old_cover = isset($category->cover) ? $category->cover : '';
-                        if(!empty($old_cover) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_cover))
+                        if(!empty($old_cover) && file_exists('public/client_uploads/categories/'.$old_cover))
                         {
-                            unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_cover);
+                            unlink('public/client_uploads/categories/'.$old_cover);
                         }
 
                         $cover_name = "cover_".time().".". $request->file('cover')->getClientOriginalExtension();
-                        $request->file('cover')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories/'), $cover_name);
+                        $request->file('cover')->move(public_path('client_uploads/categories/'), $cover_name);
                         $category->cover = $cover_name;
                     }
                 }
@@ -1555,13 +1474,13 @@ class CategoryController extends Controller
                     {
                         // Delete Old PDF
                         $old_pdf = isset($category->file) ? $category->file : '';
-                        if(!empty($old_pdf) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_pdf))
+                        if(!empty($old_pdf) && file_exists('public/client_uploads/categories/'.$old_pdf))
                         {
-                            unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$old_pdf);
+                            unlink('public/client_uploads/categories/'.$old_pdf);
                         }
 
                         $file_name = "pdf_".time().".". $request->file('pdf')->getClientOriginalExtension();
-                        $request->file('pdf')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories/'), $file_name);
+                        $request->file('pdf')->move(public_path('client_uploads/categories/'), $file_name);
                         $category->file = $file_name;
                     }
                 }
@@ -1607,9 +1526,9 @@ class CategoryController extends Controller
                             $image_base64 = base64_decode($image_arr[1]);
 
                             $imgname = "category_".$image_token.".".$image_type_ext[1];
-                            $img_path = public_path('client_uploads/shops/'.$shop_slug.'/categories/'.$imgname);
+                            $img_path = public_path('client_uploads/categories/'.$imgname);
                             file_put_contents($img_path,$image_base64);
-                            // $request->file('image')->move(public_path('client_uploads/shops/'.$shop_slug.'/categories'), $imgname);
+                            // $request->file('image')->move(public_path('client_uploads/categories'), $imgname);
 
                             // Insert Image
                             $new_img = new CategoryImages();
@@ -1646,20 +1565,16 @@ class CategoryController extends Controller
     // Function for Get Category Data
     public function getEditCategoryData($current_lang_code,$category_id)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Primary Language Details
         $primary_language_detail = Languages::where('id',$primary_lang_id)->first();
         $primary_lang_code = isset($primary_language_detail->code) ? $primary_language_detail->code : '';
-        $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
         // Additional Languages
-        $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+        $additional_languages = AdditionalLanguage::get();
         if(count($additional_languages) > 0)
         {
             $category_name_key = $current_lang_code."_name";
@@ -1690,7 +1605,7 @@ class CategoryController extends Controller
         $btn_text_color = isset($check_page_style['button_text_color']) ? $check_page_style['button_text_color'] : '';
 
         // Get all Parent Categories
-        $parent_categories = Category::where('shop_id',$shop_id)->where('id','!=',$category_id)->where('parent_category',1)->get();
+        $parent_categories = Category::where('id','!=',$category_id)->where('parent_category',1)->get();
 
         // Categories Images
         $category_images = CategoryImages::where('category_id',$category_id)->get();
@@ -1746,27 +1661,6 @@ class CategoryController extends Controller
                         $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                         $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
 
-                        // Category Type
-                        // $html .= '<div class="row mb-3">';
-                        //     $html .= '<div class="col-md-12">';
-                        //         $html .= '<label class="form-label" for="category_type">'.__('Type').'</label>';
-                        //         $html .= '<select onchange="changeElements(\'editCategoryModal\')" name="category_type" id="category_type" class="form-select category_type">';
-                        //             foreach($category_types as $cat_type_key => $cat_type)
-                        //             {
-                        //                 $html .= '<option value="'.$cat_type_key.'"';
-
-                        //                     if($cat_type_key == $category->category_type)
-                        //                     {
-                        //                         $html .= 'selected';
-                        //                     }
-
-                        //                 $html.='>'.$cat_type.'</option>';
-                        //             }
-                        //         $html .= '</select>';
-                        //     $html .= '</div>';
-                        //     $html .= '</div>';
-                        // $html .= '</div>';
-
                         // Category
                         $html .= '<div class="row mb-3 cat_div">';
                             $html .= '<div class="col-md-12">';
@@ -1793,13 +1687,6 @@ class CategoryController extends Controller
                             $html .= '</div>';
                         $html .= '</div>';
 
-                        // Sort Order
-                        $html .= '<div class="row mb-3">';
-                            $html .= '<div class="col-md-12">';
-                            $html .= '<label class="form-label" for="sort_order">'.__('Sort Order').'</label>';
-                            $html .= '<input type="text" name="sort_order" id="sort_order" class="form-control" value="'.$category['order_key'].'">';
-                            $html .= '</div>';
-                        $html .= '</div>';
 
                         // Url
                         $url_active = ($category->category_type == 'link') ? 'block' : 'none';
@@ -1863,10 +1750,10 @@ class CategoryController extends Controller
                                         {
                                             $no = $key + 1;
 
-                                            if(!empty($cat_image['image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']))
+                                            if(!empty($cat_image['image']) && file_exists('public/client_uploads/categories/'.$cat_image['image']))
                                             {
                                                 $html .= '<div class="inner-img edit_img_'.$no.'">';
-                                                    $html .= '<img src="'.asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']).'" class="w-100 h-100">';
+                                                    $html .= '<img src="'.asset('public/client_uploads/categories/'.$cat_image['image']).'" class="w-100 h-100">';
                                                     $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteCategoryImage('.$no.','.$cat_image->id.')"><i class="fa fa-trash"></i></a>';
                                                 $html .= '</div>';
                                             }
@@ -1912,9 +1799,9 @@ class CategoryController extends Controller
 
                         // Cover Image
                         $cover_active = ($category->category_type == 'page' || $category->category_type == 'link' || $category->category_type == 'gallery' || $category->category_type == 'check_in' || $category->category_type == 'parent_category' || $category->category_type == 'pdf_page') ? '' : 'none';
-                        if(!empty($category->cover) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover))
+                        if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
                         {
-                            $cover_image = asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover);
+                            $cover_image = asset('public/client_uploads/categories/'.$category->cover);
                         }
                         else
                         {
@@ -2088,27 +1975,6 @@ class CategoryController extends Controller
                         $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                         $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
 
-                        // Category Type
-                        // $html .= '<div class="row mb-3">';
-                        //     $html .= '<div class="col-md-12">';
-                        //         $html .= '<label class="form-label" for="category_type">'.__('Type').'</label>';
-                        //         $html .= '<select onchange="changeElements(\'editCategoryModal\')" name="category_type" id="category_type" class="form-select category_type">';
-                        //             foreach($category_types as $cat_type_key => $cat_type)
-                        //             {
-                        //                 $html .= '<option value="'.$cat_type_key.'"';
-
-                        //                     if($cat_type_key == $category->category_type)
-                        //                     {
-                        //                         $html .= 'selected';
-                        //                     }
-
-                        //                 $html.='>'.$cat_type.'</option>';
-                        //             }
-                        //         $html .= '</select>';
-                        //     $html .= '</div>';
-                        //     $html .= '</div>';
-                        // $html .= '</div>';
-
                         // Category
                         $html .= '<div class="row mb-3 cat_div">';
                             $html .= '<div class="col-md-12">';
@@ -2132,14 +1998,6 @@ class CategoryController extends Controller
                             $html .= '<div class="col-md-12">';
                             $html .= '<label class="form-label" for="category_name">'.__('Name').'</label>';
                             $html .= '<input type="text" name="category_name" id="category_name" class="form-control" value="'.$category_name.'">';
-                            $html .= '</div>';
-                        $html .= '</div>';
-
-                        // Sort Order
-                        $html .= '<div class="row mb-3">';
-                            $html .= '<div class="col-md-12">';
-                            $html .= '<label class="form-label" for="sort_order">'.__('Sort Order').'</label>';
-                            $html .= '<input type="text" name="sort_order" id="sort_order" class="form-control" value="'.$category['order_key'].'">';
                             $html .= '</div>';
                         $html .= '</div>';
 
@@ -2205,10 +2063,10 @@ class CategoryController extends Controller
                                         {
                                             $no = $key + 1;
 
-                                            if(!empty($cat_image['image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']))
+                                            if(!empty($cat_image['image']) && file_exists('public/client_uploads/categories/'.$cat_image['image']))
                                             {
                                                 $html .= '<div class="inner-img edit_img_'.$no.'">';
-                                                    $html .= '<img src="'.asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image['image']).'" class="w-100 h-100">';
+                                                    $html .= '<img src="'.asset('public/client_uploads/categories/'.$cat_image['image']).'" class="w-100 h-100">';
                                                     $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteCategoryImage('.$no.','.$cat_image->id.')"><i class="fa fa-trash"></i></a>';
                                                 $html .= '</div>';
                                             }
@@ -2254,9 +2112,9 @@ class CategoryController extends Controller
 
                         // Cover Image
                         $cover_active = ($category->category_type == 'page' || $category->category_type == 'link' || $category->category_type == 'gallery' || $category->category_type == 'check_in' || $category->category_type == 'parent_category' || $category->category_type == 'pdf_page') ? '' : 'none';
-                        if(!empty($category->cover) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover))
+                        if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
                         {
-                            $cover_image = asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$category->cover);
+                            $cover_image = asset('public/client_uploads/categories/'.$category->cover);
                         }
                         else
                         {
@@ -2449,8 +2307,6 @@ class CategoryController extends Controller
     // Function for Filtered Categories
     public function searchCategories(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
         $keyword = $request->keywords;
         $parent_category_id = $request->par_cat_id;
 
@@ -2466,7 +2322,7 @@ class CategoryController extends Controller
         try
         {
             $name_key = $curr_lang_code."_name";
-            $categories = Category::with(['categoryImages'])->where($name_key,'LIKE','%'.$keyword.'%')->where('shop_id',$shop_id);
+            $categories = Category::with(['categoryImages'])->where($name_key,'LIKE','%'.$keyword.'%');
 
             if((empty($parent_category_id)) || (!empty($parent_category_id) && is_numeric($parent_category_id)))
             {
@@ -2529,9 +2385,9 @@ class CategoryController extends Controller
                     }
 
 
-                    if(!empty($cat_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image))
+                    if(!empty($cat_image) && file_exists('public/client_uploads/categories/'.$cat_image))
                     {
-                        $image = asset('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image);
+                        $image = asset('public/client_uploads/categories/'.$cat_image);
                     }
                     else
                     {
@@ -2619,15 +2475,14 @@ class CategoryController extends Controller
     public function deleteCategoryImage($id)
     {
         $category = Category::find($id);
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
         if($category)
         {
             $cat_image = isset($category['image']) ? $category['image'] : '';
 
-            if(!empty($cat_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image))
+            if(!empty($cat_image) && file_exists('public/client_uploads/categories/'.$cat_image))
             {
-                unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$cat_image);
+                unlink('public/client_uploads/categories/'.$cat_image);
             }
 
             $category->image = "";
@@ -2644,16 +2499,15 @@ class CategoryController extends Controller
     public function deleteCategoryImages(Request $request)
     {
         $image_id = $request->img_id;
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
         try
         {
             $cat_image = CategoryImages::where('id',$image_id)->first();
             $image = isset($cat_image->image) ? $cat_image->image : '';
 
-            if(!empty($image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/categories/'.$image))
+            if(!empty($image) && file_exists('public/client_uploads/categories/'.$image))
             {
-                unlink('public/client_uploads/shops/'.$shop_slug.'/categories/'.$image);
+                unlink('public/client_uploads/categories/'.$image);
             }
 
             CategoryImages::where('id',$image_id)->delete();

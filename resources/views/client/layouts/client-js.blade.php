@@ -100,14 +100,6 @@
     }
 
 
-    function previewMyShop(shopSlug)
-    {
-        var preUrl = "{{ url('/') }}/"+shopSlug;
-        $('#previewModal iframe').attr('src',preUrl);
-        $('#previewModal').modal('show');
-    }
-
-
     // Change Admin Language
     function changeBackendLang(langCode)
     {

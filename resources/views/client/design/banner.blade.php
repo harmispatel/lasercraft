@@ -1,9 +1,6 @@
 @php
-    $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-    $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
     // Language Settings
-    $language_settings = clientLanguageSettings($shop_id);
+    $language_settings = clientLanguageSettings();
     $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
     // Language Details
@@ -131,8 +128,8 @@
 
                                             <tr>
                                                 <td>
-                                                    @if(!empty($banner_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_image))
-                                                        <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/banners/'.$banner_image) }}" class="w-100">
+                                                    @if(!empty($banner_image) && file_exists('public/client_uploads/banners/'.$banner_image))
+                                                        <img src="{{ asset('public/client_uploads/banners/'.$banner_image) }}" class="w-100">
                                                     @else
                                                         <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" style="width: 249px; height: 160px;">
                                                     @endif

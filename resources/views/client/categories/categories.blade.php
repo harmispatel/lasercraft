@@ -1,19 +1,10 @@
 @php
-    $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
     $head_title = (!is_numeric($parent_cat_id) && $parent_cat_id != '') ? ucfirst($parent_cat_id).'s' : 'Categories';
     $head_title = ($head_title == 'Gallerys') ? 'Galleries' : $head_title;
 
-    $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
     // Get Language Settings
-    $language_settings = clientLanguageSettings($shop_id);
+    $language_settings = clientLanguageSettings();
     $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
-
-    // Get Subscription ID
-    $subscription_id = getClientSubscriptionID($shop_id);
-
-    // Get Package Permissions
-    $package_permissions = getPackagePermission($subscription_id);
 
     // Primary Language Details
     $primary_language_detail = \App\Models\Languages::where('id',$primary_lang_id)->first();
@@ -79,29 +70,14 @@
                                 <div class="form-group mb-3">
                                     <select name="category_type" id="category_type" class="form-select" onchange="changeElements('addCategoryForm')">
                                         <option value="product_category">Category</option>
-
-                                        @if(isset($package_permissions['page']) && !empty($package_permissions['page']) && $package_permissions['page'] == 1)
-                                            <option value="page">Page</option>
-                                        @endif
-
-                                        @if(isset($package_permissions['link']) && !empty($package_permissions['link']) && $package_permissions['link'] == 1)
-                                            <option value="link">Link</option>
-                                        @endif
-
-                                        @if(isset($package_permissions['gallery']) && !empty($package_permissions['gallery']) && $package_permissions['gallery'] == 1)
-                                            <option value="gallery" {{ (isset($parent_cat_id) && !empty($parent_cat_id) && $parent_cat_id == 'gallery') ? 'selected' :'' }}>Image Gallery</option>
-                                        @endif
-
-                                        @if(isset($package_permissions['check_in']) && !empty($package_permissions['check_in']) && $package_permissions['check_in'] == 1)
-                                            <option value="check_in">Check-In Page</option>
-                                        @endif
+                                        <option value="page">Page</option>
+                                        <option value="link">Link</option>
+                                        <option value="gallery" {{ (isset($parent_cat_id) && !empty($parent_cat_id) && $parent_cat_id == 'gallery') ? 'selected' :'' }}>Image Gallery</option>
+                                        <option value="check_in">Check-In Page</option>
+                                        <option value="pdf_page">PDF Category</option>
 
                                         @if(empty($parent_cat_id))
                                             <option value="parent_category">Child Category</option>
-                                        @endif
-
-                                        @if(isset($package_permissions['pdf_file']) && !empty($package_permissions['pdf_file']) && $package_permissions['pdf_file'] == 1)
-                                            <option value="pdf_page">PDF Category</option>
                                         @endif
                                     </select>
                                 </div>

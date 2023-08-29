@@ -16,7 +16,7 @@ class TutorialController extends Controller
     public function index()
     {
         $tutorial =  Tutorial::get();
-        
+
         return view('admin.tutorial.tutorial', compact('tutorial'));
     }
 
@@ -53,27 +53,27 @@ class TutorialController extends Controller
 
     public function edit($id)
     {
-        try 
+        try
         {
             $data = Tutorial::where('id',$id)->first();
             if($data)
             {
-                
+
                 return view('admin.tutorial.edit_tutorial',compact('data'));
             }
             return redirect()->route('tutorial')->with('error', 'Something went wrong!');
-        } 
-        catch (\Throwable $th) 
+        }
+        catch (\Throwable $th)
         {
             return redirect()->route('tutorial')->with('error', 'Something went wrong!');
         }
     }
 
-    
+
     public function update(TutorialRequest $request)
     {
         // Update tutorial
-        
+
         $tutorial = Tutorial::find($request->tutorial_id);
         $tutorial->text = $request->text;
         $tutorial->title = $request->title;
@@ -86,13 +86,6 @@ class TutorialController extends Controller
         $tutorial->update();
 
         return redirect()->route('tutorial')->with('success','tutorial has been Updated SuccessFully....');
-    }
-
-    public function show()
-    {
-        $tutorial =  Tutorial::get();
-
-        return view('client.tutorial.tutorial',compact('tutorial'));
     }
 
 }

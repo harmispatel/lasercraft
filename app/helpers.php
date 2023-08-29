@@ -40,18 +40,8 @@
 
 
     // Get Client's Settings
-    function getClientSettings($shopID="")
+    function getClientSettings()
     {
-
-        if(!empty($shopID))
-        {
-            $shop_id = $shopID;
-        }
-        else
-        {
-            $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        }
-
         // Keys
         $keys = ([
             'shop_view_header_logo',
@@ -81,7 +71,7 @@
 
         foreach($keys as $key)
         {
-            $query = ClientSettings::select('value')->where('shop_id',$shop_id)->where('key',$key)->first();
+            $query = ClientSettings::select('value')->where('key',$key)->first();
             $settings[$key] = isset($query->value) ? $query->value : '';
         }
 
@@ -90,7 +80,7 @@
 
 
     // Get Order Settings
-    function getOrderSettings($shopID)
+    function getOrderSettings()
     {
         // Keys
         $keys = ([
@@ -122,7 +112,7 @@
 
         foreach($keys as $key)
         {
-            $query = OrderSetting::select('value')->where('shop_id',$shopID)->where('key',$key)->first();
+            $query = OrderSetting::select('value')->where('key',$key)->first();
             $settings[$key] = isset($query->value) ? $query->value : '';
         }
 
@@ -164,7 +154,7 @@
 
 
     // Get Client's LanguageSettings
-    function clientLanguageSettings($shopID)
+    function clientLanguageSettings()
     {
         // Keys
         $keys = ([
@@ -176,7 +166,7 @@
 
         foreach($keys as $key)
         {
-            $query = LanguageSettings::select('value')->where('key',$key)->where('shop_id',$shopID)->first();
+            $query = LanguageSettings::select('value')->where('key',$key)->first();
             $settings[$key] = isset($query->value) ? $query->value : '';
         }
 

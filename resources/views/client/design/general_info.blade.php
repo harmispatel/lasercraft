@@ -20,13 +20,8 @@
                         <div class="form-group">
                             <label class="form-label" for="business_name">{{ __('Business Name')}}</label>
                             <div class="input-group">
-                                <input type="text" class="form-control {{ ($errors->has('business_name')) ? 'is-invalid' : '' }}" name="business_name" id="business_name" value="{{ (isset($client_settings['business_name']) && !empty($client_settings['business_name'])) ? $client_settings['business_name'] : '' }}">
-                                <span class="input-group-text">#{{ isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '' }}</span>
-                                @if($errors->has('business_name'))
-                                    <div class="invalid-feedback">
-                                        {{ $errors->first('business_name') }}
-                                    </div>
-                                @endif
+                                <input type="text" class="form-control" name="business_name" id="business_name" value="{{ (isset($client_settings['business_name']) && !empty($client_settings['business_name'])) ? $client_settings['business_name'] : '' }}">
+                                <span class="input-group-text">#</span>
                             </div>
                         </div>
                     </div>

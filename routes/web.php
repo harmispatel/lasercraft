@@ -198,12 +198,6 @@ Route::group(['prefix' => 'client'], function()
         Route::post('/design-generalInfoUpdate', [DesignController::class,'generalInfoUpdate'])->name('design.generalInfoUpdate');
         Route::post('/design-mailFormUpdate', [DesignController::class,'mailFormUpdate'])->name('design.mailFormUpdate');
 
-        // Billing Infor
-        Route::get('billing-info',[BillingInfoController::class, 'billingInfo'])->name('billing.info');
-        Route::get('my-subscription',[BillingInfoController::class, 'clientSubscription'])->name('client.subscription');
-        Route::get('edit-billing-info',[BillingInfoController::class, 'editBillingInfo'])->name('billing.info.edit');
-        Route::post('billing-info-update',[BillingInfoController::class, 'updateBillingInfo'])->name('update.billing.info');
-
         // Languages
         Route::get('/languages', [LanguageController::class,'index'])->name('languages');
         Route::post('/language-set-primary', [LanguageController::class,'setPrimaryLanguage'])->name('language.set-primary');
@@ -215,12 +209,6 @@ Route::group(['prefix' => 'client'], function()
         Route::post('/language-itemdetails', [LanguageController::class,'getItemDetails'])->name('language.itemdetails');
         Route::post('/language-update-itemdetails', [LanguageController::class,'updateItemDetails'])->name('language.update-item-details');
         Route::post('/language-google-translate', [LanguageController::class,'setGoogleTranslate'])->name('language.google.translate');
-
-
-        // Shop QrCode
-        Route::get('/qrcode', [ShopQrController::class,'index'])->name('qrcode');
-        Route::post('/qrcode-settings', [ShopQrController::class,'QrCodeSettings'])->name('qrcode.settings');
-        Route::post('/qrcode-update-settings', [ShopQrController::class,'QrCodeUpdateSettings'])->name('qrcode.update.settings');
 
         // ClientProfile
         Route::get('/my-profile/{id}',[UserController::class,'myProfile'])->name('client.profile.view');
@@ -242,9 +230,6 @@ Route::group(['prefix' => 'client'], function()
 
         // Preview
         Route::get('/preview',[PreviewController::class,'index'])->name('preview');
-
-        // Tutorial
-        Route::get('/tutorial',[TutorialController::class,'show'])->name('tutorial.show');
 
 
         // Statistic

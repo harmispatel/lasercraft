@@ -20,72 +20,55 @@ class DesignController extends Controller
     // Upload new Frontend Topbar Logo
     public function logoUpload(Request $request)
     {
-
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $request->validate([
             'shop_view_header_logo' => 'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
         ]);
 
         try
         {
-            if(!empty($clientID) && !empty($shop_id))
+            if($request->hasFile('shop_view_header_logo'))
             {
-                if($request->hasFile('shop_view_header_logo'))
+                $get_logo_setting = ClientSettings::where('key','shop_view_header_logo')->first();
+                $setting_id = isset($get_logo_setting->id) ? $get_logo_setting->id : '';
+
+                if(!empty($setting_id) || $setting_id != '')
                 {
-                    $get_logo_setting = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key','shop_view_header_logo')->first();
-                    $setting_id = isset($get_logo_setting->id) ? $get_logo_setting->id : '';
-
-                    if(!empty($setting_id) || $setting_id != '')
+                    // Delete old Logo
+                    $logo = isset($get_logo_setting->value) ? $get_logo_setting->value : '';
+                    if(!empty($logo) && file_exists('public/client_uploads/top_logos/'.$logo))
                     {
-                        // Delete old Logo
-                        $logo = isset($get_logo_setting->value) ? $get_logo_setting->value : '';
-                        if(!empty($logo) && file_exists('public/client_uploads/shops/'.$shop_slug.'/top_logos/'.$logo))
-                        {
-                            unlink('public/client_uploads/shops/'.$shop_slug.'/top_logos/'.$logo);
-                        }
-
-                        // Insert new Logo
-                        $logo_name = "top_logo_".time().".". $request->file('shop_view_header_logo')->getClientOriginalExtension();
-                        $request->file('shop_view_header_logo')->move(public_path('client_uploads/shops/'.$shop_slug.'/top_logos/'), $logo_name);
-                        $new_logo = $logo_name;
-
-                        $logo_setting = ClientSettings::find($setting_id);
-                        $logo_setting->value = $new_logo;
-                        $logo_setting->update();
-
+                        unlink('public/client_uploads/top_logos/'.$logo);
                     }
-                    else
-                    {
-                        // Insert new Logo
-                        $logo_name = "top_logo_".time().".". $request->file('shop_view_header_logo')->getClientOriginalExtension();
-                        $request->file('shop_view_header_logo')->move(public_path('client_uploads/shops/'.$shop_slug.'/top_logos/'), $logo_name);
-                        $new_logo = $logo_name;
 
-                        $logo_setting = new ClientSettings();
-                        $logo_setting->client_id = $clientID;
-                        $logo_setting->shop_id = $shop_id;
-                        $logo_setting->key = 'shop_view_header_logo';
-                        $logo_setting->value = $new_logo;
-                        $logo_setting->save();
-                    }
+                    // Insert new Logo
+                    $logo_name = "top_logo_".time().".". $request->file('shop_view_header_logo')->getClientOriginalExtension();
+                    $request->file('shop_view_header_logo')->move(public_path('client_uploads/top_logos/'), $logo_name);
+                    $new_logo = $logo_name;
+
+                    $logo_setting = ClientSettings::find($setting_id);
+                    $logo_setting->value = $new_logo;
+                    $logo_setting->update();
 
                 }
+                else
+                {
+                    // Insert new Logo
+                    $logo_name = "top_logo_".time().".". $request->file('shop_view_header_logo')->getClientOriginalExtension();
+                    $request->file('shop_view_header_logo')->move(public_path('client_uploads/top_logos/'), $logo_name);
+                    $new_logo = $logo_name;
 
-                return response()->json([
-                    'success' => 1,
-                    'message' => 'Logo has been Uploaded SuccessFully....',
-                ]);
+                    $logo_setting = new ClientSettings();
+                    $logo_setting->key = 'shop_view_header_logo';
+                    $logo_setting->value = $new_logo;
+                    $logo_setting->save();
+                }
+
             }
-            else
-            {
-                return response()->json([
-                    'success' => 0,
-                    'message' => 'Oops, Something Went Wrong !',
-                ]);
-            }
+
+            return response()->json([
+                'success' => 1,
+                'message' => 'Logo has been Uploaded SuccessFully....',
+            ]);
         }
         catch (\Throwable $th)
         {
@@ -101,17 +84,13 @@ class DesignController extends Controller
     // Delete Logo
     public function deleteLogo()
     {
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
-        $get_logo_setting = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key','shop_view_header_logo')->first();
+        $get_logo_setting = ClientSettings::where('key','shop_view_header_logo')->first();
         $setting_id = isset($get_logo_setting->id) ? $get_logo_setting->id : '';
         $logo = isset($get_logo_setting->value) ? $get_logo_setting->value : '';
 
-        if(!empty($logo) && file_exists('public/client_uploads/shops/'.$shop_slug.'/top_logos/'.$logo))
+        if(!empty($logo) && file_exists('public/client_uploads/top_logos/'.$logo))
         {
-            unlink('public/client_uploads/shops/'.$shop_slug.'/top_logos/'.$logo);
+            unlink('public/client_uploads/top_logos/'.$logo);
         }
 
         if(!empty($setting_id))
@@ -371,11 +350,7 @@ class DesignController extends Controller
     // Update General General Info Settings
     public function generalInfoUpdate(Request $request)
     {
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $request->validate([
-            'business_name' => 'required',
             'default_currency' => 'required',
         ]);
 
@@ -393,15 +368,10 @@ class DesignController extends Controller
         $all_data['pinterest_link'] = $request->pinterest_link;
         $all_data['delivery_message'] = $request->delivery_message;
 
-        // Update Shop Name
-        $shop = Shop::find($shop_id);
-        $shop->name = $request->business_name;
-        $shop->update();
-
         // Insert or Update Settings
         foreach($all_data as $key => $value)
         {
-            $query = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key',$key)->first();
+            $query = ClientSettings::where('key',$key)->first();
             $setting_id = isset($query->id) ? $query->id : '';
 
             if (!empty($setting_id) || $setting_id != '')  // Update
@@ -413,8 +383,6 @@ class DesignController extends Controller
             else // Insert
             {
                 $settings = new ClientSettings();
-                $settings->client_id = $clientID;
-                $settings->shop_id = $shop_id;
                 $settings->key = $key;
                 $settings->value = $value;
                 $settings->save();
