@@ -27,12 +27,7 @@ Route::get('config-clear', function () {
 
 
 
-Route::get('/', function ()
-{
-    return redirect('home');
-})->name('home');
-
-Route::get('/welcome',[FrontendController::class,'index'])->name('home');
+Route::get('/',[FrontendController::class,'index'])->name('home');
 
 // Auth Routes
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
