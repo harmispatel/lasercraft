@@ -15,6 +15,7 @@
 
     $description_key = $lang_code."_description";
     $image_key = $lang_code."_image";
+    $name_key = $lang_code."_name";
 @endphp
 
 <section class="banner_slider">
@@ -44,54 +45,21 @@
         <h2><span>Our Collection</span></h2>
     </div>
     <div class="collection_inr">
+
+        @foreach($parent_categories as $category)
         <div class="collction_box position-relative">
             <div class="collection_img">
-                <img class="w-100" src="{{ asset('public/frontend/image/collection1.png')}}">
+                @if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
+                <img class="w-100" src="{{ asset('public/client_uploads/categories/'.$category->cover) }}">
+                @else
+                <img class="w-100" src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}">
+                @endif
             </div>
             <div class="collection_name">
-                <h3>Night Light</h3>
+                <h3>{{ isset($category[$name_key]) ? $category[$name_key] : '' }}</h3>
             </div>
         </div>
-        <div class="collction_box position-relative">
-            <div class="collection_img">
-                <img class="w-100" src="{{asset('public/frontend/image/collection1.png')}}">
-            </div>
-            <div class="collection_name">
-                <h3>Night Light</h3>
-            </div>
-        </div>
-        <div class="collction_box position-relative">
-            <div class="collection_img">
-                <img class="w-100" src="{{asset('public/frontend/image/collection1.png')}}">
-            </div>
-            <div class="collection_name">
-                <h3>Night Light</h3>
-            </div>
-        </div>
-        <div class="collction_box position-relative">
-            <div class="collection_img">
-                <img class="w-100" src="{{asset('public/frontend/image/collection1.png')}}">
-            </div>
-            <div class="collection_name">
-                <h3>Night Light</h3>
-            </div>
-        </div>
-        <div class="collction_box position-relative">
-            <div class="collection_img">
-                <img class="w-100" src="{{asset('public/frontend/image/collection1.png')}}">
-            </div>
-            <div class="collection_name">
-                <h3>Night Light</h3>
-            </div>
-        </div>
-        <div class="collction_box position-relative">
-            <div class="collection_img">
-                <img class="w-100" src="{{asset('public/frontend/image/collection1.png')}}">
-            </div>
-            <div class="collection_name">
-                <h3>Night Light</h3>
-            </div>
-        </div>
+        @endforeach
     </div>
 </section>
 
