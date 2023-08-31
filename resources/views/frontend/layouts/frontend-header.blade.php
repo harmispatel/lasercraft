@@ -1,3 +1,4 @@
+
 <header class="header">
     <div class="container">
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -14,7 +15,7 @@
                         </li>
                         <li class="nav-item" id="collection_menu">
                             <a class="nav-link" href="#">Collection</a>
-                            <!-- <div class="collection_menu">
+                            <div class="collection_menu">
                                 <ul>
                                     <li class="sub_list">
                                         <a href="#">Personalised Night lights</a>
@@ -98,7 +99,7 @@
                                     </li>
                                     <li class="sub_list"><a href="#">Wedding</a></li>
                                 </ul>
-                            </div> -->
+                            </div>      
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Occasion</a>
