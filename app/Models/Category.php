@@ -18,4 +18,8 @@ class Category extends Model
     {
         return $this->hasMany(CategoryImages::class,'category_id','id');
     }
+
+    function child_categories() {
+        return $this->hasMany(Category::class,'parent_id','id');
+    }
 }

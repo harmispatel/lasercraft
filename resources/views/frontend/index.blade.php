@@ -21,7 +21,7 @@
 <section class="banner_slider">
     <div class="swiper">
         <div class="swiper-wrapper">
-            
+
             @foreach($banners as $banner)
                 @php
                     $banner_image = isset($banner->$image_key) ? $banner->$image_key : '';
@@ -32,7 +32,7 @@
                     <div class="swiper-slide">
                         <img class="img-fluid" style="background-image: url('{{ asset('public/client_uploads/banners/'.$banner_image) }}')" />
                     </div>
-                @endif                
+                @endif
             @endforeach
         </div>
         <!-- <div class="swiper-button-next"><i class="fas fa-angle-right csb"></i></div>
@@ -46,7 +46,7 @@
     </div>
     <div class="collection_inr">
 
-        @foreach($parent_categories as $category)
+        @foreach($categories as $category)
         <div class="collction_box position-relative">
             <div class="collection_img">
                 @if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
