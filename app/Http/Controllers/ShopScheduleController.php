@@ -11,8 +11,7 @@ class ShopScheduleController extends Controller
     // Display a listing of the resource.
     public function index()
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['shop_schedule'] = ShopSchedule::where('shop_id',$shop_id)->first();
+        $data['shop_schedule'] = ShopSchedule::first();
 
         return view('client.schedule.shop-schedule',$data);
     }
@@ -22,14 +21,12 @@ class ShopScheduleController extends Controller
     // Update the specified resource in storage.
     public function updateShopSchedule(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $scheduler_active = (isset($request->scheduler_active)) ? $request->scheduler_active : 0;
         $value = $request->schedule_array;
 
         try
         {
-            $old_schedule = ShopSchedule::where('shop_id',$shop_id)->first();
+            $old_schedule = ShopSchedule::first();
             $schedule_id = (isset($old_schedule['id'])) ? $old_schedule['id'] : '';
 
             if(!empty($schedule_id))
@@ -42,7 +39,6 @@ class ShopScheduleController extends Controller
             else
             {
                 $schedule = new ShopSchedule;
-                $schedule->shop_id = $shop_id;
                 $schedule->status = $scheduler_active;
                 $schedule->value = $value;
                 $schedule->save();

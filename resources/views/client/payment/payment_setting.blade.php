@@ -46,61 +46,6 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="card-title d-flex justify-content-between align-items-center">
-                                        <h3>{{ __('Cash POS') }}</h3>
-                                        <label class="switch me-2">
-                                            <input type="checkbox" value="1" name="cash_pos" id="cash_pos" {{ (isset($payment_settings['cash_pos']) && $payment_settings['cash_pos'] == 1) ? 'checked' : '' }}>
-                                            <span class="slider round" data-bs-toggle="tooltip" title="Active / InActive Cash POS">
-                                                <i class="fa-solid fa-circle-check check_icon"></i>
-                                                <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            {{-- <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card-title d-flex justify-content-between align-items-center">
-                                        <h3>{{ __('EveryPay') }}</h3>
-                                        <label class="switch me-2">
-                                            <input type="checkbox" value="1" name="every_pay" id="every_pay" {{ (isset($payment_settings['every_pay']) && $payment_settings['every_pay'] == 1) ? 'checked' : '' }}>
-                                            <span class="slider round" data-bs-toggle="tooltip" title="Active / InActive EveryPay">
-                                                <i class="fa-solid fa-circle-check check_icon"></i>
-                                                <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label for="everypay_mode" class="form-label">{{ __('EveryPay Mode') }}</label>
-                                    <select name="everypay_mode" id="everypay_mode" class="form-select">
-                                        <option value="1" {{ (isset($payment_settings['everypay_mode']) && $payment_settings['everypay_mode'] == 1) ? 'selected' : '' }}>Sandbox</option>
-                                        <option value="0" {{ (isset($payment_settings['everypay_mode']) && $payment_settings['everypay_mode'] == 0) ? 'selected' : '' }}>Live</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label for="every_pay_public_key" class="form-label">{{ __('Public Key') }}</label>
-                                    <input type="text" name="every_pay_public_key" id="every_pay_public_key" class="form-control {{ ($errors->has('every_pay_public_key')) ? 'is-invalid' : '' }}" value="{{ (isset($payment_settings['every_pay_public_key'])) ? $payment_settings['every_pay_public_key'] : '' }}">
-                                    @if($errors->has('every_pay_public_key'))
-                                        <div class="invalid-feedback">
-                                            {{ $errors->first('every_pay_public_key') }}
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="every_pay_private_key" class="form-label">{{ __('Private Key') }}</label>
-                                    <input type="text" name="every_pay_private_key" id="every_pay_private_key" class="form-control {{ ($errors->has('every_pay_private_key')) ? 'is-invalid' : '' }}" value="{{ (isset($payment_settings['every_pay_private_key'])) ? $payment_settings['every_pay_private_key'] : '' }}">
-                                    @if($errors->has('every_pay_private_key'))
-                                        <div class="invalid-feedback">
-                                            {{ $errors->first('every_pay_private_key') }}
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <hr> --}}
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card-title d-flex justify-content-between align-items-center">
                                         <h3>PayPal</h3>
                                         <label class="switch me-2">
                                             <input type="checkbox" value="1" name="paypal" id="paypal" {{ (isset($payment_settings['paypal']) && $payment_settings['paypal'] == 1) ? 'checked' : '' }}>

@@ -2,8 +2,6 @@
     $admin_settings = getAdminSettings();
     $main_screen = isset($admin_settings['theme_main_screen_demo']) ? $admin_settings['theme_main_screen_demo'] : '';
     $category_screen = isset($admin_settings['theme_category_screen_demo']) ? $admin_settings['theme_category_screen_demo'] : '';
-
-    $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 @endphp
 
 @extends('client.layouts.client-layout')
@@ -515,8 +513,8 @@
                                                                     @endif
                                                                 </div>
                                                                 <div class="form-group mt-2">
-                                                                    @if(isset($settings['today_special_icon']) && !empty($settings['today_special_icon']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/today_special_icon/'.$settings['today_special_icon']))
-                                                                        <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/today_special_icon/'.$settings['today_special_icon']) }}" width="100">
+                                                                    @if(isset($settings['today_special_icon']) && !empty($settings['today_special_icon']) && file_exists('public/client_uploads/today_special_icon/'.$settings['today_special_icon']))
+                                                                        <img src="{{ asset('public/client_uploads/today_special_icon/'.$settings['today_special_icon']) }}" width="100">
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -535,8 +533,8 @@
                                                                     @endif
                                                                 </div>
                                                                 <div class="form-group mt-2">
-                                                                    @if(isset($settings['theme_preview_image']) && !empty($settings['theme_preview_image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/theme_preview_image/'.$settings['theme_preview_image']))
-                                                                        <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/theme_preview_image/'.$settings['theme_preview_image']) }}" width="100">
+                                                                    @if(isset($settings['theme_preview_image']) && !empty($settings['theme_preview_image']) && file_exists('public/client_uploads/theme_preview_image/'.$settings['theme_preview_image']))
+                                                                        <img src="{{ asset('public/client_uploads/theme_preview_image/'.$settings['theme_preview_image']) }}" width="100">
                                                                     @endif
                                                                 </div>
                                                             </div>

@@ -20,9 +20,6 @@ class StatisticsController extends Controller
     public function index($key="")
     {
 
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $date_arr = [];
         $user_visits_arr = [];
         $total_clicks_arr = [];
@@ -51,8 +48,7 @@ class StatisticsController extends Controller
         }
         elseif($key == 'lifetime')
         {
-            $shop_details = Shop::find($shop_id);
-            $month = isset($shop_details['created_at']) ? $shop_details['created_at'] : '';
+            $month = Carbon::now()->startOfWeek();
         }
         else
         {
@@ -66,27 +62,27 @@ class StatisticsController extends Controller
             foreach($month_array as $dateval)
             {
                 $date_arr[] = $dateval->format('d-m-Y');
-                $user_visits = UserVisits::where('shop_id',$shop_id)->whereDate('created_at','=',$dateval->format('Y-m-d'))->count();
+                $user_visits = UserVisits::whereDate('created_at','=',$dateval->format('Y-m-d'))->count();
                 $user_visits_arr[$dateval->format('d-m-Y')] = $user_visits;
-                $clicks = Clicks::where('shop_id',$shop_id)->whereDate('created_at','=',$dateval->format('Y-m-d'))->first();
-                $orders = Order::where('shop_id',$shop_id)->whereDate('created_at','=',$dateval->format('Y-m-d'))->count();
+                $clicks = Clicks::whereDate('created_at','=',$dateval->format('Y-m-d'))->first();
+                $orders = Order::whereDate('created_at','=',$dateval->format('Y-m-d'))->count();
                 $orders_arr[$dateval->format('d-m-Y')] = $orders;
                 $total_clicks_arr[] = isset($clicks['total_clicks']) ? $clicks['total_clicks'] : '';
             };
         }
 
         // Most 5 Visited Category
-        $data['category_visit'] = CategoryVisit::with(['category'])->where('shop_id',$shop_id)->orderByRaw("CAST(total_clicks as UNSIGNED) DESC")->limit(5)->get();
+        $data['category_visit'] = CategoryVisit::with(['category'])->orderByRaw("CAST(total_clicks as UNSIGNED) DESC")->limit(5)->get();
 
         // most visited Item
-        $data['items_visit'] = ItemsVisit::with(['item'])->where('shop_id',$shop_id)->orderByRaw("CAST(total_clicks as UNSIGNED) DESC")->limit(5)->get();
+        $data['items_visit'] = ItemsVisit::with(['item'])->orderByRaw("CAST(total_clicks as UNSIGNED) DESC")->limit(5)->get();
 
         // Max Rated Items
-        // $data['max_rated_items'] = Items::withCount('ratings')->withAvg('ratings', 'rating')->orderByDesc('ratings_count')->orderByDesc('ratings_avg_rating')->where('shop_id',$shop_id)->where('published',1)->limit(5)->get();
-        $data['max_rated_items'] = Items::withCount('ratings')->withAvg('ratings', 'rating')->orderByDesc('ratings_avg_rating')->where('shop_id',$shop_id)->where('published',1)->limit(5)->get();
+        // $data['max_rated_items'] = Items::withCount('ratings')->withAvg('ratings', 'rating')->orderByDesc('ratings_count')->orderByDesc('ratings_avg_rating')->where('published',1)->limit(5)->get();
+        $data['max_rated_items'] = Items::withCount('ratings')->withAvg('ratings', 'rating')->orderByDesc('ratings_avg_rating')->where('published',1)->limit(5)->get();
 
         // Low Rated Items
-        $data['low_rated_items'] = Items::withCount('ratings')->withAvg('ratings', 'rating')->orderBy('ratings_avg_rating')->where('shop_id',$shop_id)->where('published',1)->limit(5)->get();
+        $data['low_rated_items'] = Items::withCount('ratings')->withAvg('ratings', 'rating')->orderBy('ratings_avg_rating')->where('published',1)->limit(5)->get();
 
         $data['current_key'] = $key;
         $data['date_array'] = $date_arr;

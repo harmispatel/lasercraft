@@ -18,23 +18,9 @@ class OrderController extends Controller
     // Function for Display Client Orders
     public function index()
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['orders'] = Order::where('shop_id',$shop_id)->whereIn('order_status',['pending','accepted'])->orderBy('id','DESC')->get();
+        $data['orders'] = Order::whereIn('order_status',['pending','accepted'])->orderBy('id','DESC')->get();
 
-        // Subscrption ID
-        $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-
-        if(isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1)
-        {
-            return view('client.orders.orders',$data);
-        }
-        else
-        {
-            return redirect()->route('client.dashboard')->with('error','Unauthorized Action!');
-        }
+        return view('client.orders.orders',$data);
     }
 
 
@@ -42,19 +28,18 @@ class OrderController extends Controller
     public function getNewOrders()
     {
         $html = '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
 
-        $shop_settings = getClientSettings($shop_id);
+        $shop_settings = getClientSettings();
         // Shop Currency
         $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'EUR';
 
         // Order Settings
-        $order_setting = getOrderSettings($shop_id);
+        $order_setting = getOrderSettings();
         $auto_print = (isset($order_setting['auto_print']) && !empty($order_setting['auto_print'])) ? $order_setting['auto_print'] : 0;
         $enable_print = (isset($order_setting['enable_print']) && !empty($order_setting['enable_print'])) ? $order_setting['enable_print'] : 0;
 
         // Orders
-        $orders = Order::where('shop_id',$shop_id)->whereIn('order_status',['pending','accepted'])->orderBy('id','DESC')->get();
+        $orders = Order::whereIn('order_status',['pending','accepted'])->orderBy('id','DESC')->get();
 
         if(count($orders) > 0)
         {
@@ -243,7 +228,6 @@ class OrderController extends Controller
     // Function for Display Client Orders History
     public function ordersHistory(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
         $data['payment_method'] = '';
         $data['status_filter'] = '';
         $data['day_filter'] = '';
@@ -256,12 +240,12 @@ class OrderController extends Controller
 
         if($request->isMethod('get'))
         {
-            $data['orders'] = Order::where('shop_id',$shop_id)->orderBy('id','desc')->get();
-            $data['total'] = Order::where('shop_id',$shop_id)->sum('order_total');
+            $data['orders'] = Order::orderBy('id','desc')->get();
+            $data['total'] = Order::sum('order_total');
         }
         else
         {
-            $orders = Order::where('shop_id',$shop_id);
+            $orders = Order::query();
             $start_date = $request->start_date;
             $end_date = $request->end_date;
             $data['payment_method'] = (isset($request->filter_by_payment_method)) ? $request->filter_by_payment_method : '';
@@ -375,20 +359,7 @@ class OrderController extends Controller
             $data['orders'] = $orders->orderBy('id','desc')->get();
         }
 
-        // Subscrption ID
-        $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-
-        if(isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1)
-        {
-            return view('client.orders.orders_history',$data);
-        }
-        else
-        {
-            return redirect()->route('client.dashboard')->with('error','Unauthorized Action!');
-        }
+        return view('client.orders.orders_history',$data);
     }
 
 
@@ -396,12 +367,11 @@ class OrderController extends Controller
     // Function for Export Order History
     public function exportOrderHistory(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
         $filter_by_day = $request->day_value;
 
         try
         {
-            $orders = Order::where('shop_id',$shop_id);
+            $orders = Order::query();
 
             if($filter_by_day == 'today')
             {
@@ -473,9 +443,8 @@ class OrderController extends Controller
     // function for view OrderSettings
     public function OrderSettings()
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['order_settings'] = getOrderSettings($shop_id);
-        $data['deliveryAreas'] = DeliveryAreas::where('shop_id',$shop_id)->get();
+        $data['order_settings'] = getOrderSettings();
+        $data['deliveryAreas'] = DeliveryAreas::get();
 
         return view('client.orders.order_settings',$data);
     }
@@ -484,8 +453,6 @@ class OrderController extends Controller
     // Function for Update Order Settings
     public function UpdateOrderSettings(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $all_data['delivery'] = (isset($request->delivery)) ? $request->delivery : 0;
         $all_data['takeaway'] = (isset($request->takeaway)) ? $request->takeaway : 0;
         $all_data['room_delivery'] = (isset($request->room_delivery)) ? $request->room_delivery : 0;
@@ -514,7 +481,7 @@ class OrderController extends Controller
             // Insert or Update Settings
             foreach($all_data as $key => $value)
             {
-                $query = OrderSetting::where('shop_id',$shop_id)->where('key',$key)->first();
+                $query = OrderSetting::where('key',$key)->first();
                 $setting_id = isset($query->id) ? $query->id : '';
 
                 if (!empty($setting_id) || $setting_id != '')  // Update
@@ -526,7 +493,6 @@ class OrderController extends Controller
                 else // Insert
                 {
                     $settings = new OrderSetting();
-                    $settings->shop_id = $shop_id;
                     $settings->key = $key;
                     $settings->value = $value;
                     $settings->save();
@@ -543,7 +509,6 @@ class OrderController extends Controller
                     $polygon = serialize($delivery_zone);
 
                     $delivery_area = new DeliveryAreas();
-                    $delivery_area->shop_id = $shop_id;
                     $delivery_area->coordinates = $polygon;
                     $delivery_area->save();
                 }
@@ -567,9 +532,7 @@ class OrderController extends Controller
     // Function for Clear Delivery Range Settings
     public function clearDeliveryRangeSettings()
     {
-        $shop_id = (isset(Auth::user()->hasOneShop->shop['id'])) ? Auth::user()->hasOneShop->shop['id'] : '';
-
-        DeliveryAreas::where('shop_id',$shop_id)->delete();
+        DeliveryAreas::deleteAll();
 
         return redirect()->route('order.settings')->with('success',"Setting has been Updated SuccessFully..");
 
@@ -903,7 +866,6 @@ class OrderController extends Controller
         $lat = $request->latitude;
         $lng = $request->longitude;
         $address = $request->address;
-        $shop_id = $request->shop_id;
 
         try
         {
@@ -912,7 +874,7 @@ class OrderController extends Controller
             session()->put('cust_address',$address);
             session()->save();
 
-            $delivey_avaialbility = checkDeliveryAvilability($shop_id,$lat,$lng);
+            $delivey_avaialbility = checkDeliveryAvilability($lat,$lng);
 
             return response()->json([
                 'success' => 1,
@@ -931,243 +893,11 @@ class OrderController extends Controller
     }
 
 
-    // Function for set Printer JS License Key
-    public function setPrinterLicense()
-    {
-        $license_owner = 'Dimitris Bourlos - 1 WebApp Lic - 1 WebServer Lic';
-        // $license_key  = '661C6658D5FC2787F94AC3E96C33BBE59C5FC29D';
-        $license_key  = '6FFB09414392C388097D50175A10478DE4611F4A';
-
-        //DO NOT MODIFY THE FOLLOWING CODE
-        $timestamp = request()->query('timestamp');
-        $license_hash = hash('sha256', $license_key . $timestamp, false);
-        $resp = $license_owner . '|' . $license_hash;
-
-        return response($resp)->header('Content-Type', 'text/plain');
-    }
-
-
-    // Function for Get Order Receipt
-    public function getOrderReceipt(Request $request)
-    {
-        $order_id = $request->order_id;
-        $user_details = Auth::user();
-        $shop_address = (isset($user_details['address'])) ? $user_details['address'] : '';
-        $shop_id = (isset(Auth::user()->hasOneShop->shop['id'])) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_name = (isset(Auth::user()->hasOneShop->shop['name'])) ? Auth::user()->hasOneShop->shop['name'] : '';
-        $shop_settings = getClientSettings($shop_id);
-        $business_telephone = (isset($shop_settings['business_telephone'])) ? $shop_settings['business_telephone'] : '';
-        $gst_number = (isset($user_details['gst_number']) && !empty($user_details['gst_number'])) ? $user_details['gst_number'] : '';
-
-        $html = '';
-
-        try
-        {
-            $order = Order::with(['order_items','shop'])->where('id',$order_id)->first();
-            $discount_type = (isset($order->discount_type) && !empty($order->discount_type)) ? $order->discount_type : 'percentage';
-            $shop_id = (isset($order->shop['id'])) ? $order->shop['id'] : '';
-
-            $shop_settings = getClientSettings($shop_id);
-
-            $order_setting = getOrderSettings($shop_id);
-            $receipt_intro = (isset($order_setting['receipt_intro']) && !empty($order_setting['receipt_intro'])) ? $order_setting['receipt_intro'] : 'ORDER';
-
-            // Shop Currency
-            $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'EUR';
-
-            $order_date = (isset($order->created_at)) ? $order->created_at : '';
-            $payment_method = (isset($order->payment_method)) ? str_replace('_',' ',$order->payment_method) : '';
-            $checkout_type = (isset($order->checkout_type)) ? $order->checkout_type : '';
-            $customer = $order->firstname." ".$order->lastname;
-            $phone = (isset($order->phone)) ? $order->phone : '';
-            $email = (isset($order->email)) ? $order->email : '';
-            $address = (isset($order->address)) ? $order->address : '';
-            $floor = (isset($order->floor)) ? $order->floor : '';
-            $table_no = (isset($order->table)) ? $order->table : '';
-            $office_no = (isset($order->office_no)) ? $order->office_no : '';
-            $building = (isset($order->building)) ? $order->building : '';
-            $room_no = (isset($order->room)) ? $order->room : '';
-            $delivery_time = (isset($order->delivery_time)) ? $order->delivery_time : '';
-            $door_bell = (isset($order->door_bell)) ? $order->door_bell : '';
-            $items = (isset($order->order_items)) ? $order->order_items : [];
-            $order_total_text = (isset($order->order_total_text)) ? $order->order_total_text : '';
-
-            $html .= '<div class="row justify-content-center">';
-                $html .= '<div class="col-md-10">';
-                    $html .= '<div class="card">';
-                        $html .= '<div class="card-body" style="font-size:38px!important;">';
-                            $html .= '<div class="row">';
-                                $html .= '<div class="col-md-12 text-center mb-3">';
-                                    $html .= '<p class="m-0"><strong>'.$shop_name.'</strong></p>';
-                                    if(!empty($business_telephone))
-                                    {
-                                        $html .= '<p class="m-0"><b>'.$business_telephone.'</b></p>';
-                                    }
-                                $html .= '</div>';
-                                $html .= '<div class="col-md-12 text-center mb-3">';
-                                    $html .= '<p class="m-0">'.$shop_address.'</p>';
-                                $html .= '</div>';
-                                if(!empty($gst_number))
-                                {
-                                    $html .= '<div class="col-md-12 text-center mb-3">';
-                                        $html .= '<p class="m-0"> GST No. : '.$gst_number.'</p>';
-                                    $html .= '</div>';
-                                }
-                                $html .= '<div class="col-md-12">';
-                                    $html .= '<ul class="p-0 m-0 list-unstyled" style="border-top: 2px dotted #ccc;padding:15px 0 !important;border-bottom:2px solid #000;">';
-                                        if($checkout_type == 'takeaway' || $checkout_type == 'delivery')
-                                        {
-                                            $html .= '<li><b>Customer : </b> '.$customer.'</li>';
-                                            $html .= '<li><b>Customer Phone : </b> '.$phone.'</li>';
-                                        }
-                                        if($checkout_type == 'room_delivery')
-                                        {
-                                            $html .= '<li><b>Customer : </b> '.$customer.'</li>';
-                                            $html .= '<li><b>Room No. : </b> '.$room_no.'</li>';
-                                            if(!empty($delivery_time))
-                                            {
-                                                $html .= '<li><b>Delivery Time : </b> '.$delivery_time.'</li>';
-                                            }
-                                        }
-                                        $html .= '<li><b>Order No. : </b>'.$order_id.'</li>';
-                                        $html .= '<li><b>Order Date : </b> '.date('d-m-Y h:i:s',strtotime($order_date)).'</li>';
-                                        $html .= '<li><b>Payment Method : </b> '.ucfirst($payment_method).'</li>';
-                                        $html .= '<li><b>Checkout Type : </b> '.ucfirst(str_replace('_',' ',$checkout_type)).'</li>';
-                                        if($checkout_type == 'delivery')
-                                        {
-                                            $html .= '<li><b>Bell : </b> '.$door_bell.'</li>';
-                                            $html .= '<li><b>Floor No. : </b> '.$floor.'</li>';
-                                            $html .= '<li><b>Address : </b> '.$address.'</li>';
-                                        }
-                                        if($checkout_type == 'table_service')
-                                        {
-                                            $html .= '<li><b>Table No : </b> '.$table_no.'</li>';
-                                        }
-                                        if($checkout_type == 'office_service')
-                                        {
-                                            $html .= '<li><b>Building : </b> '.$building.'</li>';
-                                            $html .= '<li><b>Office No : </b> '.$office_no.'</li>';
-                                        }
-                                    $html .= '</ul>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            // $html .= '<hr>';
-                            $html .= '<div class="row ord-rec-body">';
-                                $html .= '<div class="col-md-12">';
-                                    $html .= '<table class="table border-0 m-0" style="border-bottom:2px solid #000 !important">';
-                                        $html .= '<thead>';
-                                            $html .= '<tr><th class="border-0" width="10%">S.No</th><th class="border-0">Item</th><th class="border-0" width="10%">Qty.</th><th width="25%" class="text-end border-0">Amount</th></tr>';
-                                        $html .= '</thead>';
-                                        $html .= '<tbody>';
-                                            if(count($items) > 0)
-                                            {
-                                                $i=1;
-                                                foreach($items as $item)
-                                                {
-                                                    $item_name = (isset($item['item_name'])) ? $item['item_name'] : '';
-                                                    $item_qty = (isset($item['item_qty'])) ? $item['item_qty'] : 0;
-                                                    $sub_total_text = (isset($item['sub_total_text'])) ? $item['sub_total_text'] : 0;
-                                                    $option = unserialize($item['options']);
-
-                                                    $html .= '<tr>';
-                                                        $html .= '<td class="border-0">'.$i.'</td>';
-                                                        $html .= '<td class="border-0">'.$item_name;
-                                                        if(!empty($option))
-                                                        {
-                                                            $html .= '<br>'.implode(', ',$option);
-                                                        }
-                                                        $html .= '</td>';
-                                                        $html .= '<td class="border-0">'.$item_qty.'</td>';
-                                                        $html .= '<td class="text-end border-0">'.$sub_total_text.'</td>';
-                                                    $html .= '</tr>';
-                                                    $i++;
-                                                }
-                                            }
-                                        $html .= '</tbody>';
-                                    $html .= '</table>';
-                                $html .= '</div>';
-                                // $html .= '<div class="col-md-6 mt-2">';
-                                // $html .= '</div>';
-                                $html .= '<div class="col-md-12 ord-rec-body">';
-                                    $html .= '<table class="table m-0 border-0" style="border-bottom:2px solid #000 !important">';
-
-                                        $html .= '<tr>';
-                                            $html .= '<td><strong>Sub Total : </strong></td>';
-                                            $html .= '<td class="text-end">'.Currency::currency($currency)->format($order->order_subtotal).'</td>';
-                                        $html .= '</tr>';
-
-                                        if($order->discount_per > 0)
-                                        {
-                                            $html .= '<tr>';
-                                                $html .= '<td><strong>Discount : </strong></td>';
-                                                if($order->discount_per == 'fixed')
-                                                {
-                                                    $html .= '<td class="text-end">- '.Currency::currency($currency)->format($order->discount_per).'</td>';
-                                                }
-                                                else
-                                                {
-                                                    $html .= '<td class="text-end">- '.$order->discount_per.'%</td>';
-                                                }
-                                            $html .= '</tr>';
-                                        }
-
-                                        if($order->cgst > 0 && $order->sgst > 0)
-                                        {
-                                            $gst_amt = $order->cgst + $order->sgst;
-                                            $gst_amt = $order->gst_amount / $gst_amt;
-
-                                            $html .= '<tr>';
-                                                $html .= '<td><strong>CGST ('.$order->cgst.'%) : </strong></td>';
-                                                $html .= '<td class="text-end">+ '.Currency::currency($currency)->format($order->cgst * $gst_amt).'</td>';
-                                            $html .= '</tr>';
-                                            $html .= '<tr>';
-                                                $html .= '<td><strong>SGST ('.$order->sgst.'%) : </strong></td>';
-                                                $html .= '<td class="text-end">+ '.Currency::currency($currency)->format($order->sgst * $gst_amt).'</td>';
-                                            $html .= '</tr>';
-                                        }
-
-                                        $html .= '<tr class="text-end">';
-                                            $html .= '<td colspan="2"><strong>'.Currency::currency($currency)->format($order->order_total).'</strong></td>';
-                                        $html .= '</tr>';
-
-                                    $html .= '</table>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            // $html .= '<hr>';
-                            $html .= '<div class="row">';
-                                $html .= '<div class="col-md-12 text-center mt-2">';
-                                    $html .= '<p class="p-0 m-0 ord-rec-body-start">Thank For Your Business.</p>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            return response()->json([
-                'success' => 1,
-                'message' => "Receipt Generated",
-                'data' => $html,
-            ]);
-
-        }
-        catch (\Throwable $th)
-        {
-            return response()->json([
-                'success' => 0,
-                'message' => "Internal Server Error!",
-            ]);
-        }
-
-    }
-
-
     // Function for Get Order Notification
     public function orderNotification(Request $request)
     {
         $html = '';
-        $shop_id = (isset(Auth::user()->hasOneShop->shop['id'])) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $new_order_count = Order::where('shop_id',$shop_id)->where('order_status','pending')->where('is_new',1)->count();
+        $new_order_count = Order::where('order_status','pending')->where('is_new',1)->count();
 
         if($new_order_count > 0)
         {

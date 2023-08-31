@@ -61,11 +61,12 @@
                     </a>
                 </li>
 
-                <li>
+                {{-- <li>
                     <a href="{{ route('design.theme') }}" class="{{ ($routeName == 'design.theme' || $routeName == 'design.theme-preview' || $routeName == 'theme.clone') ? 'active-link' : '' }}">
                         <span>{{ __('Themes') }}</span>
                     </a>
-                </li>
+                </li> --}}
+
                 <li>
                     <a href="{{ route('design.mail.forms') }}" class="{{ ($routeName == 'design.mail.forms') ? 'active-link' : '' }}">
                         <span>{{ __('Mail Forms') }}</span>
@@ -77,10 +78,10 @@
         {{-- Menu Nav --}}
         <li class="nav-item">
             {{-- && --}}
-            <a class="nav-link {{ (($routeName != 'categories') && ($routeName != 'items') && ($routeName != 'tags') && ($routeName != 'options') && ($routeName != 'shop.tables') && ($routeName != 'shop.tables.create') && ($routeName != 'rooms') && ($routeName != 'rooms.create') && ($routeName != 'buildings') && ($routeName != 'buildings.create')) ? 'collapsed' : '' }} {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options') || ($routeName == 'shop.tables') || ($routeName == 'rooms') || ($routeName == 'rooms.create') || ($routeName == 'shop.tables.create') || ($routeName == 'buildings') || ($routeName == 'buildings.create')) ? 'active-tab' : '' }}" data-bs-target="#menu-nav" data-bs-toggle="collapse" href="#" aria-expanded="{{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options') || ($routeName == 'shop.tables') || ($routeName == 'rooms') || ($routeName == 'rooms.create') || ($routeName == 'shop.tables.create') || ($routeName == 'buildings') || ($routeName == 'buildings.create')) ? 'true' : 'false' }}">
-                <i class="fa-solid fa-bars {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'shop.tables') || ($routeName == 'rooms') || ($routeName == 'rooms.create') || ($routeName == 'shop.tables.create') || ($routeName == 'buildings') || ($routeName == 'buildings.create')) ? 'icon-tab' : '' }}"></i><span>{{ __('Catalogue') }}</span><i class="bi bi-chevron-down ms-auto {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options') || ($routeName == 'shop.tables') || ($routeName == 'rooms') || ($routeName == 'rooms.create') || ($routeName == 'shop.tables.create') || ($routeName == 'buildings') || ($routeName == 'buildings.create')) ? 'icon-tab' : '' }}"></i>
+            <a class="nav-link {{ (($routeName != 'categories') && ($routeName != 'items') && ($routeName != 'tags') && ($routeName != 'options')) ? 'collapsed' : '' }} {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options')) ? 'active-tab' : '' }}" data-bs-target="#menu-nav" data-bs-toggle="collapse" href="#" aria-expanded="{{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options')) ? 'true' : 'false' }}">
+                <i class="fa-solid fa-bars {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags')) ? 'icon-tab' : '' }}"></i><span>{{ __('Catalogue') }}</span><i class="bi bi-chevron-down ms-auto {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options')) ? 'icon-tab' : '' }}"></i>
             </a>
-            <ul id="menu-nav" class="nav-content sidebar-ul collapse {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options') || ($routeName == 'shop.tables') || ($routeName == 'rooms') || ($routeName == 'rooms.create') || ($routeName == 'shop.tables.create') || ($routeName == 'buildings') || ($routeName == 'buildings.create')) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+            <ul id="menu-nav" class="nav-content sidebar-ul collapse {{ (($routeName == 'categories') || ($routeName == 'items') || ($routeName == 'tags') || ($routeName == 'options')) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="{{ route('categories') }}" class="{{ (($routeName == 'categories') &&  count($routeParams) == 0) ? 'active-link' : '' }}">
                         <span>{{ __('Categories') }}</span>
@@ -135,24 +136,6 @@
                         <span>{{ __('Order Attributes') }}</span>
                     </a>
                 </li>
-
-                <li>
-                    <a href="{{ route('shop.tables') }}" class="{{ ($routeName == 'shop.tables' || $routeName == 'shop.tables.create') ? 'active-link' : '' }}">
-                        <span>{{ __('Tables') }}</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ route('rooms') }}" class="{{ ($routeName == 'rooms' || $routeName == 'rooms.create') ? 'active-link' : '' }}">
-                        <span>{{ __('Rooms') }}</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ route('buildings') }}" class="{{ ($routeName == 'buildings' || $routeName == 'buildings.create') ? 'active-link' : '' }}">
-                        <span>{{ __('Buildings') }}</span>
-                    </a>
-                </li>
             </ul>
         </li>
 
@@ -194,14 +177,6 @@
             </a>
         </li>
 
-
-        {{-- Special Icons Nav --}}
-        <li class="nav-item">
-            <a class="nav-link {{ ($routeName == 'special.icons' || $routeName == 'special.icons.add' || $routeName == 'special.icons.edit') ? 'active-tab' : '' }}" href="{{ route('special.icons') }}">
-                <i class="fas fa-seedling {{ ($routeName == 'special.icons' || $routeName == 'special.icons.add' || $routeName == 'special.icons.edit') ? 'icon-tab' : '' }}"></i>
-            <span>{{ __('Special Icons') }}</span>
-            </a>
-        </li>
 
         {{-- Statistics Nav --}}
         <li class="nav-item">

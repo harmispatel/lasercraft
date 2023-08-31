@@ -10,8 +10,7 @@ class PaymentController extends Controller
 {
     public function paymentSettings()
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['payment_settings'] = getPaymentSettings($shop_id);
+        $data['payment_settings'] = getPaymentSettings();
         return view('client.payment.payment_setting',$data);
     }
 
@@ -19,17 +18,9 @@ class PaymentController extends Controller
     // Function for Update Payment Settings
     public function UpdatePaymentSettings(Request $request)
     {
-
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $cash = (isset($request->cash)) ? $request->cash : 0;
-        $cash_pos = (isset($request->cash_pos)) ? $request->cash_pos : 0;
         $paypal = (isset($request->paypal)) ? $request->paypal : 0;
         $paypal_mode = (isset($request->paypal_mode)) ? $request->paypal_mode : 'sandbox';
-        $every_pay = (isset($request->every_pay)) ? $request->every_pay : 0;
-        $everypay_mode = (isset($request->everypay_mode)) ? $request->everypay_mode : 1;
-        $every_pay_public_key = (isset($request->every_pay_public_key)) ? $request->every_pay_public_key : '';
-        $every_pay_private_key = (isset($request->every_pay_private_key)) ? $request->every_pay_private_key : '';
         $paypal_public_key = (isset($request->paypal_public_key)) ? $request->paypal_public_key : '';
         $paypal_private_key = (isset($request->paypal_private_key)) ? $request->paypal_private_key : '';
         $upi_payment = (isset($request->upi_payment)) ? $request->upi_payment : 0;
@@ -42,14 +33,6 @@ class PaymentController extends Controller
             $rules += [
                 'paypal_public_key' => 'required',
                 'paypal_private_key' => 'required',
-            ];
-        }
-
-        if($every_pay == 1)
-        {
-            $rules += [
-                'every_pay_public_key' => 'required',
-                'every_pay_private_key' => 'required',
             ];
         }
 
@@ -74,15 +57,10 @@ class PaymentController extends Controller
         {
             $datas = [
                 'cash' => $cash,
-                'cash_pos' => $cash_pos,
                 'paypal' => $paypal,
                 'paypal_mode' => $paypal_mode,
                 'paypal_public_key' => $paypal_public_key,
                 'paypal_private_key' => $paypal_private_key,
-                'every_pay' => $every_pay,
-                'everypay_mode' => $everypay_mode,
-                'every_pay_public_key' => $every_pay_public_key,
-                'every_pay_private_key' => $every_pay_private_key,
                 'upi_payment' => $upi_payment,
                 'upi_id' => $upi_id,
                 'payee_name' => $payee_name,
@@ -98,7 +76,7 @@ class PaymentController extends Controller
             // Insert or Update Settings
             foreach($datas as $key => $value)
             {
-                $query = PaymentSettings::where('shop_id',$shop_id)->where('key',$key)->first();
+                $query = PaymentSettings::where('key',$key)->first();
                 $setting_id = isset($query->id) ? $query->id : '';
 
                 if (!empty($setting_id) || $setting_id != '')  // Update
@@ -110,7 +88,6 @@ class PaymentController extends Controller
                 else // Insert
                 {
                     $settings = new PaymentSettings();
-                    $settings->shop_id = $shop_id;
                     $settings->key = $key;
                     $settings->value = $value;
                     $settings->save();

@@ -43,17 +43,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-
-    public function hasOneShop()
-    {
-        return $this->hasOne(UserShop::class,'user_id','id');
-    }
-
-    public function hasOneSubscription()
-    {
-        return $this->hasOne(UsersSubscriptions::class,'user_id','id');
-    }
-
     public function hasOneCountry()
     {
         return $this->hasOne(Country::class,'id','country');

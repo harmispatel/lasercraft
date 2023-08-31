@@ -236,14 +236,14 @@ Route::group(['prefix' => 'client'], function()
         Route::post('/contact-send',[ContactController::class,'send'])->name('contact.send');
 
         // Themes
-        Route::get('/design-theme', [ThemeController::class,'index'])->name('design.theme');
-        Route::get('/design-theme-preview/{id}', [ThemeController::class,'themePrview'])->name('design.theme-preview');
-        Route::get('/design-create-theme', [ThemeController::class,'create'])->name('design.theme-create');
-        Route::post('/design-store-theme', [ThemeController::class,'store'])->name('design.theme-store');
-        Route::post('/design-update-theme', [ThemeController::class,'update'])->name('design.theme-update');
-        Route::post('/change-theme', [ThemeController::class,'changeTheme'])->name('theme.change');
-        Route::get('/delete-theme/{id}', [ThemeController::class,'destroy'])->name('theme.delete');
-        Route::get('/clone-theme/{id}', [ThemeController::class,'cloneView'])->name('theme.clone');
+        // Route::get('/design-theme', [ThemeController::class,'index'])->name('design.theme');
+        // Route::get('/design-theme-preview/{id}', [ThemeController::class,'themePrview'])->name('design.theme-preview');
+        // Route::get('/design-create-theme', [ThemeController::class,'create'])->name('design.theme-create');
+        // Route::post('/design-store-theme', [ThemeController::class,'store'])->name('design.theme-store');
+        // Route::post('/design-update-theme', [ThemeController::class,'update'])->name('design.theme-update');
+        // Route::post('/change-theme', [ThemeController::class,'changeTheme'])->name('theme.change');
+        // Route::get('/delete-theme/{id}', [ThemeController::class,'destroy'])->name('theme.delete');
+        // Route::get('/clone-theme/{id}', [ThemeController::class,'cloneView'])->name('theme.clone');
 
 
         // Orders
@@ -257,20 +257,9 @@ Route::group(['prefix' => 'client'], function()
         Route::post('/finalized-order',[OrderController::class,'finalizedOrder'])->name('finalized.order');
         Route::get('/order-view/{id}',[OrderController::class,'viewOrder'])->name('view.order');
         Route::get('/clear-delivey-range',[OrderController::class,'clearDeliveryRangeSettings'])->name('remove.delivery.range');
-        Route::post('/get-order-receipt',[OrderController::class,'getOrderReceipt'])->name('order.receipt');
         Route::post('/order-notification',[OrderController::class,'orderNotification'])->name('order.notification');
         Route::get('/new-orders',[OrderController::class,'getNewOrders'])->name('new.orders');
-        Route::get('/jspm',[OrderController::class,'setPrinterLicense'])->name('jspm');
         Route::post('orders-history-export',[OrderController::class,'exportOrderHistory'])->name('orders.history.export');
-
-        // Special Icons
-        Route::get('/special-icons',[IngredientController::class,'specialIcons'])->name('special.icons');
-        Route::get('/new-special-icons',[IngredientController::class,'insertSpecialIcons'])->name('special.icons.add');
-        Route::post('/store-special-icons',[IngredientController::class,'storeSpecialIcons'])->name('special.icons.store');
-        Route::get('/delete-special-icons/{id}',[IngredientController::class,'destroySpecialIcons'])->name('special.icons.destroy');
-        Route::get('/edit-special-icons/{id}',[IngredientController::class,'editSpecialIcons'])->name('special.icons.edit');
-        Route::post('/update-special-icons',[IngredientController::class,'updateSpecialIcons'])->name('special.icons.update');
-        Route::post('/status-special-icons',[IngredientController::class,'changeStatus'])->name('special.icons.status');
 
         // Payment
         Route::get('/payment-settings',[PaymentController::class,'paymentSettings'])->name('payment.settings');
@@ -282,28 +271,6 @@ Route::group(['prefix' => 'client'], function()
 
         Route::post('/verify/client/password',[UserController::class,'verifyClientPassword'])->name('verify.client.password');
 
-        // Tables
-        Route::get('/shop-tables',[ShopTablesController::class,'index'])->name('shop.tables');
-        Route::get('/shop-tables/create',[ShopTablesController::class,'create'])->name('shop.tables.create');
-        Route::post('/shop-tables/store',[ShopTablesController::class,'store'])->name('shop.tables.store');
-        Route::post('/shop-tables/status',[ShopTablesController::class,'changeStatus'])->name('shop.tables.status');
-        Route::post('/shop-tables/destroy',[ShopTablesController::class,'destroy'])->name('shop.tables.destroy');
-        Route::get('/shop-tables/printqr',[ShopTablesController::class,'printTablesQR'])->name('shop.tables.printqr');
-
-        // Rooms
-        Route::get('/rooms',[RoomsController::class,'index'])->name('rooms');
-        Route::get('/rooms/create',[RoomsController::class,'create'])->name('rooms.create');
-        Route::post('/rooms/store',[RoomsController::class,'store'])->name('rooms.store');
-        Route::post('/rooms/status',[RoomsController::class,'changeStatus'])->name('rooms.status');
-        Route::post('/rooms/destroy',[RoomsController::class,'destroy'])->name('rooms.destroy');
-        Route::get('/rooms/printqr',[RoomsController::class,'printRoomsQR'])->name('rooms.printqr');
-
-        // Buildings
-        Route::get('/buildings',[BuildingController::class,'index'])->name('buildings');
-        Route::get('/buildings/create',[BuildingController::class,'create'])->name('buildings.create');
-        Route::post('/buildings/store',[BuildingController::class,'store'])->name('buildings.store');
-        Route::post('/buildings/destroy',[BuildingController::class,'destroy'])->name('buildings.destroy');
-
         // Shop Schedule
         Route::get('/shop-schedule',[ShopScheduleController::class,'index'])->name('shop.schedule');
         Route::post('/shop-schedule-update',[ShopScheduleController::class,'updateShopSchedule'])->name('update.shop.schedule');
@@ -311,7 +278,6 @@ Route::group(['prefix' => 'client'], function()
     });
 });
 
-Route::get('/jspm',[OrderController::class,'setPrinterLicense'])->name('jspm');
 
 // Get Total with currency
 Route::post('total-with-currency',function(Request $request)

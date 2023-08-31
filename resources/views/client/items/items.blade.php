@@ -1,22 +1,11 @@
 @php
-
-    // Shop ID & Slug
-    $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : "";
-    $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
     // Primary Language Details
-    $primary_lang_details = clientLanguageSettings($shop_id);
+    $primary_lang_details = clientLanguageSettings();
     $language = getLangDetails(isset($primary_lang_details['primary_language']) ? $primary_lang_details['primary_language'] : '');
     $language_code = isset($language['code']) ? $language['code'] : '';
 
     // Name Language Key
     $name_key = $language_code."_name";
-
-    // Subscrption ID
-    $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-    // Get Package Permissions
-    $package_permissions = getPackagePermission($subscription_id);
 
 @endphp
 
@@ -167,26 +156,6 @@
                                 </div>
                             </div>
 
-                            {{-- Indicative Icons --}}
-                            <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <label for="ingredients" class="form-label">{{ __('Indicative Icons')}}</label>
-                                    <select name="ingredients[]" id="ingredients" class="form-control" multiple>
-                                        @if(count($ingredients) > 0)
-                                            @foreach ($ingredients as $ingredient)
-                                                @php
-                                                    $parent_id = (isset($ingredient->parent_id)) ? $ingredient->parent_id : NULL;
-                                                @endphp
-
-                                                @if((isset($package_permissions['special_icons']) && !empty($package_permissions['special_icons']) && $package_permissions['special_icons'] == 1) || $parent_id != NULL)
-                                                    <option value="{{ $ingredient->id }}">{{ $ingredient->name }}</option>
-                                                @endif
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
-                            </div>
-
                             {{-- Tags --}}
                             <div class="row mb-3">
                                 <div class="col-md-12">
@@ -201,29 +170,19 @@
                                 </div>
                             </div>
 
-                            {{-- Calories --}}
-                            <div class="row mb-3 calories_div">
+                            {{-- Attributes --}}
+                            <div class="row mb-3">
                                 <div class="col-md-12">
-                                    <label for="calories" class="form-label">{{ __('Calories')}}</label>
-                                    <input type="text" name="calories" class="form-control" id="calories" placeholder="Enter Calories">
+                                    <label for="options" class="form-label">{{ __('Attributes')}}</label>
+                                    <select name="options[]" id="options" class="form-control" multiple>
+                                        @if(count($options) > 0)
+                                            @foreach ($options as $option)
+                                                <option value="{{ $option->id }}">{{ $option->title }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
                                 </div>
                             </div>
-
-                            {{-- Attributes --}}
-                            @if((isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1))
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label for="options" class="form-label">{{ __('Attributes')}}</label>
-                                        <select name="options[]" id="options" class="form-control" multiple>
-                                            @if(count($options) > 0)
-                                                @foreach ($options as $option)
-                                                    <option value="{{ $option->id }}">{{ $option->title }}</option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
-                                </div>
-                            @endif
 
                             {{-- Status Buttons --}}
                             <div class="row mb-3">
@@ -425,8 +384,8 @@
                                         <div class="item_box">
                                             <div class="item_img">
                                                 <a>
-                                                    @if(!empty($item->image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item->image))
-                                                        <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/items/'.$item->image) }}" class="w-100">
+                                                    @if(!empty($item->image) && file_exists('public/client_uploads/items/'.$item->image))
+                                                        <img src="{{ asset('public/client_uploads/items/'.$item->image) }}" class="w-100">
                                                     @else
                                                         <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" class="w-100">
                                                     @endif
@@ -508,12 +467,6 @@
 
             // Clear all Toastr Messages
             toastr.clear();
-
-            // Intialized Ingredients SelectBox
-            $("#addItemForm #ingredients").select2({
-                dropdownParent: $("#addItemModal"),
-                placeholder: "Select Indicative Icons",
-            });
 
             // Intialized Options SelectBox
             $("#addItemForm #options").select2({
@@ -1025,13 +978,6 @@
                             $('#editItemModal .mark_new').show();
                             $('#editItemModal .review_rating').show();
                         }
-
-                        // Intialized Ingredients SelectBox
-                        var ingredientsEle = "#editItemModal #ingredients";
-                        $(ingredientsEle).select2({
-                            dropdownParent: $("#editItemModal"),
-                            placeholder: "Select Indicative Icons",
-                        });
 
                         // Intialized Tags SelectBox
                         var tagsEle = "#editItemModal #tags";

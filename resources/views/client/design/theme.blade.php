@@ -5,14 +5,6 @@
     $shop_settings = getClientSettings();
     $active_theme = isset($shop_settings['shop_active_theme']) ? $shop_settings['shop_active_theme'] : '';
 
-    // Subscrption ID
-    $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-    // Get Package Permissions
-    $package_permissions = getPackagePermission($subscription_id);
-
-    $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
 @endphp
 
 @extends('client.layouts.client-layout')
@@ -61,14 +53,10 @@
                                 @endif --}}
                                 <div class="edit_item_bt">
                                     @if($theme->is_default == 0)
-                                        @if(isset($package_permissions['add_edit_clone_theme']) && !empty($package_permissions['add_edit_clone_theme']) && $package_permissions['add_edit_clone_theme'] == 1)
-                                            <a href="{{ route('design.theme-preview',$theme->id) }}" class="btn edit_item">{{ __('Edit')}}</a>
-                                        @endif
+                                        <a href="{{ route('design.theme-preview',$theme->id) }}" class="btn edit_item">{{ __('Edit')}}</a>
                                     @endif
 
-                                    @if(isset($package_permissions['add_edit_clone_theme']) && !empty($package_permissions['add_edit_clone_theme']) && $package_permissions['add_edit_clone_theme'] == 1)
-                                        <a href="{{ route('theme.clone',$theme->id) }}" class="btn edit_category">{{ __('Clone')}}</a>
-                                    @endif
+                                    <a href="{{ route('theme.clone',$theme->id) }}" class="btn edit_category">{{ __('Clone')}}</a>
 
                                 </div>
                                 @if($theme->is_default == 0)
@@ -97,26 +85,23 @@
                 @endforeach
             @endif
 
-
-            @if(isset($package_permissions['add_edit_clone_theme']) && !empty($package_permissions['add_edit_clone_theme']) && $package_permissions['add_edit_clone_theme'] == 1)
-                <div class="col-md-6 col-lg-3">
-                    <div class="item_box">
-                        <div class="item_img add_category add_theme">
-                            <a href="#" class="add_category_bt">
-                                <i class="fa-solid fa-image icon_none"></i>
-                            </a>
-                            <div class="edit_item_bt">
-                                <a href="{{ route('design.theme-create') }}" class="btn edit_item">{{ __('Add New Theme')}}</a>
-                            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="item_box">
+                    <div class="item_img add_category add_theme">
+                        <a href="#" class="add_category_bt">
+                            <i class="fa-solid fa-image icon_none"></i>
+                        </a>
+                        <div class="edit_item_bt">
+                            <a href="{{ route('design.theme-create') }}" class="btn edit_item">{{ __('Add New Theme')}}</a>
                         </div>
-                        <div class="item_info">
-                            <div class="item_name">
-                                <h3>{{ __('Add theme')}}</h3>
-                            </div>
+                    </div>
+                    <div class="item_info">
+                        <div class="item_name">
+                            <h3>{{ __('Add theme')}}</h3>
                         </div>
                     </div>
                 </div>
-            @endif
+            </div>
 
 
         </div>

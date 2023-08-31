@@ -150,56 +150,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <hr>
-                                <div class="row mb-2">
-                                    <h3>{{ __('Shop Details')}}</h3>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="shop_name" class="form-label">{{ __('Shop Name')}}</label>
-                                            <input type="text" name="shop_name" id="shop_name" class="form-control {{ ($errors->has('shop_name')) ? 'is-invalid' : '' }}" value="{{ isset($user->hasOneShop->shop['name']) ? $user->hasOneShop->shop['name'] : '' }}" placeholder="Enter Your Shop Name">
-                                            @if($errors->has('shop_name'))
-                                                <div class="invalid-feedback">
-                                                    {{ $errors->first('shop_name') }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="shop_logo" class="form-label">{{ __('Shop Logo')}}</label>
-                                            <input type="file" name="shop_logo" id="shop_logo" class="form-control {{ ($errors->has('shop_logo')) ? 'is-invalid' : '' }}">
-                                            @if($errors->has('shop_logo'))
-                                                <div class="invalid-feedback">
-                                                    {{ $errors->first('shop_logo') }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <code class="mt-2">Upload Shop Logo (150*80) or (150*150)</code>
-                                        @php
-                                            $image = isset($user->hasOneShop->shop['logo']) ? $user->hasOneShop->shop['logo'] : '';
-                                        @endphp
-                                        <div class="row mt-5">
-                                            <div class="col-md-4">
-                                                <div class="form-group mt-2 position-relative">
-                                                    @if(!empty($image))
-                                                        <img class="w-100" src="{{ $image }}">
-                                                        <a href="{{ route('shop.delete.logo') }}" class="btn btn-sm btn-danger" style="position: absolute; top: -35px; right: 0px;"><i class="bi bi-trash"></i></a>
-                                                    @else
-                                                        <img width="100" src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}">
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12 mb-3">
-                                        <div class="form-group">
-                                            <label for="shop_description" class="form-label">{{ __('Shop Description')}}</label>
-                                            <textarea name="shop_description" id="shop_description" rows="5" class="form-control text-editor">{{ isset($user->hasOneShop->shop['description']) ? $user->hasOneShop->shop['description'] : '' }}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="card-footer">

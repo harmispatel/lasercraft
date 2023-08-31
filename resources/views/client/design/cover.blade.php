@@ -3,8 +3,6 @@
     $intro_status = isset($client_settings['intro_icon_status']) ? $client_settings['intro_icon_status'] : '';
     $intro_duration = isset($client_settings['intro_icon_duration']) ? $client_settings['intro_icon_duration'] : '';
     $shop_intro_icon = isset($client_settings['shop_intro_icon']) ? $client_settings['shop_intro_icon'] : '';
-
-    $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 @endphp
 
 @extends('client.layouts.client-layout')
@@ -34,16 +32,16 @@
                             <div class="add_logo_sec_body_inr">
                                 <div>
                                     <label for="shop_intro_icon" class="position-relative" style="cursor: pointer;">
-                                        @if(!empty($shop_intro_icon) && file_exists('public/client_uploads/shops/'.$shop_slug.'/intro_icons/'.$shop_intro_icon))
+                                        @if(!empty($shop_intro_icon) && file_exists('public/client_uploads/intro_icons/'.$shop_intro_icon))
                                             @php
                                                 $file_ext = pathinfo($shop_intro_icon, PATHINFO_EXTENSION);
                                             @endphp
                                             @if($file_ext == 'mp4' || $file_ext == 'mov')
-                                                <video src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/intro_icons/'.$shop_intro_icon) }}" width="200px" autoplay muted loop>
+                                                <video src="{{ asset('public/client_uploads/intro_icons/'.$shop_intro_icon) }}" width="200px" autoplay muted loop>
                                                 </video>
                                                 <a href="{{ route('design.cover.delete') }}" class="btn btn-sm btn-danger" style="position: absolute; top: -35px; right: 0px;"><i class="bi bi-trash"></i></a>
                                             @else
-                                                <img src="{{ asset('public/client_uploads/shops/'.$shop_slug.'/intro_icons/'.$shop_intro_icon) }}" width="200px"/>
+                                                <img src="{{ asset('public/client_uploads/intro_icons/'.$shop_intro_icon) }}" width="200px"/>
                                                 <a href="{{ route('design.cover.delete') }}" class="btn btn-sm btn-danger" style="position: absolute; top: -35px; right: 0px;"><i class="bi bi-trash"></i></a>
                                             @endif
                                         @else

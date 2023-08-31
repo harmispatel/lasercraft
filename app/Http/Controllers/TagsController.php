@@ -14,28 +14,16 @@ class TagsController extends Controller
     // Display a listing of the resource.
     public function index()
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['tags'] = Tags::where('shop_id',$shop_id)->get();
+        $data['tags'] = Tags::get();
         return view('client.tags.tags',$data);
-    }
-
-
-    // Show the form for creating a new resource.
-    public function create()
-    {
-        //
     }
 
 
     // Store a newly created resource in storage.
     public function store(Request $request)
     {
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Language Details
@@ -45,7 +33,7 @@ class TagsController extends Controller
         $tag_name_key = $lang_code."_name";
 
         $request->validate([
-            'tag_name' => 'required|unique:tags,'.$tag_name_key.',NULL,id,shop_id,'.$shop_id,
+            'tag_name' => 'required|unique:tags,'.$tag_name_key,
         ]);
 
         $max_tag_order_key = Tags::max('order');
@@ -55,7 +43,6 @@ class TagsController extends Controller
         {
             $tag = new Tags();
             $tag->name = $request->tag_name;
-            $tag->shop_id = $shop_id;
             $tag->order = $tag_order;
             $tag->$tag_name_key = $request->tag_name;
             $tag->save();
@@ -99,22 +86,20 @@ class TagsController extends Controller
     public function edit(Request $request)
     {
         $tag_id = $request->id;
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
 
         try
         {
             // Get Language Settings
-            $language_settings = clientLanguageSettings($shop_id);
+            $language_settings = clientLanguageSettings();
             $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
             // Primary Language Details
             $primary_language_detail = Languages::where('id',$primary_lang_id)->first();
             $primary_lang_code = isset($primary_language_detail->code) ? $primary_language_detail->code : '';
-            $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
             $tag_name_key = $primary_lang_code."_name";
 
             // Additional Languages
-            $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+            $additional_languages = AdditionalLanguage::get();
 
             // Tag Details
             $tag_details = Tags::where('id',$tag_id)->first();
@@ -214,9 +199,6 @@ class TagsController extends Controller
     // Function for Update Tag By Language Code
     public function updateByLangCode(Request $request)
     {
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $tag_id = $request->tag_id;
         $name = $request->name;
         $active_lang_code = $request->active_lang_code;
@@ -224,7 +206,7 @@ class TagsController extends Controller
         $act_lang_name_key = $active_lang_code."_name";
 
         $request->validate([
-            'name' => 'required|unique:tags,'.$act_lang_name_key.','.$tag_id.',id,shop_id,'.$shop_id,
+            'name' => 'required|unique:tags,'.$act_lang_name_key.','.$tag_id,
         ]);
 
         try
@@ -258,20 +240,16 @@ class TagsController extends Controller
     // Function for Get Tag Data
     public function getEditTagData($current_lang_code,$tag_id)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Primary Language Details
         $primary_language_detail = Languages::where('id',$primary_lang_id)->first();
         $primary_lang_code = isset($primary_language_detail->code) ? $primary_language_detail->code : '';
-        $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
         // Additional Languages
-        $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+        $additional_languages = AdditionalLanguage::get();
         if(count($additional_languages) > 0)
         {
             $tag_name_key = $current_lang_code."_name";
@@ -373,16 +351,13 @@ class TagsController extends Controller
     // Function for edit Tag Language Wise
     public function update(Request $request)
     {
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $tag_id = $request->tag_id;
         $name = $request->name;
         $active_lang_code = $request->active_lang_code;
         $act_lang_name_key = $active_lang_code."_name";
 
         $request->validate([
-            'name' => 'required|unique:tags,'.$act_lang_name_key.','.$tag_id.',id,shop_id,'.$shop_id,
+            'name' => 'required|unique:tags,'.$act_lang_name_key.','.$tag_id,
         ]);
 
         try

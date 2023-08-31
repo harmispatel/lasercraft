@@ -1,6 +1,5 @@
 @php
-    $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : "";
-    $primary_lang_details = clientLanguageSettings($shop_id);
+    $primary_lang_details = clientLanguageSettings();
 
     $language = getLangDetails(isset($primary_lang_details['primary_language']) ? $primary_lang_details['primary_language'] : '');
     $language_code = isset($language['code']) ? $language['code'] : '';

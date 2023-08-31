@@ -108,53 +108,39 @@ class DesignController extends Controller
     // Change Intro Status
     public function introStatus(Request $request)
     {
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         try
         {
-            if(!empty($clientID) && !empty($shop_id))
+            $get_intro_status_setting = ClientSettings::where('key','intro_icon_status')->first();
+
+            $setting_id = isset($get_intro_status_setting->id) ? $get_intro_status_setting->id : '';
+
+            if(!empty($setting_id) || $setting_id != '')
             {
-                $get_intro_status_setting = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key','intro_icon_status')->first();
-                $setting_id = isset($get_intro_status_setting->id) ? $get_intro_status_setting->id : '';
-
-                if(!empty($setting_id) || $setting_id != '')
-                {
-                    $intro_status = ClientSettings::find($setting_id);
-                    $intro_status->value = $request->status;
-                    $intro_status->update();
-                }
-                else
-                {
-                    $intro_status = new ClientSettings();
-                    $intro_status->client_id = $clientID;
-                    $intro_status->shop_id = $shop_id;
-                    $intro_status->key = 'intro_icon_status';
-                    $intro_status->value = $request->status;
-                    $intro_status->save();
-                }
-
-                if($request->status == 1)
-                {
-                    $message = "Intro has been Enabled SuccessFully....";
-                }
-                else
-                {
-                    $message = "Intro has been Disabled SuccessFully....";
-                }
-
-                return response()->json([
-                    'success' => 1,
-                    'message' => $message,
-                ]);
+                $intro_status = ClientSettings::find($setting_id);
+                $intro_status->value = $request->status;
+                $intro_status->update();
             }
             else
             {
-                return response()->json([
-                    'success' => 0,
-                    'message' => 'Oops, Something Went Wrong !',
-                ]);
+                $intro_status = new ClientSettings();
+                $intro_status->key = 'intro_icon_status';
+                $intro_status->value = $request->status;
+                $intro_status->save();
             }
+
+            if($request->status == 1)
+            {
+                $message = "Intro has been Enabled SuccessFully....";
+            }
+            else
+            {
+                $message = "Intro has been Disabled SuccessFully....";
+            }
+
+            return response()->json([
+                'success' => 1,
+                'message' => $message,
+            ]);
         }
         catch (\Throwable $th)
         {
@@ -168,44 +154,29 @@ class DesignController extends Controller
     // Change Intro Duration
     public function introDuration(Request $request)
     {
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         try
         {
-            if(!empty($clientID) && !empty($shop_id))
+            $get_intro_duration_setting = ClientSettings::where('key','intro_icon_duration')->first();
+            $setting_id = isset($get_intro_duration_setting->id) ? $get_intro_duration_setting->id : '';
+
+            if(!empty($setting_id) || $setting_id != '')
             {
-                $get_intro_duration_setting = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key','intro_icon_duration')->first();
-                $setting_id = isset($get_intro_duration_setting->id) ? $get_intro_duration_setting->id : '';
-
-                if(!empty($setting_id) || $setting_id != '')
-                {
-                    $intro_duration = ClientSettings::find($setting_id);
-                    $intro_duration->value = $request->duration;
-                    $intro_duration->update();
-                }
-                else
-                {
-                    $intro_duration = new ClientSettings();
-                    $intro_duration->client_id = $clientID;
-                    $intro_duration->shop_id = $shop_id;
-                    $intro_duration->key = 'intro_icon_duration';
-                    $intro_duration->value = $request->duration;
-                    $intro_duration->save();
-                }
-
-                return response()->json([
-                    'success' => 1,
-                    'message' => "Duration has been Updated SuccessFully...",
-                ]);
+                $intro_duration = ClientSettings::find($setting_id);
+                $intro_duration->value = $request->duration;
+                $intro_duration->update();
             }
             else
             {
-                return response()->json([
-                    'success' => 0,
-                    'message' => 'Oops, Something Went Wrong !',
-                ]);
+                $intro_duration = new ClientSettings();
+                $intro_duration->key = 'intro_icon_duration';
+                $intro_duration->value = $request->duration;
+                $intro_duration->save();
             }
+
+            return response()->json([
+                'success' => 1,
+                'message' => "Duration has been Updated SuccessFully...",
+            ]);
         }
         catch (\Throwable $th)
         {
@@ -220,71 +191,55 @@ class DesignController extends Controller
     // Upload Intro Icon
     public function introIconUpload(Request $request)
     {
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $request->validate([
             'shop_intro_icon' => 'mimes:png,jpg,svg,gif,jpeg,PNG,SVG,JPG,JPEG,GIF,mp4,mov|max:2000',
         ]);
 
         try
         {
-            if(!empty($clientID) && !empty($shop_id))
+            if($request->hasFile('shop_intro_icon'))
             {
-                if($request->hasFile('shop_intro_icon'))
+                $get_intro_icon_setting = ClientSettings::where('key','shop_intro_icon')->first();
+                $setting_id = isset($get_intro_icon_setting->id) ? $get_intro_icon_setting->id : '';
+
+                if(!empty($setting_id) || $setting_id != '')
                 {
-                    $get_intro_icon_setting = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key','shop_intro_icon')->first();
-                    $setting_id = isset($get_intro_icon_setting->id) ? $get_intro_icon_setting->id : '';
-
-                    if(!empty($setting_id) || $setting_id != '')
+                    // Delete old Logo
+                    $icon = isset($get_intro_icon_setting->value) ? $get_intro_icon_setting->value : '';
+                    if(!empty($icon) && file_exists('public/client_uploads/intro_icons/'.$icon))
                     {
-                        // Delete old Logo
-                        $icon = isset($get_intro_icon_setting->value) ? $get_intro_icon_setting->value : '';
-                        if(!empty($icon) && file_exists('public/client_uploads/shops/'.$shop_slug.'/intro_icons/'.$icon))
-                        {
-                            unlink('public/client_uploads/shops/'.$shop_slug.'/intro_icons/'.$icon);
-                        }
-
-                        // Insert new Logo
-                        $icon_name = "intro_icon_".time().".". $request->file('shop_intro_icon')->getClientOriginalExtension();
-                        $request->file('shop_intro_icon')->move(public_path('client_uploads/shops/'.$shop_slug.'/intro_icons/'), $icon_name);
-                        $new_icon = $icon_name;
-
-                        $logo_setting = ClientSettings::find($setting_id);
-                        $logo_setting->value = $new_icon;
-                        $logo_setting->update();
-
+                        unlink('public/client_uploads/intro_icons/'.$icon);
                     }
-                    else
-                    {
-                        // Insert new Logo
-                        $icon_name = "intro_icon_".time().".". $request->file('shop_intro_icon')->getClientOriginalExtension();
-                        $request->file('shop_intro_icon')->move(public_path('client_uploads/shops/'.$shop_slug.'/intro_icons/'), $icon_name);
-                        $new_icon = $icon_name;
 
-                        $logo_setting = new ClientSettings();
-                        $logo_setting->client_id = $clientID;
-                        $logo_setting->shop_id = $shop_id;
-                        $logo_setting->key = 'shop_intro_icon';
-                        $logo_setting->value = $new_icon;
-                        $logo_setting->save();
-                    }
+                    // Insert new Logo
+                    $icon_name = "intro_icon_".time().".". $request->file('shop_intro_icon')->getClientOriginalExtension();
+                    $request->file('shop_intro_icon')->move(public_path('client_uploads/intro_icons/'), $icon_name);
+                    $new_icon = $icon_name;
+
+                    $logo_setting = ClientSettings::find($setting_id);
+                    $logo_setting->value = $new_icon;
+                    $logo_setting->update();
 
                 }
+                else
+                {
+                    // Insert new Logo
+                    $icon_name = "intro_icon_".time().".". $request->file('shop_intro_icon')->getClientOriginalExtension();
+                    $request->file('shop_intro_icon')->move(public_path('client_uploads/intro_icons/'), $icon_name);
+                    $new_icon = $icon_name;
 
-                return response()->json([
-                    'success' => 1,
-                    'message' => 'Icon has been Uploaded SuccessFully....',
-                ]);
+                    $logo_setting = new ClientSettings();
+                    $logo_setting->key = 'shop_intro_icon';
+                    $logo_setting->value = $new_icon;
+                    $logo_setting->save();
+                }
+
             }
-            else
-            {
-                return response()->json([
-                    'success' => 0,
-                    'message' => 'Oops, Something Went Wrong !',
-                ]);
-            }
+
+            return response()->json([
+                'success' => 1,
+                'message' => 'Icon has been Uploaded SuccessFully....',
+            ]);
         }
         catch (\Throwable $th)
         {
@@ -307,17 +262,13 @@ class DesignController extends Controller
     // Delete Cover
     public function deleteCover()
     {
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
-        $get_intro_icon = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key','shop_intro_icon')->first();
+        $get_intro_icon = ClientSettings::where('key','shop_intro_icon')->first();
         $setting_id = isset($get_intro_icon->id) ? $get_intro_icon->id : '';
         $shop_intro_icon = isset($get_intro_icon->value) ? $get_intro_icon->value : '';
 
-        if(!empty($shop_intro_icon) && file_exists('public/client_uploads/shops/'.$shop_slug.'/intro_icons/'.$shop_intro_icon))
+        if(!empty($shop_intro_icon) && file_exists('public/client_uploads/intro_icons/'.$shop_intro_icon))
         {
-            unlink('public/client_uploads/shops/'.$shop_slug.'/intro_icons/'.$shop_intro_icon);
+            unlink('public/client_uploads/intro_icons/'.$shop_intro_icon);
         }
 
         if(!empty($setting_id))
@@ -395,17 +346,14 @@ class DesignController extends Controller
     // Update Mail Form Settings
     public function mailFormUpdate(Request $request)
     {
-        $clientID = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $all_data['orders_mail_form_client'] = $request->orders_mail_form_client;
         $all_data['orders_mail_form_customer'] = $request->orders_mail_form_customer;
-        $all_data['check_in_mail_form'] = $request->check_in_mail_form;
+        // $all_data['check_in_mail_form'] = $request->check_in_mail_form;
 
         // Insert or Update Settings
         foreach($all_data as $key => $value)
         {
-            $query = ClientSettings::where('client_id',$clientID)->where('shop_id',$shop_id)->where('key',$key)->first();
+            $query = ClientSettings::where('key',$key)->first();
             $setting_id = isset($query->id) ? $query->id : '';
 
             if (!empty($setting_id) || $setting_id != '')  // Update
@@ -417,8 +365,6 @@ class DesignController extends Controller
             else // Insert
             {
                 $settings = new ClientSettings();
-                $settings->client_id = $clientID;
-                $settings->shop_id = $shop_id;
                 $settings->key = $key;
                 $settings->value = $value;
                 $settings->save();

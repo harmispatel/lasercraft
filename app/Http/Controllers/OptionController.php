@@ -14,31 +14,9 @@ class OptionController extends Controller
     // Display a listing of the resource.
     public function index()
     {
-        $data['shop_id'] = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['options'] = Option::with(['optionPrices'])->where('shop_id',$data['shop_id'])->get();
+        $data['options'] = Option::with(['optionPrices'])->get();
 
-        // Subscrption ID
-        $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-
-        if(isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1)
-        {
-            return view('client.options.options',$data);
-        }
-        else
-        {
-            return redirect()->route('client.dashboard')->with('error','Unauthorized Action!');
-        }
-
-    }
-
-
-    // Show the form for creating a new resource.
-    public function create()
-    {
-        //
+        return view('client.options.options',$data);
     }
 
 
@@ -51,11 +29,8 @@ class OptionController extends Controller
             'option.price.*' => 'required',
         ]);
 
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         // Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Language Details
@@ -75,7 +50,6 @@ class OptionController extends Controller
             {
                 // Insert Option
                 $option = new Option();
-                $option->shop_id = $shop_id;
                 $option->title = $request->title;
                 $option->multiple_select = $multiple_selection;
                 $option->enabled_price = $enabled_price;
@@ -101,7 +75,6 @@ class OptionController extends Controller
                             $opt_price = isset($option_price_arr[$key]) ? $option_price_arr[$key] : '';
                             $option_price = new OptionPrice();
                             $option_price->option_id = $option->id;
-                            $option_price->shop_id = $shop_id;
                             $option_price->price = $opt_price;
                             $option_price->name = $opt_name;
                             $option_price->$name_key = $opt_name;
@@ -134,18 +107,10 @@ class OptionController extends Controller
     }
 
 
-    // Display the specified resource.
-    public function show(Option $option)
-    {
-        //
-    }
-
-
     // Show the form for editing the specified resource.
     public function edit(Request $request)
     {
         $option_id = $request->id;
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
 
         try
         {
@@ -157,7 +122,7 @@ class OptionController extends Controller
             $option_prices = (isset($option_details['optionPrices'])) ? $option_details['optionPrices'] : [];
 
             // Get Language Settings
-            $language_settings = clientLanguageSettings($shop_id);
+            $language_settings = clientLanguageSettings();
             $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
             // Primary Language Details
@@ -166,7 +131,7 @@ class OptionController extends Controller
             $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
             // Additional Languages
-            $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+            $additional_languages = AdditionalLanguage::get();
 
             // Dynamic Language Bar
             if(count($additional_languages) > 0)
@@ -413,9 +378,6 @@ class OptionController extends Controller
     // Update Option Data When Change Tab
     public function updateByLangCode(Request $request)
     {
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $option_id = $request->option_id;
         $options = isset($request->option) ? $request->option : [];
         $multiple_selection = isset($request->multiple_selection) ? $request->multiple_selection : 0;
@@ -474,7 +436,6 @@ class OptionController extends Controller
                         {
                             $option_price = new OptionPrice();
                             $option_price->option_id = $option_id;
-                            $option_price->shop_id = $shop_id;
                             $option_price->price = $opt_price;
                             $option_price->name = $opt_name;
                             $option_price->$update_name_key = $opt_name;
@@ -517,8 +478,6 @@ class OptionController extends Controller
     // Get Option Data By Language Code & Option ID
     public function getEditOptionData($current_lang_code,$option_id)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         // Option Details
         $option_details = Option::with(['optionPrices'])->where('id',$option_id)->first();
         $multiple_selection_active = (isset($option_details['multiple_select']) && $option_details['multiple_select'] == 1) ? 'checked' : '';
@@ -527,7 +486,7 @@ class OptionController extends Controller
         $option_prices = (isset($option_details['optionPrices'])) ? $option_details['optionPrices'] : [];
 
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Primary Language Details
@@ -536,7 +495,7 @@ class OptionController extends Controller
         $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
         // Additional Languages
-        $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+        $additional_languages = AdditionalLanguage::get();
 
         // Primary Active Tab
         $primary_active_tab = ($primary_lang_code == $current_lang_code) ? 'active' : '';
@@ -774,9 +733,6 @@ class OptionController extends Controller
     // Update the specified resource in storage.
     public function update(Request $request)
     {
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         $option_id = $request->option_id;
         $options = isset($request->option) ? $request->option : [];
         $multiple_selection = isset($request->multiple_selection) ? $request->multiple_selection : 0;
@@ -834,7 +790,6 @@ class OptionController extends Controller
                         {
                             $option_price = new OptionPrice();
                             $option_price->option_id = $option_id;
-                            $option_price->shop_id = $shop_id;
                             $option_price->price = $opt_price;
                             $option_price->name = $opt_name;
                             $option_price->$update_name_key = $opt_name;

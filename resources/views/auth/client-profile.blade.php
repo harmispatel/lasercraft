@@ -62,7 +62,7 @@
                         <h5 class="card-title">{{ __('Profile Details') }}</h5>
                         <div class="row mb-2">
                             <div class="col-lg-3 col-md-4 label"><b>{{ __('Role') }}</b></div>
-                            <div class="col-lg-9 col-md-8">{{ ($user->user_type == 1) ? 'Admin' : 'Client' }}</div>
+                            <div class="col-lg-9 col-md-8">Admin</div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-lg-3 col-md-4 label"><b>{{ __('FirstName') }}</b></div>
@@ -71,10 +71,6 @@
                         <div class="row mb-2">
                             <div class="col-lg-3 col-md-4 label"><b>{{ __('LastName') }}</b></div>
                             <div class="col-lg-9 col-md-8">{{ $user->lastname }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-lg-3 col-md-4 label"><b>{{ __('Shop Name') }}</b></div>
-                            <div class="col-lg-9 col-md-8">{{ $user->hasOneShop->shop['name'] }}</div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-lg-3 col-md-4 label"><b>{{ __('Email') }}</b></div>

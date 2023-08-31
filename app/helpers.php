@@ -121,20 +121,15 @@
 
 
     // Get Payment Settings
-    function getPaymentSettings($shopID)
+    function getPaymentSettings()
     {
         // Keys
         $keys = [
             'cash',
-            'cash_pos',
             'paypal',
             'paypal_mode',
             'paypal_public_key',
             'paypal_private_key',
-            'every_pay',
-            'everypay_mode',
-            'every_pay_public_key',
-            'every_pay_private_key',
             'upi_payment',
             'upi_id',
             'payee_name',
@@ -145,7 +140,7 @@
 
         foreach($keys as $key)
         {
-            $query = PaymentSettings::select('value')->where('shop_id',$shopID)->where('key',$key)->first();
+            $query = PaymentSettings::select('value')->where('key',$key)->first();
             $settings[$key] = isset($query->value) ? $query->value : '';
         }
 
@@ -575,9 +570,9 @@
 
 
     // Function for Check Delivery Available in Customer Zone
-    function checkDeliveryAvilability($shop_id,$latitude,$longitude)
+    function checkDeliveryAvilability($latitude,$longitude)
     {
-        $delivery_areas = DeliveryAreas::where('shop_id',$shop_id)->get();
+        $delivery_areas = DeliveryAreas::get();
         $inside = 0;
 
         if(count($delivery_areas) > 0)

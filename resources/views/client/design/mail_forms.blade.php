@@ -31,7 +31,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mb-4">
+                {{-- <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="form-group">
                             <label class="form-label" for="check_in_mail_form">{{ __('Check In Mail Form') }}</label>
@@ -39,7 +39,7 @@
                             <code>Tags : ({shop_logo}, {shop_name}, {firstname}, {lastname}, {phone}, {passport_no}, {room_no}, {nationality}, {age}, {address}, {arrival_date}, {departure_date}, {message})</code>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="row mb-4">
                     <div class="col-md-3">
                         <button class="btn btn-success">{{ __('Update')}}</button>

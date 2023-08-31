@@ -730,7 +730,7 @@ class UserController extends Controller
         }
         else
         {
-            $data['user'] = User::with(['hasOneShop','hasOneSubscription'])->where('id',decrypt($id))->first();
+            $data['user'] = User::where('id',decrypt($id))->first();
             return view('auth.client-profile-edit',$data);
         }
     }
@@ -745,7 +745,7 @@ class UserController extends Controller
         }
         else
         {
-            $data['user'] = User::with(['hasOneShop','hasOneSubscription'])->where('id',decrypt($id))->first();
+            $data['user'] = User::where('id',decrypt($id))->first();
             return view('auth.client-profile',$data);
         }
     }
@@ -795,12 +795,10 @@ class UserController extends Controller
         else
         {
             $request->validate([
-                'shop_name'             =>      'required',
                 'firstname'             =>      'required',
                 'email'                 =>      'required|email|unique:users,email,'.$request->user_id,
                 'confirm_password'      =>      'same:password',
                 'profile_picture'       =>      'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
-                'shop_logo'             =>      'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
             ]);
 
             $explode_emails = explode(',',str_replace(' ','',$request->contact_emails));
@@ -833,56 +831,6 @@ class UserController extends Controller
                 $user->image = $imageurl;
             }
             $user->update();
-
-            // Shop Update
-            $shop_id = isset($user->hasOneShop->shop['id']) ? $user->hasOneShop->shop['id'] : '';
-
-            // Update Shop name in Client Settings
-            $shop_name_query = ClientSettings::where('client_id',$request->user_id)->where('shop_id',$shop_id)->where('key','business_name')->first();
-            $shop_name_setting_id = isset($shop_name_query->id) ? $shop_name_query->id : '';
-            if (!empty($shop_name_setting_id) || $shop_name_setting_id != '')  // Update
-            {
-                $settings = ClientSettings::find($shop_name_setting_id);
-                $settings->value = $request->shop_name;
-                $settings->update();
-            }
-            else // Insert
-            {
-                $settings = new ClientSettings();
-                $settings->client_id = $request->user_id;
-                $settings->shop_id = $shop_id;
-                $settings->key = 'business_name';
-                $settings->value = $request->shop_name;
-                $settings->save();
-            }
-
-
-            if(!empty($shop_id))
-            {
-                $shop = Shop::find($shop_id);
-                $shop->name = $request->shop_name;
-                $shop->description = $request->shop_description;
-
-                if($request->hasFile('shop_logo'))
-                {
-                    $old_image = isset($shop->logo) ? $shop->logo : '';
-                    if(!empty($old_image))
-                    {
-                        if(file_exists($old_image))
-                        {
-                            unlink($old_image);
-                        }
-                    }
-
-                    $path = public_path('admin_uploads/shops/').$shop->shop_slug."/";
-                    $imgname = time().".". $request->file('shop_logo')->getClientOriginalExtension();
-                    $request->file('shop_logo')->move($path, $imgname);
-                    $imageurl = asset('public/admin_uploads/shops/'.$shop->shop_slug).'/'.$imgname;
-                    $shop->logo = $imageurl;
-                    $shop->directory = $path;
-                }
-                $shop->update();
-            }
 
             return redirect()->route('client.profile.view',encrypt($request->user_id))->with('success','Profile has been Updated SuccessFully..');
         }

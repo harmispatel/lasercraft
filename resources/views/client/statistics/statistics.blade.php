@@ -1,17 +1,9 @@
 @php
-    $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : "";
-    $primary_lang_details = clientLanguageSettings($shop_id);
+    $primary_lang_details = clientLanguageSettings();
 
     $language = getLangDetails(isset($primary_lang_details['primary_language']) ? $primary_lang_details['primary_language'] : '');
     $language_code = isset($language['code']) ? $language['code'] : '';
     $name_key = $language_code."_name";
-
-    // Get Subscription ID
-    $subscription_id = getClientSubscriptionID($shop_id);
-
-    // Get Package Permissions
-    $package_permissions = getPackagePermission($subscription_id);
-    $ordering = (isset($package_permissions['ordering'])) ? $package_permissions['ordering'] : 0;
 
 @endphp
 
@@ -179,7 +171,6 @@
         const user_visit_arr = {{ Js::from($user_visits_array) }};
         const total_clicks_arr = {{ Js::from($total_clicks_array) }};
         const orders_arr = {{ Js::from($orders_arr) }};
-        const ordering = @json($ordering);
 
         var chartArr = [
             {
@@ -197,18 +188,6 @@
                 tension: 0.1
             }
         ];
-
-        if(ordering == 1)
-        {
-            var ordArr = {
-                label: 'Orders',
-                data: orders_arr,
-                fill: false,
-                borderColor: 'blue',
-                tension: 0.1
-            };
-            chartArr.push(ordArr);
-        }
 
         // Chart
         document.addEventListener("DOMContentLoaded", () =>

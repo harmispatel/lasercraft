@@ -20,25 +20,23 @@ class ItemsController extends Controller
 {
     public function index($id="")
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['ingredients'] = Ingredient::where('shop_id',$shop_id)->get();
-        $data['tags'] = Tags::where('shop_id',$shop_id)->get();
-        $data['options'] = Option::where('shop_id',$shop_id)->get();
-        $data['categories'] = Category::where('shop_id',$shop_id)->where('category_type','product_category')->get();
+        $data['tags'] = Tags::get();
+        $data['options'] = Option::get();
+        $data['categories'] = Category::where('category_type','product_category')->get();
 
         if(!empty($id) || $id != '')
         {
             $data['cat_id'] = $id;
             $data['category'] = Category::where('id',$id)->first();
-            $data['items'] = Items::where('category_id',$id)->where('shop_id',$shop_id)->orderBy('order_key')->get();
-            $data['cat_tags'] = CategoryProductTags::join('tags','tags.id','category_product_tags.tag_id')->orderBy('tags.order')->where('category_id',$id)->where('tags.shop_id','=',$shop_id)->get()->unique('tag_id');
+            $data['items'] = Items::where('category_id',$id)->orderBy('order_key')->get();
+            $data['cat_tags'] = CategoryProductTags::join('tags','tags.id','category_product_tags.tag_id')->orderBy('tags.order')->where('category_id',$id)->get()->unique('tag_id');
         }
         else
         {
             $data['cat_id'] = '';
             $data['category'] = "All";
-            $data['items'] = Items::orderBy('order_key')->where('shop_id',$shop_id)->get();
-            $data['cat_tags'] = CategoryProductTags::join('tags','tags.id','category_product_tags.tag_id')->where('tags.shop_id','=',$shop_id)->orderBy('tags.order')->get()->unique('tag_id');
+            $data['items'] = Items::orderBy('order_key')->get();
+            $data['cat_tags'] = CategoryProductTags::join('tags','tags.id','category_product_tags.tag_id')->orderBy('tags.order')->get()->unique('tag_id');
         }
 
         return view('client.items.items',$data);
@@ -54,11 +52,8 @@ class ItemsController extends Controller
             'category'   => 'required',
         ]);
 
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Language Details
@@ -66,7 +61,6 @@ class ItemsController extends Controller
         $lang_code = isset($language_detail->code) ? $language_detail->code : '';
 
         $item_name_key = $lang_code."_name";
-        $item_calories_key = $lang_code."_calories";
         $item_description_key = $lang_code."_description";
         $item_price_label_key = $lang_code."_label";
 
@@ -85,7 +79,6 @@ class ItemsController extends Controller
         $published = isset($request->published) ? $request->published : 0;
         $review_rating = isset($request->review_rating) ? $request->review_rating : 0;
         $day_special = isset($request->day_special) ? $request->day_special : 0;
-        $ingredients = (isset($request->ingredients) && count($request->ingredients) > 0) ? serialize($request->ingredients) : '';
         $options = (isset($request->options) && count($request->options) > 0) ? serialize($request->options) : '';
         $tags = isset($request->tags) ? $request->tags : [];
 
@@ -107,22 +100,18 @@ class ItemsController extends Controller
         {
             $item = new Items();
             $item->category_id = $category_id;
-            $item->shop_id = $shop_id;
             $item->type = $type;
 
             $item->name = $name;
-            $item->calories = $calories;
             $item->description = $description;
 
             $item->$item_name_key = $name;
-            $item->$item_calories_key = $calories;
             $item->$item_description_key = $description;
 
             $item->discount_type = $discount_type;
             $item->discount = $discount;
             $item->published = $published;
             $item->order_key = $item_order;
-            $item->ingredients = $ingredients;
             $item->options = $options;
             $item->is_new = $is_new;
             $item->as_sign = $as_sign;
@@ -137,9 +126,9 @@ class ItemsController extends Controller
                 $image_base64 = base64_decode($image_arr[1]);
 
                 $imgname = "item_".time().".". $request->file('image')->getClientOriginalExtension();
-                $img_path = public_path('client_uploads/shops/'.$shop_slug.'/items/'.$imgname);
+                $img_path = public_path('client_uploads/items/'.$imgname);
                 file_put_contents($img_path,$image_base64);
-                // $request->file('image')->move(public_path('client_uploads/shops/'.$shop_slug.'/items/'), $imgname);
+                // $request->file('image')->move(public_path('client_uploads/items/'), $imgname);
                 $item->image = $imgname;
             }
 
@@ -158,7 +147,6 @@ class ItemsController extends Controller
                         $label_val = isset($label_arr[$key]) ? $label_arr[$key] : '';
                         $new_price = new ItemPrice();
                         $new_price->item_id = $item->id;
-                        $new_price->shop_id = $shop_id;
                         $new_price->price = $price_val;
                         $new_price->label = $label_val;
                         $new_price->$item_price_label_key = $label_val;
@@ -173,7 +161,7 @@ class ItemsController extends Controller
             {
                 foreach($tags as $val)
                 {
-                    $findTag = Tags::where($item_name_key,$val)->where('shop_id',$shop_id)->first();
+                    $findTag = Tags::where($item_name_key,$val)->first();
                     $tag_id = (isset($findTag->id) && !empty($findTag->id)) ? $findTag->id : '';
 
                     if(!empty($tag_id) || $tag_id != '')
@@ -189,7 +177,6 @@ class ItemsController extends Controller
                         $order = (isset($max_order) && !empty($max_order)) ? ($max_order + 1) : 1;
 
                         $tag = new Tags();
-                        $tag->shop_id = $shop_id;
                         $tag->name = $val;
                         $tag->$item_name_key = $val;
                         $tag->order = $order;
@@ -238,9 +225,9 @@ class ItemsController extends Controller
             $cat_id = isset($item->category_id) ? $item->category_id : '';
 
             // Delete Item Image
-            if(!empty($item_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image))
+            if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
             {
-                unlink('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image);
+                unlink('public/client_uploads/items/'.$item_image);
             }
 
             // Delete Item Category Tags
@@ -340,9 +327,9 @@ class ItemsController extends Controller
                     $newStatus = ($item->published == 1) ? 0 : 1;
                     $checked = ($item->published == 1) ? 'checked' : '';
 
-                    if(!empty($item->image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item->image))
+                    if(!empty($item->image) && file_exists('public/client_uploads/items/'.$item->image))
                     {
-                        $image = asset('public/client_uploads/shops/'.$shop_slug.'/items/'.$item->image);
+                        $image = asset('public/client_uploads/items/'.$item->image);
                     }
                     else
                     {
@@ -454,7 +441,7 @@ class ItemsController extends Controller
             $item_type = (isset($item['type'])) ? $item['type'] : '';
             $category_id = (isset($item['category_id'])) ? $item['category_id'] : '';
             $default_image = asset('public/client_images/not-found/no_image_1.jpg');
-            $item_image = (isset($item['image']) && !empty($item['image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item['image'])) ? asset('public/client_uploads/shops/'.$shop_slug.'/items/'.$item['image']) : "";
+            $item_image = (isset($item['image']) && !empty($item['image']) && file_exists('public/client_uploads/items/'.$item['image'])) ? asset('public/client_uploads/items/'.$item['image']) : "";
             $delete_item_image_url = route('items.delete.image',$item_id);
             $item_name = (isset($item[$item_name_key])) ? $item[$item_name_key] : '';
             $item_desc = (isset($item[$item_desc_key])) ? $item[$item_desc_key] : '';
@@ -1274,13 +1261,13 @@ class ItemsController extends Controller
 
                     // Delete old Image
                     $item_image = isset($item->image) ? $item->image : '';
-                    if(!empty($item_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image))
+                    if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
                     {
-                        unlink('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image);
+                        unlink('public/client_uploads/items/'.$item_image);
                     }
 
                     $imgname = "item_".time().".". $request->file('item_image')->getClientOriginalExtension();
-                    $img_path = public_path('client_uploads/shops/'.$shop_slug.'/items/'.$imgname);
+                    $img_path = public_path('client_uploads/items/'.$imgname);
                     file_put_contents($img_path,$image_base64);
                     $item->image = $imgname;
                 }
@@ -1471,13 +1458,13 @@ class ItemsController extends Controller
 
                     // Delete old Image
                     $item_image = isset($item->image) ? $item->image : '';
-                    if(!empty($item_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image))
+                    if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
                     {
-                        unlink('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image);
+                        unlink('public/client_uploads/items/'.$item_image);
                     }
 
                     $imgname = "item_".time().".". $request->file('item_image')->getClientOriginalExtension();
-                    $img_path = public_path('client_uploads/shops/'.$shop_slug.'/items/'.$imgname);
+                    $img_path = public_path('client_uploads/items/'.$imgname);
                     file_put_contents($img_path,$image_base64);
                     $item->image = $imgname;
                 }
@@ -1647,7 +1634,7 @@ class ItemsController extends Controller
         $item_type = (isset($item['type'])) ? $item['type'] : '';
         $category_id = (isset($item['category_id'])) ? $item['category_id'] : '';
         $default_image = asset('public/client_images/not-found/no_image_1.jpg');
-        $item_image = (isset($item['image']) && !empty($item['image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item['image'])) ? asset('public/client_uploads/shops/'.$shop_slug.'/items/'.$item['image']) : "";
+        $item_image = (isset($item['image']) && !empty($item['image']) && file_exists('public/client_uploads/items/'.$item['image'])) ? asset('public/client_uploads/items/'.$item['image']) : "";
         $delete_item_image_url = route('items.delete.image',$item_id);
         $item_name = (isset($item[$name_key])) ? $item[$name_key] : '';
         $item_desc = (isset($item[$description_key])) ? $item[$description_key] : '';
@@ -2381,9 +2368,9 @@ class ItemsController extends Controller
         {
             $item_image = isset($item['image']) ? $item['image'] : '';
 
-            if(!empty($item_image) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image))
+            if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
             {
-                unlink('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_image);
+                unlink('public/client_uploads/items/'.$item_image);
             }
 
             $item->image = "";

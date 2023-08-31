@@ -15,7 +15,6 @@ class CreateAdditionalLanguagesTable extends Migration
     {
         Schema::create('additional_languages', function (Blueprint $table) {
             $table->id();
-            $table->integer('shop_id');
             $table->integer('language_id');
             $table->tinyInteger('published')->default(0);
             $table->timestamps();

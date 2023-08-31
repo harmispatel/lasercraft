@@ -15,19 +15,17 @@ class LanguageController extends Controller
 {
     public function index()
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Language Details
         $language_detail = Languages::where('id',$primary_lang_id)->first();
         $data['lang_code'] = isset($language_detail->code) ? $language_detail->code : '';
 
-        $data['categories'] = Category::with(['items'])->where('shop_id',$shop_id)->get();
+        $data['categories'] = Category::with(['items'])->get();
         $data['languages'] = Languages::get();
-        $data['additional_languages'] = AdditionalLanguage::with(['language'])->where('shop_id',$shop_id)->get();
+        $data['additional_languages'] = AdditionalLanguage::with(['language'])->get();
         return view('client.language.language',$data);
     }
 
@@ -37,10 +35,9 @@ class LanguageController extends Controller
     {
         try
         {
-            $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
             $status = $request->status;
 
-            $setting = LanguageSettings::where('shop_id',$shop_id)->where('key','google_translate')->first();
+            $setting = LanguageSettings::where('key','google_translate')->first();
             $setting_id = (isset($setting->id)) ? $setting->id : '';
 
             // Insert or Update Default Key
@@ -53,7 +50,6 @@ class LanguageController extends Controller
             else
             {
                 $primary_lang = new LanguageSettings();
-                $primary_lang->shop_id = $shop_id;
                 $primary_lang->key = "google_translate";
                 $primary_lang->value = $status;
                 $primary_lang->save();
@@ -79,12 +75,11 @@ class LanguageController extends Controller
     // Set Primary Language
     public function setPrimaryLanguage(Request $request)
     {
-        // try
-        // {
-            $shop_id = $request->shop_id;
+        try
+        {
             $language_id = $request->language_id;
 
-            $setting = LanguageSettings::where('shop_id',$shop_id)->where('key','primary_language')->first();
+            $setting = LanguageSettings::where('key','primary_language')->first();
             $setting_id = (isset($setting->id)) ? $setting->id : '';
 
             // Insert or Update Default Key
@@ -97,7 +92,6 @@ class LanguageController extends Controller
             else
             {
                 $primary_lang = new LanguageSettings();
-                $primary_lang->shop_id = $shop_id;
                 $primary_lang->key = "primary_language";
                 $primary_lang->value = $language_id;
                 $primary_lang->save();
@@ -109,7 +103,7 @@ class LanguageController extends Controller
 
 
             // Enter All Categories Data into Primary Language if is empty
-            $categories = Category::where('shop_id',$shop_id)->get();
+            $categories = Category::get();
             if(count($categories) > 0)
             {
                 foreach($categories as $category)
@@ -143,7 +137,7 @@ class LanguageController extends Controller
             }
 
             // Enter All Items Data into Primary Language if is empty
-            $items = Items::where('shop_id',$shop_id)->get();
+            $items = Items::get();
             if(count($items) > 0)
             {
                 foreach($items as $item)
@@ -165,7 +159,7 @@ class LanguageController extends Controller
                         }
 
                         // Insert Item Price into Primary Language.
-                        $price_arr = ItemPrice::where('item_id',$item->id)->where('shop_id',$shop_id)->get();
+                        $price_arr = ItemPrice::where('item_id',$item->id)->get();
 
                         if(count($price_arr) > 0)
                         {
@@ -212,21 +206,21 @@ class LanguageController extends Controller
             }
 
             // Remove Primary Language From Additional Language
-            AdditionalLanguage::where('shop_id',$shop_id)->where('language_id',$language_id)->delete();
+            AdditionalLanguage::where('language_id',$language_id)->delete();
 
             return response()->json([
                 'success' => 1,
                 'message' => "Primary Language has been changed SuccessFully...",
             ]);
 
-        // }
-        // catch (\Throwable $th)
-        // {
-        //     return response()->json([
-        //         'success' => 0,
-        //         'message' => "Internal Server Error!",
-        //     ]);
-        // }
+        }
+        catch (\Throwable $th)
+        {
+            return response()->json([
+                'success' => 0,
+                'message' => "Internal Server Error!",
+            ]);
+        }
     }
 
 
@@ -235,20 +229,18 @@ class LanguageController extends Controller
     {
         try
         {
-            $shop_id = $request->shop_id;
             $language_ids = $request->language_ids;
 
             if(count($language_ids) > 0)
             {
                 foreach($language_ids as $key => $val)
                 {
-                    $language = AdditionalLanguage::where('shop_id',$shop_id)->where('language_id',$val)->first();
+                    $language = AdditionalLanguage::where('language_id',$val)->first();
                     $additional_language_id = isset($language->id) ? $language->id : '';
 
                     if(empty($additional_language_id) || $additional_language_id == '')
                     {
                         $additional_language = new AdditionalLanguage();
-                        $additional_language->shop_id = $shop_id;
                         $additional_language->language_id = $val;
                         $additional_language->save();
                     }
@@ -256,7 +248,7 @@ class LanguageController extends Controller
             }
 
             // Get All Additional Languages
-            $additional_languages = AdditionalLanguage::with(['language'])->where('shop_id',$shop_id)->get();
+            $additional_languages = AdditionalLanguage::with(['language'])->get();
             $html = "";
 
             if(count($additional_languages) > 0)
@@ -305,10 +297,9 @@ class LanguageController extends Controller
     {
         try
         {
-            $shop_id = $request->shop_id;
             $language_id = $request->language_id;
 
-            AdditionalLanguage::where('shop_id',$shop_id)->where('language_id',$language_id)->delete();
+            AdditionalLanguage::where('language_id',$language_id)->delete();
 
             return response()->json([
                 'success' => 1,
@@ -359,10 +350,8 @@ class LanguageController extends Controller
     // Get Language Wise Category Details
     public function getCategoryDetails(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Primary Language Details
@@ -371,7 +360,7 @@ class LanguageController extends Controller
         $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
         // Additional Languages
-        $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+        $additional_languages = AdditionalLanguage::get();
 
         try
         {
@@ -510,10 +499,8 @@ class LanguageController extends Controller
     // Get Language Wise Item Details
     public function getItemDetails(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Primary Language Details
@@ -522,7 +509,7 @@ class LanguageController extends Controller
         $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
         // Additional Languages
-        $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+        $additional_languages = AdditionalLanguage::get();
 
         try
         {

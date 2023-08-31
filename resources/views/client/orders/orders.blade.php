@@ -1,11 +1,8 @@
 @php
-
-    $shop_id = (isset(Auth::user()->hasOneShop->shop['id'])) ? Auth::user()->hasOneShop->shop['id'] : '';
-
-    $shop_settings = getClientSettings($shop_id);
+    $shop_settings = getClientSettings();
 
     // Order Settings
-    $order_setting = getOrderSettings($shop_id);
+    $order_setting = getOrderSettings();
 
     // Default Printer
     $default_printer = (isset($order_setting['default_printer']) && !empty($order_setting['default_printer'])) ? $order_setting['default_printer'] : 'Microsoft Print to PDF';
@@ -201,98 +198,8 @@
 
 {{-- Custom Script --}}
 @section('page-js')
-    <script src="{{ asset('public/admin/assets/js/jsprintmanager.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script type="text/javascript">
-
-        var enablePrint = "{{ $enable_print }}";
-        var printFontSize = "{{ $printFontSize }}";
-
-        if(enablePrint == 1)
-        {
-            JSPM.JSPrintManager.license_url = "{{ route('jspm') }}";
-            JSPM.JSPrintManager.auto_reconnect = true;
-            JSPM.JSPrintManager.start();
-        }
-
-
-        function printReceipt(ordID)
-        {
-            if(jspmWSStatus())
-            {
-                $.ajax({
-                    type: "POST",
-                    url: "{{ route('order.receipt') }}",
-                    data: {
-                        "_token":"{{ csrf_token() }}",
-                        "order_id" : ordID,
-                    },
-                    dataType: "JSON",
-                    success: function (response)
-                    {
-                        if(response.success == 1)
-                        {
-                            if (jspmWSStatus())
-                            {
-                                $('#print-data').html('');
-                                $('#print-data').append(response.data);
-                                $('#print-data').show();
-                                // $('.ord-rec-body').attr('style','font-size:'+printFontSize+'px; font-family:Arial, sans-serif;');
-                                // $('.ord-rec-body-start').attr('style','font-size:43px!important; font-family:Arial;');
-
-                                html2canvas(document.getElementById('print-data'), { scale: 5 }).then(function (canvas)
-                                {
-                                    //Create a ClientPrintJob
-                                    var cpj = new JSPM.ClientPrintJob();
-
-                                    //Set Printer info
-                                    var myPrinter = new JSPM.InstalledPrinter($('#default_printer').val());
-                                    myPrinter.paperName = $('#printer_paper').val();
-                                    myPrinter.trayName = $('#printer_tray').val();
-                                    cpj.clientPrinter = myPrinter;
-
-                                    //Set content to print...
-                                    var b64Prefix = "data:image/png;base64,";
-                                    var imgBase64DataUri = canvas.toDataURL("image/png");
-                                    var imgBase64Content = imgBase64DataUri.substring(b64Prefix.length, imgBase64DataUri.length);
-
-                                    var myImageFile = new JSPM.PrintFile(imgBase64Content, JSPM.FileSourceType.Base64, 'ORD-INVOICE.PNG', 1);
-
-                                    //add file to print job
-                                    cpj.files.push(myImageFile);
-
-                                    // Send print job to printer!
-                                    cpj.sendToClient();
-                                });
-                                $('#print-data').hide();
-                            }
-                        }
-                        else
-                        {
-                            toastr.error(response.message);
-                        }
-                    }
-                });
-            }
-        }
-
-        //Check JSPM WebSocket status
-        function jspmWSStatus()
-        {
-            if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Open)
-                return true;
-            else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Closed) {
-                alert('JSPrintManager (JSPM) is not installed or not running! Download JSPM Client App from https://neodynamic.com/downloads/jspm');
-                return false;
-            }
-            else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Blocked) {
-                alert('JSPM has blocked this website!');
-                return false;
-            }
-        }
-
 
         toastr.options = {
             "closeButton": true,
@@ -358,19 +265,9 @@
 
                         toastr.success(response.message);
 
-                        if(auto_print == 1 && enablePrint == 1)
-                        {
-                            printReceipt(ordID);
-                            setTimeout(() => {
-                                location.reload();
-                            }, 2500);
-                        }
-                        else
-                        {
-                            setTimeout(() => {
+                        setTimeout(() => {
                                 location.reload();
                             }, 1000);
-                        }
 
                     }
                     else

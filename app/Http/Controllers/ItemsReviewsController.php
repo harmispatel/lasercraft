@@ -10,8 +10,7 @@ class ItemsReviewsController extends Controller
 {
     function index()
     {
-        $shop_id = (isset(Auth::user()->hasOneShop->shop['id'])) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $data['item_reviews'] = ItemReview::with(['item'])->orderBy('id','desc')->where('shop_id',$shop_id)->get();
+        $data['item_reviews'] = ItemReview::with(['item'])->orderBy('id','desc')->get();
         return view('client.reviews.item_reviews',$data);
     }
 

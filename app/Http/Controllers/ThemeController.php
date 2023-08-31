@@ -13,9 +13,7 @@ class ThemeController extends Controller
     // Display a listing of the resource.
     public function index()
     {
-        $data['shop_id'] = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-
-        $data['themes'] = Theme::where('shop_id',$data['shop_id'])->get();
+        $data['themes'] = Theme::get();
         return view('client.design.theme',$data);
     }
 
@@ -97,17 +95,6 @@ class ThemeController extends Controller
     // Show the form for creating a new resource.
     public function create()
     {
-        // Subscrption ID
-        $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-
-        if(!isset($package_permissions['add_edit_clone_theme']) || empty($package_permissions['add_edit_clone_theme']) || $package_permissions['add_edit_clone_theme'] == 0)
-        {
-            return redirect()->route('client.dashboard')->with('error',"You have not access this Menu");
-        }
-
         return view('client.design.new-theme');
     }
 
@@ -121,15 +108,10 @@ class ThemeController extends Controller
             'theme_preview_image' => 'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
         ]);
 
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $theme_name = $request->theme_name;
 
         // Insert New Theme
         $theme = new Theme();
-        $theme->shop_id = $shop_id;
         $theme->name = $theme_name;
         $theme->is_default = false;
         $theme->save();
@@ -177,14 +159,14 @@ class ThemeController extends Controller
         if($request->hasFile('today_special_icon'))
         {
             $imgname = "today_special_icon_".time().".". $request->file('today_special_icon')->getClientOriginalExtension();
-            $request->file('today_special_icon')->move(public_path('client_uploads/shops/'.$shop_slug.'/today_special_icon/'), $imgname);
+            $request->file('today_special_icon')->move(public_path('client_uploads/shops/today_special_icon/'), $imgname);
             $setting_keys['today_special_icon'] = $imgname;
         }
 
         if($request->hasFile('theme_preview_image'))
         {
             $imgname = "theme_preview_image_".time().".". $request->file('theme_preview_image')->getClientOriginalExtension();
-            $request->file('theme_preview_image')->move(public_path('client_uploads/shops/'.$shop_slug.'/theme_preview_image/'), $imgname);
+            $request->file('theme_preview_image')->move(public_path('client_uploads/theme_preview_image/'), $imgname);
             $setting_keys['theme_preview_image'] = $imgname;
         }
 
@@ -209,11 +191,9 @@ class ThemeController extends Controller
     // Change Current Theme
     public function changeTheme(Request $request)
     {
-        $client_id = isset(Auth::user()->id) ? Auth::user()->id : '';
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
         $theme_id = $request->theme_id;
 
-        $query = ClientSettings::where('shop_id',$shop_id)->where('client_id',$client_id)->where('key','shop_active_theme')->first();
+        $query = ClientSettings::where('key','shop_active_theme')->first();
         $setting_id = isset($query->id) ? $query->id : '';
 
         if(!empty($setting_id))
@@ -226,8 +206,6 @@ class ThemeController extends Controller
         else
         {
             $active_theme = new ClientSettings();
-            $active_theme->client_id = $client_id;
-            $active_theme->shop_id = $shop_id;
             $active_theme->key = 'shop_active_theme';
             $active_theme->value = $theme_id;
             $active_theme->save();
@@ -255,8 +233,6 @@ class ThemeController extends Controller
     // Update the specified resource in storage.
     public function update(Request $request)
     {
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $request->validate([
             'theme_name' => 'required',
             'today_special_icon' => 'mimes:png,jpg,svg,gif,jpeg,PNG,SVG,JPG,JPEG,GIF',
@@ -314,14 +290,14 @@ class ThemeController extends Controller
         if($request->hasFile('today_special_icon'))
         {
             $imgname = "today_special_icon_".time().".". $request->file('today_special_icon')->getClientOriginalExtension();
-            $request->file('today_special_icon')->move(public_path('client_uploads/shops/'.$shop_slug.'/today_special_icon/'), $imgname);
+            $request->file('today_special_icon')->move(public_path('client_uploads/shops/today_special_icon/'), $imgname);
             $setting_keys['today_special_icon'] = $imgname;
         }
 
         if($request->hasFile('theme_preview_image'))
         {
             $imgname = "theme_preview_image_".time().".". $request->file('theme_preview_image')->getClientOriginalExtension();
-            $request->file('theme_preview_image')->move(public_path('client_uploads/shops/'.$shop_slug.'/theme_preview_image/'), $imgname);
+            $request->file('theme_preview_image')->move(public_path('client_uploads/theme_preview_image/'), $imgname);
             $setting_keys['theme_preview_image'] = $imgname;
         }
 
@@ -369,17 +345,6 @@ class ThemeController extends Controller
     // Clone Theme View
     public function cloneView($id)
     {
-        // Subscrption ID
-        $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-
-        if(!isset($package_permissions['add_edit_clone_theme']) || empty($package_permissions['add_edit_clone_theme']) || $package_permissions['add_edit_clone_theme'] == 0)
-        {
-            return redirect()->route('client.dashboard')->with('error',"You have not access this Menu");
-        }
-
         // Theme Details
         $theme = Theme::where('id',$id)->first();
 
