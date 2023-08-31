@@ -22,7 +22,7 @@ class ItemsController extends Controller
     {
         $data['tags'] = Tags::get();
         $data['options'] = Option::get();
-        $data['categories'] = Category::where('category_type','product_category')->get();
+        $data['categories'] = Category::where('parent_id',NULL)->get();
 
         if(!empty($id) || $id != '')
         {

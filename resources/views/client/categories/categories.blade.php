@@ -53,48 +53,23 @@
                 </div>
                 <form id="addCategoryForm" enctype="multipart/form-data">
                     @csrf
-                        @if($parent_cat_id == 'gallery')
-                            <input type="hidden" name="parent_cat_id" id="parent_cat_id" value="">
-                        @else
-                            <input type="hidden" name="parent_cat_id" id="parent_cat_id" value="{{ $parent_cat_id }}">
-                        @endif
                     <input type="hidden" name="schedule_array" id="schedule_array">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-2">
                                 <div class="input_label">
-                                    <label for="tyep" class="form-label">{{ __('Type') }}</label>
+                                    <label for="category_type" class="form-label">{{ __('Type') }}</label>
                                 </div>
                             </div>
                             <div class="col-md-10">
                                 <div class="form-group mb-3">
                                     <select name="category_type" id="category_type" class="form-select" onchange="changeElements('addCategoryForm')">
-                                        <option value="product_category">Category</option>
-                                        <option value="page">Page</option>
-                                        <option value="link">Link</option>
-                                        <option value="gallery" {{ (isset($parent_cat_id) && !empty($parent_cat_id) && $parent_cat_id == 'gallery') ? 'selected' :'' }}>Image Gallery</option>
-                                        <option value="check_in">Check-In Page</option>
-                                        <option value="pdf_page">PDF Category</option>
-
-                                        @if(empty($parent_cat_id))
-                                            <option value="parent_category">Child Category</option>
+                                        @if(isset($parent_cat_id) && !empty($parent_cat_id) && $parent_cat_id == 'gallery')
+                                            <option value="gallery" {{ (isset($parent_cat_id) && !empty($parent_cat_id) && $parent_cat_id == 'gallery') ? 'selected' :'' }}>Image Gallery</option>
+                                        @else
+                                            <option value="product_category">Category</option>
                                         @endif
                                     </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 cat_div" style="display: none;">
-                                <div class="input_label">
-                                    <label class="form-label">{{ __('Category') }}</label>
-                                </div>
-                            </div>
-                            <div class="col-md-10 cat_div" style="display: none;">
-                                <div class="form-group mb-3" id="categories_div">
-                                    <input type="radio" name="parent_cat" id="root" value="0" checked> <label for="root">Root</label> <br>
-                                    @if(count($parent_categories) > 0)
-                                        @foreach ($parent_categories as $key => $pcategory)
-                                            <input type="radio" name="parent_cat" id="pcat_{{ $key }}" value="{{ $pcategory->id }}"> <label for="pcat_{{ $key }}">{{ $pcategory->name }}</label><br>
-                                        @endforeach
-                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-2">
@@ -106,6 +81,30 @@
                                 <div class="form-group mb-3">
                                     <input type="text" name="name" class="form-control" id="name" placeholder="Category Title">
                                 </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input_label">
+                                    <label for="parent_category" class="form-label">{{ __('Parent Category') }}</label>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                               <div class="form-group mb-3">
+                                    <select name="parent_category" id="parent_category" class="form-select">
+                                        <option value="">Choose Parent Category</option>
+                                        @if(count($parent_categories) > 0)
+                                            @foreach ($parent_categories as $parent_cat)
+                                                @php
+                                                    $quote = "";
+                                                    $par_cat_id = (isset($cat_details['id'])) ? $cat_details['id'] : '';
+                                                @endphp
+                                                <option value="{{ $parent_cat->id }}" style="font-weight: 900" {{ ($par_cat_id == $parent_cat->id) ? 'selected' : '' }}>{{ $parent_cat[$name_key] }}</option>
+                                                @if(count($parent_cat->subcategories) > 0)
+                                                    @include('client.categories.child_categories',['subcategories' => $parent_cat->subcategories,'par_cat_id'=>$par_cat_id])
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                    </select>
+                               </div>
                             </div>
                             <div class="col-md-2 url" style="display: none;">
                                 <div class="input_label">
@@ -473,7 +472,7 @@
                                         <div class="item_box">
                                             <div class="item_img">
                                                 <a>
-                                                    @if($category->category_type == 'page' || $category->category_type == 'gallery' || $category->category_type == 'link' || $category->category_type == 'check_in' || $category->category_type == 'parent_category' || $category->category_type == 'pdf_page')
+                                                    @if($category->category_type == 'page' || $category->category_type == 'gallery' || $category->category_type == 'link' || $category->category_type == 'check_in' || $category->category_type == 'pdf_page')
                                                         @if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
                                                             <img src="{{ asset('public/client_uploads/categories/'.$category->cover) }}" class="w-100">
                                                         @else
@@ -496,12 +495,12 @@
                                                         <a href="{{ route('items',$category->id) }}" class="btn edit_item" >{{ __('ADD OR EDIT ITEMS')}}</a>
                                                     @endif
 
-                                                    @if($category->category_type == 'parent_category')
+                                                    @if($category->parent_id == NULL || $category->parent_id != NULL)
                                                         <a href="{{ route('categories',$category->id) }}" class="btn edit_item">{{ __('ADD OR EDIT CHILD CATEGORY') }}</a>
                                                     @endif
                                                     <button class="btn edit_category" onclick="editCategory({{ $category->id }})">{{ __('EDIT')}}</button>
                                                 </div>
-                                                @if($category->category_type == 'parent_category')
+                                                @if($category->parent_id == NULL || $category->parent_id != NULL)
                                                     <a class="btn-search-cat" href="{{ route('categories',$category->id) }}"><i class="fa-solid fa-magnifying-glass"></i></a>
                                                 @endif
                                                 <a class="delet_bt" onclick="deleteCategory({{ $category->id }})" style="cursor: pointer;">
@@ -537,8 +536,6 @@
                                                         Image Gallery
                                                     @elseif ($category->category_type == 'check_in')
                                                         Check-In Page
-                                                    @elseif ($category->category_type == 'parent_category')
-                                                        Parent Category
                                                     @elseif ($category->category_type == 'pdf_page')
                                                         PDF
                                                     @endif

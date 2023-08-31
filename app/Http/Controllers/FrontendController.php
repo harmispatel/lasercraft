@@ -10,8 +10,8 @@ class FrontendController extends Controller
     public function index()
     {
         $banners = ShopBanner::where('key','shop_banner')->get();
-        $categories = Category::with(['child_categories'])->where('category_type','parent_category')->orderBy('order_key')->get();
-        return view('frontend.index',compact('banners','categories'));
+        $parent_categories = Category::with(['categoryImages'])->where('parent_id',NULL)->orderBy('order_key')->get();
+        return view('frontend.index',compact('banners','parent_categories'));
 
     }
 }

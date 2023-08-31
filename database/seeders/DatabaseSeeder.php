@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
             LanguagesSeeder::class,
             // CategorySeeder::class,
             AdminSettingSeeder::class,
-            IngredientSeeder::class,
             CountrySeeder::class,
             LanguageSettingSeeder::class,
             ClientSettingSeeder::class,

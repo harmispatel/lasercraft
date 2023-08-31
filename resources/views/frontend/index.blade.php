@@ -46,20 +46,29 @@
     </div>
     <div class="collection_inr">
 
-        @foreach($categories as $category)
-        <div class="collction_box position-relative">
-            <div class="collection_img">
-                @if(!empty($category->cover) && file_exists('public/client_uploads/categories/'.$category->cover))
-                <img class="w-100" src="{{ asset('public/client_uploads/categories/'.$category->cover) }}">
-                @else
-                <img class="w-100" src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}">
+        @if(count($parent_categories) > 0)
+            @foreach($parent_categories as $parent_cat)
+                @if(count($parent_cat->subcategories) > 0)
+                    @foreach ($parent_cat->subcategories as $sub_cat)
+                        <div class="collction_box position-relative">
+                            <div class="collection_img">
+                                @php
+                                    $cat_img = (isset($sub_cat->categoryImages) && count($sub_cat->categoryImages) > 0) ? $sub_cat->categoryImages[0]->image : '';
+                                @endphp
+                                @if(!empty($cat_img) && file_exists('public/client_uploads/categories/'.$cat_img))
+                                    <img class="w-100" src="{{ asset('public/client_uploads/categories/'.$cat_img) }}">
+                                @else
+                                    <img class="w-100" src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}">
+                                @endif
+                            </div>
+                            <div class="collection_name">
+                                <h3>{{ isset($sub_cat[$name_key]) ? $sub_cat[$name_key] : '' }}</h3>
+                            </div>
+                        </div>
+                    @endforeach
                 @endif
-            </div>
-            <div class="collection_name">
-                <h3>{{ isset($category[$name_key]) ? $category[$name_key] : '' }}</h3>
-            </div>
-        </div>
-        @endforeach
+            @endforeach
+        @endif
     </div>
 </section>
 

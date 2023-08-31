@@ -45,7 +45,14 @@
                                     <option value="">Choose Category</option>
                                     @if(count($categories) > 0)
                                         @foreach ($categories as $cat)
-                                            <option value="{{ $cat->id }}" {{ ($cat_id == $cat->id) ? 'selected' : '' }}>{{ $cat->en_name }}</option>
+                                            @php
+                                                $quote = "";
+                                                $par_cat_id = $cat_id;
+                                            @endphp
+                                            <option value="{{ $cat->id }}" style="font-weight: 900" {{ ($par_cat_id == $cat->id) ? 'selected' : '' }}>{{ $cat[$name_key] }}</option>
+                                            @if(count($cat->subcategories) > 0)
+                                            @include('client.categories.child_categories',['subcategories' => $cat->subcategories,'par_cat_id'=>$par_cat_id])
+                                        @endif
                                         @endforeach
                                     @endif
                                 </select>
@@ -342,7 +349,14 @@
                                     <option value="">Filter By Category</option>
                                     @if(count($categories) > 0)
                                         @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}" {{ ($cat_id == $category->id) ? 'selected' : '' }}>{{ $category->en_name }}</option>
+                                            @php
+                                                $quote = "";
+                                                $par_cat_id = $cat_id;
+                                            @endphp
+                                            <option value="{{ $category->id }}" style="font-weight: 900" {{ ($par_cat_id == $category->id) ? 'selected' : '' }}>{{ $category[$name_key] }}</option>
+                                            @if(count($category->subcategories) > 0)
+                                                @include('client.categories.child_categories',['subcategories' => $category->subcategories,'par_cat_id'=>$par_cat_id])
+                                            @endif
                                         @endforeach
                                     @endif
                                 </select>

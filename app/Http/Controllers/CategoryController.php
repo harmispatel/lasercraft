@@ -11,6 +11,8 @@ use App\Models\Languages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use function Composer\Autoload\includeFile;
+
 class CategoryController extends Controller
 {
 
@@ -19,16 +21,13 @@ class CategoryController extends Controller
     {
         $categories = Category::query();
 
+        $data['parent_categories'] = Category::where('parent_id',NULL)->where('category_type','product_category')->get();
+
         $cat_type_arr = ['page','link','gallery','check_in','pdf_page'];
 
         if(!empty($uri) && is_numeric($uri))
         {
             $cat = Category::with(['categoryImages'])->where('id',$uri)->first();
-            $category_type = (isset($cat->category_type)) ? $cat->category_type : '';
-            if(empty($category_type) || $category_type != 'parent_category')
-            {
-                return redirect()->route('categories')->with('error','This Action is Unauthorized!');
-            }
             $categories = $categories->where('parent_id',$uri);
         }
         elseif(!empty($uri) && !is_numeric($uri))
@@ -50,14 +49,13 @@ class CategoryController extends Controller
         else
         {
             $cat = '';
-            $categories = $categories->where('parent_id',$uri)->whereIn('category_type',['product_category','parent_category']);
+            $categories = $categories->where('parent_id',NULL)->whereIn('category_type',['product_category','parent_category']);
         }
 
         $categories = $categories->orderBy('order_key')->get();
         $data['categories'] = $categories;
         $data['parent_cat_id'] = $uri;
         $data['cat_details'] = $cat;
-        $data['parent_categories'] = Category::where('parent_category',1)->get();
 
         if($uri == 'page' || $uri == 'link' || $uri == 'pdf_page' || $uri == 'check_in')
         {
@@ -149,7 +147,7 @@ class CategoryController extends Controller
             }
 
             // Cover
-            if($category_type == 'page' || $category_type == 'link' || $category_type == 'gallery' || $category_type == 'check_in' || $category_type == 'parent_category' || $category_type == 'pdf_page')
+            if($category_type == 'page' || $category_type == 'link' || $category_type == 'gallery' || $category_type == 'check_in' || $category_type == 'pdf_page')
             {
                 if($request->hasFile('cover'))
                 {
@@ -171,24 +169,6 @@ class CategoryController extends Controller
                 $category->styles = isset($request->checkin_styles) ? serialize($request->checkin_styles) : '';
             }
 
-            // Parent Category
-            if($category_type == 'parent_category')
-            {
-                if(isset($request->parent_cat) && !empty($request->parent_cat) && $request->parent_cat == 0)
-                {
-                    $category->parent_category = 1;
-                }
-                elseif(empty($request->parent_cat) || !isset($request->parent_cat))
-                {
-                    $category->parent_category = 1;
-                }
-                else
-                {
-                    $category->parent_id = $request->parent_cat;
-                    $category->category_type = 'product_category';
-                }
-            }
-
             // Pdf File
             if($category_type == 'pdf_page')
             {
@@ -200,11 +180,7 @@ class CategoryController extends Controller
                 }
             }
 
-            if(isset($request->parent_cat_id) && !empty($request->parent_cat_id))
-            {
-                $category->parent_id = $request->parent_cat_id;
-            }
-
+            $category->parent_id = (isset($request->parent_category)) ? $request->parent_category : null;
             $category->published = $published;
             $category->order_key = $category_order;
             $category->save();
@@ -263,6 +239,17 @@ class CategoryController extends Controller
         try
         {
             $id = $request->id;
+
+            // Child Categories Count
+            $child_cat = Category::where('parent_id',$id)->count();
+
+            if($child_cat > 0)
+            {
+                return response()->json([
+                    'success' => 0,
+                    'message' => "You cannot delete a category as long as there are any Child Categories in the Category!",
+                ]);
+            }
 
             // Category Items Count
             $items_count = Items::where('category_id',$id)->count();
@@ -348,7 +335,7 @@ class CategoryController extends Controller
             $category = Category::where('id',$category_id)->first();
 
             // Get all Parent Categories
-            $parent_categories = Category::where('id','!=',$category_id)->where('parent_category',1)->get();
+            $parent_categories = Category::where('id','!=',$category_id)->where('parent_id',NULL)->get();
 
             // Category Types
             $category_types = [
@@ -359,11 +346,6 @@ class CategoryController extends Controller
                 'check_in' => 'Check-In Page',
                 'pdf_page' => 'PDF Category',
             ];
-
-            if($category->parent_id == null)
-            {
-                $category_types['parent_category'] = 'Child Category';
-            }
 
             // Categories Images
             $category_images = CategoryImages::where('category_id',$category_id)->get();
@@ -427,24 +409,6 @@ class CategoryController extends Controller
                             $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                             $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
 
-                            // Category
-                            $html .= '<div class="row mb-3 cat_div">';
-                                $html .= '<div class="col-md-12">';
-                                    $html .= '<label class="form-label">'.__('Category').'</label>';
-                                    $html .= '<div id="categories_div">';
-                                        $html .= '<input type="radio" name="parent_cat" id="root" value="0" '.$root_parent_cat_checked.'> <label for="root">Root</label> <br>';
-                                        if(count($parent_categories) > 0)
-                                        {
-                                            foreach ($parent_categories as $key => $pcategory)
-                                            {
-                                                $parent_cat_check = ($pcategory->parent_id == $pcategory->id) ? 'checked' : '';
-                                                $html .= '<input type="radio" name="parent_cat" id="pcat_'.$key.'" value="'.$pcategory->id.'" '.$parent_cat_check.'> <label for="pcat_'.$key.'">'.$pcategory->name.'</label><br>';
-                                            }
-                                        }
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-
                             // Name
                             $html .= '<div class="row mb-3">';
                                 $html .= '<div class="col-md-12">';
@@ -452,6 +416,46 @@ class CategoryController extends Controller
                                 $html .= '<input type="text" name="category_name" id="category_name" class="form-control" value="'.$category_name.'">';
                                 $html .= '</div>';
                             $html .= '</div>';
+
+
+                            if(isset($category['parent_id']) && $category['parent_id'] != null)
+                            {
+                                // Parent Category
+                                $html .= '<div class="row mb-3">';
+                                    $html .= '<div class="col-md-12">';
+                                        $html .= '<label class="form-label" for="category_name">'.__('Parent Category').'</label>';
+                                        $html .= '<select name="parent_category" id="parent_category" class="form-select">';
+                                            $html .= '<option value="">Choose Parent Category</option>';
+                                            if(count($parent_categories) > 0)
+                                            {
+                                                foreach ($parent_categories as $parent_cat)
+                                                {
+                                                    $quote = "";
+
+                                                    $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                    if($parent_cat->id == $category['parent_id'])
+                                                    {
+                                                        $html .= 'selected';
+                                                    }
+
+                                                    $html .='>'.$parent_cat[$category_name_key].'</option>';
+
+                                                    if(count($parent_cat->subcategories) > 0)
+                                                    {
+                                                        $data['quote'] = $quote;
+                                                        $data['par_cat_id'] = $category['parent_id'];
+                                                        $data['name_key'] = $category_name_key;
+                                                        $data['subcategories'] = $parent_cat->subcategories;
+
+                                                        $html .= $this->child_cat($data);
+                                                    }
+                                                }
+                                            }
+                                        $html .= '</select>';
+                                    $html .= '</div>';
+                                $html .= '</div>';
+                            }
 
                             // Url
                             $url_active = ($category->category_type == 'link') ? 'block' : 'none';
@@ -741,23 +745,6 @@ class CategoryController extends Controller
                             $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                             $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
 
-                            // Category
-                            $html .= '<div class="row mb-3 cat_div">';
-                                $html .= '<div class="col-md-12">';
-                                    $html .= '<label class="form-label">'.__('Category').'</label>';
-                                    $html .= '<div id="categories_div">';
-                                        $html .= '<input type="radio" name="parent_cat" id="root" value="0" '.$root_parent_cat_checked.'> <label for="root">Root</label> <br>';
-                                        if(count($parent_categories) > 0)
-                                        {
-                                            foreach ($parent_categories as $key => $pcategory)
-                                            {
-                                                $parent_cat_check = ($pcategory->parent_id == $pcategory->id) ? 'checked' : '';
-                                                $html .= '<input type="radio" name="parent_cat" id="pcat_'.$key.'" value="'.$pcategory->id.'" '.$parent_cat_check.'> <label for="pcat_'.$key.'">'.$pcategory->name.'</label><br>';
-                                            }
-                                        }
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
 
                             // Name
                             $html .= '<div class="row mb-3">';
@@ -766,6 +753,45 @@ class CategoryController extends Controller
                                 $html .= '<input type="text" name="category_name" id="category_name" class="form-control" value="'.$category_name.'">';
                                 $html .= '</div>';
                             $html .= '</div>';
+
+                            if(isset($category['parent_id']) && $category['parent_id'] != null)
+                            {
+                                // Parent Category
+                                $html .= '<div class="row mb-3">';
+                                    $html .= '<div class="col-md-12">';
+                                        $html .= '<label class="form-label" for="category_name">'.__('Parent Category').'</label>';
+                                        $html .= '<select name="parent_category" id="parent_category" class="form-select">';
+                                            $html .= '<option value="">Choose Parent Category</option>';
+                                            if(count($parent_categories) > 0)
+                                            {
+                                                foreach ($parent_categories as $parent_cat)
+                                                {
+                                                    $quote = "";
+
+                                                    $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                    if($parent_cat->id == $category['parent_id'])
+                                                    {
+                                                        $html .= 'selected';
+                                                    }
+
+                                                    $html .='>'.$parent_cat[$category_name_key].'</option>';
+
+                                                    if(count($parent_cat->subcategories) > 0)
+                                                    {
+                                                        $data['quote'] = $quote;
+                                                        $data['par_cat_id'] = $category['parent_id'];
+                                                        $data['name_key'] = $category_name_key;
+                                                        $data['subcategories'] = $parent_cat->subcategories;
+
+                                                        $html .= $this->child_cat($data);
+                                                    }
+                                                }
+                                            }
+                                        $html .= '</select>';
+                                    $html .= '</div>';
+                                $html .= '</div>';
+                            }
 
                             // Url
                             $url_active = ($category->category_type == 'link') ? 'block' : 'none';
@@ -1047,11 +1073,49 @@ class CategoryController extends Controller
         }
         catch (\Throwable $th)
         {
+            dd($th);
             return response()->json([
                 'success' => 0,
                 'message' => "Internal Server Error!",
             ]);
         }
+    }
+
+
+
+    // Get Child Categories
+    function child_cat($data)
+    {
+        $quote = $data['quote'];
+        $quote .= '-';
+        $quote_array = strlen($quote);
+        $fw = ($quote_array == 1) ? 600 : 400;
+
+        $html = '';
+
+        foreach($data['subcategories'] as $subcategory)
+        {
+            $html .= '<option value="'.$subcategory->id.'" style="font-weight: '.$fw.'"';
+
+            if($data['par_cat_id'] == $subcategory->id)
+            {
+                $html .= 'selected';
+            }
+
+            $html .= '> &nbsp;'.$quote.' '.$subcategory[$data['name_key']].'</option>';
+
+            if(count($subcategory->subcategories) > 0)
+            {
+                $new_data['quote'] = $quote;
+                $new_data['par_cat_id'] = $data['par_cat_id'];
+                $new_data['name_key'] = $data['name_key'];
+                $new_data['subcategories'] = $subcategory->subcategories;
+
+                $html .= $this->child_cat($new_data);
+            }
+        }
+
+        return $html;
     }
 
 
@@ -1221,7 +1285,7 @@ class CategoryController extends Controller
                 }
 
                 // Cover
-                if($category_type == 'page' || $category_type == 'link' || $category_type == 'gallery' || $category_type == 'check_in' || $category_type == 'parent_category' || $category_type == 'pdf_page')
+                if($category_type == 'page' || $category_type == 'link' || $category_type == 'gallery' || $category_type == 'check_in' || $category_type == 'pdf_page')
                 {
                     if($request->hasFile('cover'))
                     {
@@ -1250,24 +1314,6 @@ class CategoryController extends Controller
                     $category->styles = isset($request->checkin_styles) ? serialize($request->checkin_styles) : '';
                 }
 
-                // Parent Category
-                if($category_type == 'parent_category')
-                {
-                    if(isset($request->parent_cat) && !empty($request->parent_cat) && $request->parent_cat == 0)
-                    {
-                        $category->parent_category = 1;
-                    }
-                    elseif(empty($request->parent_cat) || !isset($request->parent_cat))
-                    {
-                        $category->parent_category = 1;
-                    }
-                    else
-                    {
-                        $category->parent_id = $request->parent_cat;
-                        $category->category_type = 'product_category';
-                    }
-                }
-
                 // Pdf File
                 if($category_type == 'pdf_page')
                 {
@@ -1286,11 +1332,7 @@ class CategoryController extends Controller
                     }
                 }
 
-                if(isset($request->parent_cat_id) && !empty($request->parent_cat_id))
-                {
-                    $category->parent_id = $request->parent_cat_id;
-                }
-
+                $category->parent_id = (isset($request->parent_category)) ? $request->parent_category : null;
                 $category->published = $published;
                 $category->schedule = $schedule;
                 $category->schedule_type = $schedule_type;
@@ -1420,7 +1462,7 @@ class CategoryController extends Controller
                 }
 
                 // Cover
-                if($category_type == 'page' || $category_type == 'link' || $category_type == 'gallery' || $category_type == 'check_in' || $category_type == 'parent_category' || $category_type == 'pdf_page')
+                if($category_type == 'page' || $category_type == 'link' || $category_type == 'gallery' || $category_type == 'check_in' || $category_type == 'pdf_page')
                 {
                     if($request->hasFile('cover'))
                     {
@@ -1449,24 +1491,6 @@ class CategoryController extends Controller
                     $category->styles = isset($request->checkin_styles) ? serialize($request->checkin_styles) : '';
                 }
 
-                // Parent Category
-                if($category_type == 'parent_category')
-                {
-                    if(isset($request->parent_cat) && !empty($request->parent_cat) && $request->parent_cat == 0)
-                    {
-                        $category->parent_category = 1;
-                    }
-                    elseif(empty($request->parent_cat) || !isset($request->parent_cat))
-                    {
-                        $category->parent_category = 1;
-                    }
-                    else
-                    {
-                        $category->parent_id = $request->parent_cat;
-                        $category->category_type = 'product_category';
-                    }
-                }
-
                 // Pdf File
                 if($category_type == 'pdf_page')
                 {
@@ -1485,11 +1509,7 @@ class CategoryController extends Controller
                     }
                 }
 
-                if(isset($request->parent_cat_id) && !empty($request->parent_cat_id))
-                {
-                    $category->parent_id = $request->parent_cat_id;
-                }
-
+                $category->parent_id = (isset($request->parent_category)) ? $request->parent_category : null;
                 $category->published = $published;
                 $category->schedule = $schedule;
                 $category->schedule_type = $schedule_type;
@@ -1661,24 +1681,6 @@ class CategoryController extends Controller
                         $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                         $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
 
-                        // Category
-                        $html .= '<div class="row mb-3 cat_div">';
-                            $html .= '<div class="col-md-12">';
-                                $html .= '<label class="form-label">'.__('Category').'</label>';
-                                $html .= '<div id="categories_div">';
-                                    $html .= '<input type="radio" name="parent_cat" id="root" value="0" '.$root_parent_cat_checked.'> <label for="root">Root</label> <br>';
-                                    if(count($parent_categories) > 0)
-                                    {
-                                        foreach ($parent_categories as $key => $pcategory)
-                                        {
-                                            $parent_cat_check = ($pcategory->parent_id == $pcategory->id) ? 'checked' : '';
-                                            $html .= '<input type="radio" name="parent_cat" id="pcat_'.$key.'" value="'.$pcategory->id.'" '.$parent_cat_check.'> <label for="pcat_'.$key.'">'.$pcategory->name.'</label><br>';
-                                        }
-                                    }
-                                $html .= '</div>';
-                            $html .= '</div>';
-                        $html .= '</div>';
-
                         // Name
                         $html .= '<div class="row mb-3">';
                             $html .= '<div class="col-md-12">';
@@ -1686,6 +1688,45 @@ class CategoryController extends Controller
                             $html .= '<input type="text" name="category_name" id="category_name" class="form-control" value="'.$category_name.'">';
                             $html .= '</div>';
                         $html .= '</div>';
+
+                        if(isset($category['parent_id']) && $category['parent_id'] != null)
+                        {
+                            // Parent Category
+                            $html .= '<div class="row mb-3">';
+                                $html .= '<div class="col-md-12">';
+                                    $html .= '<label class="form-label" for="category_name">'.__('Parent Category').'</label>';
+                                    $html .= '<select name="parent_category" id="parent_category" class="form-select">';
+                                        $html .= '<option value="">Choose Parent Category</option>';
+                                        if(count($parent_categories) > 0)
+                                        {
+                                            foreach ($parent_categories as $parent_cat)
+                                            {
+                                                $quote = "";
+
+                                                $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                if($parent_cat->id == $category['parent_id'])
+                                                {
+                                                    $html .= 'selected';
+                                                }
+
+                                                $html .='>'.$parent_cat[$category_name_key].'</option>';
+
+                                                if(count($parent_cat->subcategories) > 0)
+                                                {
+                                                    $data['quote'] = $quote;
+                                                    $data['par_cat_id'] = $category['parent_id'];
+                                                    $data['name_key'] = $category_name_key;
+                                                    $data['subcategories'] = $parent_cat->subcategories;
+
+                                                    $html .= $this->child_cat($data);
+                                                }
+                                            }
+                                        }
+                                    $html .= '</select>';
+                                $html .= '</div>';
+                            $html .= '</div>';
+                        }
 
 
                         // Url
@@ -1975,24 +2016,6 @@ class CategoryController extends Controller
                         $html .= '<input type="hidden" name="category_id" id="category_id" value="'.$category['id'].'">';
                         $html .= '<input type="hidden" name="category_type" id="category_type" value="'.$category->category_type.'">';
 
-                        // Category
-                        $html .= '<div class="row mb-3 cat_div">';
-                            $html .= '<div class="col-md-12">';
-                                $html .= '<label class="form-label">'.__('Category').'</label>';
-                                $html .= '<div id="categories_div">';
-                                    $html .= '<input type="radio" name="parent_cat" id="root" value="0" '.$root_parent_cat_checked.'> <label for="root">Root</label> <br>';
-                                    if(count($parent_categories) > 0)
-                                    {
-                                        foreach ($parent_categories as $key => $pcategory)
-                                        {
-                                            $parent_cat_check = ($pcategory->parent_id == $pcategory->id) ? 'checked' : '';
-                                            $html .= '<input type="radio" name="parent_cat" id="pcat_'.$key.'" value="'.$pcategory->id.'" '.$parent_cat_check.'> <label for="pcat_'.$key.'">'.$pcategory->name.'</label><br>';
-                                        }
-                                    }
-                                $html .= '</div>';
-                            $html .= '</div>';
-                        $html .= '</div>';
-
                         // Name
                         $html .= '<div class="row mb-3">';
                             $html .= '<div class="col-md-12">';
@@ -2000,6 +2023,45 @@ class CategoryController extends Controller
                             $html .= '<input type="text" name="category_name" id="category_name" class="form-control" value="'.$category_name.'">';
                             $html .= '</div>';
                         $html .= '</div>';
+
+                        if(isset($category['parent_id']) && $category['parent_id'] != null)
+                        {
+                            // Parent Category
+                            $html .= '<div class="row mb-3">';
+                                $html .= '<div class="col-md-12">';
+                                    $html .= '<label class="form-label" for="category_name">'.__('Parent Category').'</label>';
+                                    $html .= '<select name="parent_category" id="parent_category" class="form-select">';
+                                        $html .= '<option value="">Choose Parent Category</option>';
+                                        if(count($parent_categories) > 0)
+                                        {
+                                            foreach ($parent_categories as $parent_cat)
+                                            {
+                                                $quote = "";
+
+                                                $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                if($parent_cat->id == $category['parent_id'])
+                                                {
+                                                    $html .= 'selected';
+                                                }
+
+                                                $html .='>'.$parent_cat[$category_name_key].'</option>';
+
+                                                if(count($parent_cat->subcategories) > 0)
+                                                {
+                                                    $data['quote'] = $quote;
+                                                    $data['par_cat_id'] = $category['parent_id'];
+                                                    $data['name_key'] = $category_name_key;
+                                                    $data['subcategories'] = $parent_cat->subcategories;
+
+                                                    $html .= $this->child_cat($data);
+                                                }
+                                            }
+                                        }
+                                    $html .= '</select>';
+                                $html .= '</div>';
+                            $html .= '</div>';
+                        }
 
                         // Url
                         $url_active = ($category->category_type == 'link') ? 'block' : 'none';
