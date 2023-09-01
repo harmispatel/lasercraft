@@ -72,12 +72,12 @@
     </div>
 </section>
 
-<section class="offer_sec">
+{{-- <section class="offer_sec">
     <div class="offer_banner position-relative">
         <img src="{{asset('public/frontend//image/offer.png')}}" class="w-100" />
         <button class="btn btn_explore">Explore More</button>
     </div>
-</section>
+</section> --}}
 
 <section class="sec_main product_sec">
     <div class="sec_title">

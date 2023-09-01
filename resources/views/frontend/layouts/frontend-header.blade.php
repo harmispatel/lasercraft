@@ -33,104 +33,19 @@
 
                         @if(count($parent_categories) > 0)
                             @foreach ($parent_categories as $parent_cat)
-                                <li class="nav-item" id="{{ strtolower($parent_cat[$name_key]) }}_menu">
-                                    <a class="nav-link" href="#">{{ $parent_cat[$name_key] }}</a>
+                                <li class="nav-item dropdown" id="myDropdown">
+                                    @php
+                                        $menu_count = 1;
+                                    @endphp
+                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">{{ $parent_cat[$name_key] }}</a>
+
+                                    @if(count($parent_cat->subcategories) > 0)
+                                        @include('frontend.child_categories_menu',['subcategories' => $parent_cat->subcategories,'parent_key'=>$menu_count])
+                                    @endif
                                 </li>
                             @endforeach
                         @endif
 
-                        {{-- <li class="nav-item" id="collection_menu">
-                            <a class="nav-link" href="#">Collection</a>
-                            <div class="collection_menu">
-                                <ul>
-                                    <li class="sub_list">
-                                        <a href="#">Personalised Night lights</a>
-                                        <div class="collection_sub_menu">
-                                            <ul>
-                                                <li>
-                                                    <a href="" title="Novelty lights">Novelty lights</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Printed lights">Printed lights</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Monogram">Monogram</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    <li class="sub_list">
-                                        <a href="#">Personalised Cake Topper</a>
-                                        <div class="collection_sub_menu">
-                                            <ul>
-                                                <li>
-                                                    <a href="" title="Birthday">Birthday</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Wedding/Engagement">Wedding/Engagement</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Printed toppers">Printed toppers</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Baby shower">Baby shower</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Cupcake toppers">Cupcake toppers</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    <li class="sub_list">
-                                        <a href="#">Keyrings / Bagtags</a>
-
-                                    </li>
-                                    <li class="sub_list">
-                                        <a href="#">Drinkware- Personalise</a>
-                                        <div class="collection_sub_menu">
-                                            <ul>
-                                                <li>
-                                                    <a href="" title="Personalised Steel Water bottles">Personalised Steel Water bottles</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Mugs">Mugs</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Tumblers">Tumblers</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    <li class="sub_list">
-                                        <a href="#">Babies and Children</a>
-                                        <div class="collection_sub_menu">
-                                            <ul>
-                                                <li>
-                                                    <a href="" title="Baby announcement Plaque">Baby announcement Plaque</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Personalised Name/ Wall Plaque">Personalised Name/ Wall Plaque</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Baby shower">Baby shower</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Milestones">Milestones</a>
-                                                </li>
-                                                <li>
-                                                    <a href="" title="Back to school">Back to school</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    <li class="sub_list"><a href="#">Wedding</a></li>
-                                </ul>
-                            </div>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Occasion</a>
-                        </li> --}}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Shop</a>
                         </li>
