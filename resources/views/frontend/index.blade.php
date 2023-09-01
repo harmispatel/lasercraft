@@ -1,6 +1,6 @@
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('Clients'))
+@section('title', __('Laser Craft'))
 
 @section('content')
 

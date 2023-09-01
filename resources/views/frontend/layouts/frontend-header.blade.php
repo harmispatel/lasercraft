@@ -1,3 +1,20 @@
+@php
+
+    // Language Settings
+    $language_settings = clientLanguageSettings();
+    $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
+
+    // Language Details
+    $language_detail = App\Models\Languages::where('id',$primary_lang_id)->first();
+    $lang_code = isset($language_detail->code) ? $language_detail->code : '';
+
+    $description_key = $lang_code."_description";
+    $image_key = $lang_code."_image";
+    $name_key = $lang_code."_name";
+
+    $parent_categories = \App\Models\Category::where('parent_id',NULL)->get();
+@endphp
+
 
 <header class="header">
     <div class="container">
@@ -11,9 +28,18 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                            <a class="nav-link active" aria-current="page" href="{{ route('home') }}">Home</a>
                         </li>
-                        <li class="nav-item" id="collection_menu">
+
+                        @if(count($parent_categories) > 0)
+                            @foreach ($parent_categories as $parent_cat)
+                                <li class="nav-item" id="{{ strtolower($parent_cat[$name_key]) }}_menu">
+                                    <a class="nav-link" href="#">{{ $parent_cat[$name_key] }}</a>
+                                </li>
+                            @endforeach
+                        @endif
+
+                        {{-- <li class="nav-item" id="collection_menu">
                             <a class="nav-link" href="#">Collection</a>
                             <div class="collection_menu">
                                 <ul>
@@ -57,7 +83,7 @@
                                     </li>
                                     <li class="sub_list">
                                         <a href="#">Keyrings / Bagtags</a>
-                                        
+
                                     </li>
                                     <li class="sub_list">
                                         <a href="#">Drinkware- Personalise</a>
@@ -99,17 +125,18 @@
                                     </li>
                                     <li class="sub_list"><a href="#">Wedding</a></li>
                                 </ul>
-                            </div>      
+                            </div>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="#">Occasion</a>
-                        </li>
+                        </li> --}}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Shop</a>
                         </li>
                     </ul>
                 </div>
-                <a class="navbar-brand m-0" href="#">
+                <a class="navbar-brand m-0" href="{{ route('home') }}">
                     <img src="{{asset('public/frontend/image/logo.jpeg')}}" height="60" />
                 </a>
                 <div class="header_right">

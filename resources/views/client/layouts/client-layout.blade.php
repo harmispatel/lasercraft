@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title')</title>
-    <link href="{{ asset('public/admin_images/favicons/smartqrscan.ico') }}" rel="icon">
+    <link href="{{ asset('public/admin_images/favicons/glob.png') }}" rel="icon">
     @include('client.layouts.client-css')
 </head>
 
