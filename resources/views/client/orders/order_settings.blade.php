@@ -60,46 +60,6 @@
                                     </label>
                                     <label for="takeaway" class="form-label">{{ __('Takeaway') }}</label>
                                 </div>
-                                <div class="col-md-4 mt-3">
-                                    <label class="switch me-2">
-                                        <input type="checkbox" value="1" name="room_delivery" id="room_delivery" class="ord-setting" {{ (isset($order_settings['room_delivery']) && $order_settings['room_delivery'] == 1) ? 'checked' : '' }}>
-                                        <span class="slider round" data-bs-toggle="tooltip" title="If room delivery is disabled guests will not be able to make orders for room delivery.">
-                                            <i class="fa-solid fa-circle-check check_icon"></i>
-                                            <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
-                                        </span>
-                                    </label>
-                                    <label for="room_delivery" class="form-label">{{ __('Room Delivery') }}</label>
-                                </div>
-                                <div class="col-md-4 mt-3">
-                                    <label class="switch me-2">
-                                        <input type="checkbox" value="1" name="table_service" id="table_service" class="ord-setting" {{ (isset($order_settings['table_service']) && $order_settings['table_service'] == 1) ? 'checked' : '' }}>
-                                        <span class="slider round" data-bs-toggle="tooltip" title="If table service is disabled guests will not be able to make orders for table service.">
-                                            <i class="fa-solid fa-circle-check check_icon"></i>
-                                            <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
-                                        </span>
-                                    </label>
-                                    <label for="table_service" class="form-label">{{ __('Table Service') }}</label>
-                                </div>
-                                <div class="col-md-4 mt-3">
-                                    <label class="switch me-2">
-                                        <input type="checkbox" value="1" name="office_service" id="office_service" class="ord-setting" {{ (isset($order_settings['office_service']) && $order_settings['office_service'] == 1) ? 'checked' : '' }}>
-                                        <span class="slider round" data-bs-toggle="tooltip" title="If office service is disabled guests will not be able to make orders for office service.">
-                                            <i class="fa-solid fa-circle-check check_icon"></i>
-                                            <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
-                                        </span>
-                                    </label>
-                                    <label for="office_service" class="form-label">{{ __('Office Service') }}</label>
-                                </div>
-                                <div class="col-md-4 mt-3">
-                                    <label class="switch me-2">
-                                        <input type="checkbox" value="1" name="only_cart" id="only_cart" class="ord-setting" {{ (isset($order_settings['only_cart']) && $order_settings['only_cart'] == 1) ? 'checked' : '' }}>
-                                        <span class="slider round" data-bs-toggle="tooltip" title="If only cart is enabled guests will not be able to continue to checkout page.">
-                                            <i class="fa-solid fa-circle-check check_icon"></i>
-                                            <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
-                                        </span>
-                                    </label>
-                                    <label for="only_cart" class="form-label">{{ __('Only Cart') }}</label>
-                                </div>
                             </div>
                             <hr>
 
@@ -107,18 +67,6 @@
                             <div class="row">
                                 <h3>{{ __('Other Settings') }}</h3>
                             </div>
-                            {{-- <div class="row mt-2">
-                                <div class="col-md-6">
-                                    <label class="switch me-2">
-                                        <input type="checkbox" value="1" name="auto_order_approval" id="auto_order_approval" class="ord-setting" {{ (isset($order_settings['auto_order_approval']) && $order_settings['auto_order_approval'] == 1) ? 'checked' : '' }}>
-                                        <span class="slider round">
-                                            <i class="fa-solid fa-circle-check check_icon"></i>
-                                            <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
-                                        </span>
-                                    </label>
-                                    <label for="auto_order_approval" class="form-label">{{ __('Auto Order Approval') }}</label>
-                                </div>
-                            </div> --}}
                             <div class="row mt-2">
                                 <div class="col-md-6 mt-3">
                                     <label for="min_amount_for_delivery" class="form-label">{{ __('Minimum amount needed for delivery, if left null any amount is acceptable.') }}</label>

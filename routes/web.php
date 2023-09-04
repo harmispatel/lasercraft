@@ -28,6 +28,8 @@ Route::get('config-clear', function () {
 
 
 Route::get('/',[FrontendController::class,'index'])->name('home');
+Route::get('/collections/{cat_id}',[FrontendController::class,'collectionByCategory'])->name('categories.collections');
+Route::get('/product-details/{item_id}',[FrontendController::class,'productDetails'])->name('product.deatails');
 
 // Auth Routes
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
@@ -158,7 +160,7 @@ Route::group(['prefix' => 'client'], function()
         Route::post('update-items-by-lang',[ItemsController::class,'updateByLangCode'])->name('items.update.by.lang');
         Route::post('sorting-items',[ItemsController::class,'sorting'])->name('items.sorting');
         Route::post('delete-price-items',[ItemsController::class,'deleteItemPrice'])->name('items.delete.price');
-        Route::get('delete-items-image/{id}',[ItemsController::class,'deleteItemImage'])->name('items.delete.image');
+        Route::post('delete-items-image',[ItemsController::class,'deleteItemImage'])->name('items.delete.image');
 
         // Options
         Route::get('options',[OptionController::class,'index'])->name('options');

@@ -18,4 +18,12 @@ class Items extends Model
     {
         return $this->hasMany(ItemReview::class,'item_id','id');
     }
+
+    function itemImages() {
+        return $this->hasMany(ItemImages::class,'item_id','id');
+    }
+
+    function itemPrices(){
+        return $this->hasMany(ItemPrice::class,'item_id','id');
+    }
 }

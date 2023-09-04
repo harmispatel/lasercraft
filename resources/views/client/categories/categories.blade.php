@@ -769,9 +769,9 @@
                     fileName = currentFile.name;
                     fileType = fileName.split('.').pop().toLowerCase();
 
-                    if(fileSize > 2)
+                    if(fileSize > 3)
                     {
-                        toastr.error("File is to Big "+fileSize.toFixed(2)+"MiB. Max File size : 2 MiB.");
+                        toastr.error("File is to Big "+fileSize.toFixed(2)+"MiB. Max File size : 3 MiB.");
                         $('#'+myFormID+' #image').val('');
                         return false;
                     }

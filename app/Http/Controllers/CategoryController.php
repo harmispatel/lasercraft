@@ -3,15 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdditionalLanguage;
-use App\Models\Category;
-use App\Models\CategoryImages;
-use App\Models\CategoryVisit;
-use App\Models\Items;
-use App\Models\Languages;
+use App\Models\{Category,CategoryImages,CategoryVisit,Items,Languages};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-
-use function Composer\Autoload\includeFile;
 
 class CategoryController extends Controller
 {
@@ -368,7 +361,6 @@ class CategoryController extends Controller
             $schedule_arr = isset($category->schedule_value) ? json_decode($category->schedule_value,true) : [];
             $category_name = (isset($category[$category_name_key])) ? $category[$category_name_key] : '';
             $category_desc = (isset($category[$category_desc_key])) ? $category[$category_desc_key] : '';
-            $root_parent_cat_checked = ($category['parent_category'] == 1) ? 'checked' : '';
 
             // Additional Languages
             $additional_languages = AdditionalLanguage::get();

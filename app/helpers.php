@@ -86,26 +86,14 @@
         $keys = ([
             'delivery',
             'takeaway',
-            'room_delivery',
-            'table_service',
-            'only_cart',
-            'auto_order_approval',
             'scheduler_active',
             'min_amount_for_delivery',
             'discount_percentage',
             'order_arrival_minutes',
             'schedule_array',
-            'default_printer',
-            'receipt_intro',
-            'auto_print',
-            'printer_paper',
-            'printer_tray',
             'play_sound',
             'notification_sound',
-            'enable_print',
-            'print_font_size',
             'discount_type',
-            'office_service',
         ]);
 
         $settings = [];

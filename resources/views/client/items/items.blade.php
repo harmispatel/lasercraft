@@ -127,26 +127,27 @@
                                 </div>
                             </div>
 
-                            {{-- Image --}}
                             <div class="row mb-3">
+                                <div class="col-md-12 mt-2 mb-2 d-flex flex-wrap" id="images_div">
+                                </div>
+                                <div class="col-md-12 mul-image" id="img-val"></div>
                                 <div class="col-md-12">
                                     <label for="image" class="form-label">{{ __('Image')}}</label>
                                 </div>
-                                <div class="col-md-9">
+                                <div class="col-md-12 mul-image">
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <div id="img-label">
-                                                    <label for="image" style="cursor: pointer">
-                                                        <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" class="w-100 h-100" id="crp-img-prw" style="border-radius: 10px;">
+                                                    <label for="image">
+                                                        Upload Images
                                                     </label>
                                                 </div>
                                                 <input type="file" name="image" id="image" class="form-control" style="display: none;">
-                                                <input type="hidden" name="og_image" id="og_image">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                            <code>Upload Image in (400*400) Dimensions</code>
+                                            <code class="img-upload-label">Upload Image in (400*400) Dimensions</code>
                                         </div>
                                     </div>
                                 </div>
@@ -162,6 +163,7 @@
                                     <div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>
                                 </div>
                             </div>
+
 
                             {{-- Tags --}}
                             <div class="row mb-3">
@@ -244,7 +246,7 @@
                                 <div class="col-md-6 mt-2 review_rating">
                                     <div class="form-group">
                                         <label class="switch me-2">
-                                            <input type="checkbox" id="review_rating" name="review_rating" value="1">
+                                            <input type="checkbox" id="review_rating" name="review_rating" value="1" checked>
                                             <span class="slider round">
                                                 <i class="fa-solid fa-circle-check check_icon"></i>
                                                 <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
@@ -394,12 +396,15 @@
                             {{-- Itens Section --}}
                             @if(count($items) > 0)
                                 @foreach ($items as $item)
+                                    @php
+                                        $item_image = (isset($item->itemImages) && count($item->itemImages) > 0) ? $item->itemImages[0]->image : '';
+                                    @endphp
                                     <div class="col-md-3" item-id="{{ $item->id }}">
                                         <div class="item_box">
                                             <div class="item_img">
                                                 <a>
-                                                    @if(!empty($item->image) && file_exists('public/client_uploads/items/'.$item->image))
-                                                        <img src="{{ asset('public/client_uploads/items/'.$item->image) }}" class="w-100">
+                                                    @if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
+                                                        <img src="{{ asset('public/client_uploads/items/'.$item_image) }}" class="w-100">
                                                     @else
                                                         <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" class="w-100">
                                                     @endif
@@ -467,6 +472,7 @@
         var cropper;
         var addItemEditor;
         var editItemEditor;
+        var addKey=0;
 
         // Reset AddItem Modal & Form
         $('#NewItemBtn').on('click',function()
@@ -1322,6 +1328,15 @@
                     {
                         // $('#editItemModal').modal('hide');
                         toastr.success(response.message);
+
+                        if(cropper)
+                        {
+                            cropper.destroy();
+                            $('#'+formID+' #resize-image').attr('src',"");
+                            $('#'+formID+' .img-crop-sec').hide();
+                        }
+                        $('#'+formID+' #resize-image').attr('src',"");
+                        $('#'+formID+' #img-val').html("");
                         // setTimeout(() => {
                         //     location.reload();
                         // }, 1000);
@@ -1720,7 +1735,7 @@
 
                     if(fileSize > 2)
                     {
-                        toastr.error("File is to Big "+fileSize.toFixed(2)+"MiB. Max File size : 2 MiB.");
+                        toastr.error("File is to Big "+fileSize.toFixed(2)+"MiB. Max File size : 3 MiB.");
                         $('#'+myFormID+' #item_image').val('');
                         return false;
                     }
@@ -1740,7 +1755,6 @@
                                 $('#'+myFormID+' #resize-image').attr('src',"");
                                 $('#'+myFormID+' .img-crop-sec').hide();
                             }
-
                             $('#'+myFormID+' #resize-image').attr('src',"");
                             $('#'+myFormID+' #resize-image').attr('src',URL.createObjectURL(currentFile));
                             $('#'+myFormID+' .img-crop-sec').show();
@@ -1790,31 +1804,42 @@
 
             canvas.toBlob(function(blob)
             {
-                $('#'+formID+" #crp-img-prw").attr('src',URL.createObjectURL(blob));
+                addKey++;
+                var html = '';
+
+                var image = URL.createObjectURL(blob);
+                html += '<div class="inner-img img_'+addKey+'">'
+                    html += '<img src="'+image+'" class="w-100 h-100">';
+                    html += '<a class="btn btn-sm btn-danger del-pre-btn" onclick="$(\'#'+formID+' .img_'+addKey+', #'+formID+' #img_inp_'+addKey+'\').remove()"><i class="fa fa-trash"></a>';
+                html += '</div>';
+
+                $('#'+formID+" #images_div").append(html);
                 url = URL.createObjectURL(blob);
-                var reader = new FileReader();
+                var reader = new FileReader(url);
                 reader.readAsDataURL(blob);
                 reader.onloadend = function()
                 {
                     var base64data = reader.result;
-                    $('#'+formID+' #og_image').val(base64data);
+                    $('#'+formID+' #img-val').append('<input type="hidden" name="og_image[]" value="'+base64data+'" id="img_inp_'+addKey+'">');
                 };
+
+                // $('#'+formID+" #crp-img-prw").attr('src',URL.createObjectURL(blob));
+                // url = URL.createObjectURL(blob);
+                // var reader = new FileReader();
+                // reader.readAsDataURL(blob);
+                // reader.onloadend = function()
+                // {
+                //     var base64data = reader.result;
+                //     $('#'+formID+' #og_image').val(base64data);
+                // };
             });
 
             cropper.destroy();
             $('#'+formID+' #resize-image').attr('src',"");
             $('#'+formID+' .img-crop-sec').hide();
 
-            if(formID == 'addItemForm')
-            {
-                $('#'+formID+" #img-label").append('<a class="btn btn-sm btn-danger" id="del-img" style="border-radius:50%" onclick="deleteCropper(\''+formID+'\')"><i class="fa fa-trash"></i></a>');
-            }
-            else
-            {
-                $('#'+formID+' #edit-img').hide();
-                $('#'+formID+" #img-label").append('<a class="btn btn-sm btn-danger" id="del-img" style="border-radius:50%" onclick="deleteCropper(\''+formID+'\')"><i class="fa fa-trash"></i></a>');
-                $('#'+formID+' #rep-image').show();
-            }
+            $('#'+formID+' #image').val('');
+            $('#'+formID+' #'+formID+'category_image').val('');
         }
 
 
@@ -1869,6 +1894,33 @@
                 $(formId+' #more_dt_btn i').attr('class','bi bi-eye-slash');
             }
             $(formId+' #more_details').toggle();
+        }
+
+
+        // function for Delete Item Images
+        function deleteItemImages(key,imageID)
+        {
+            $.ajax({
+                type: "POST",
+                url: "{{ route('items.delete.image') }}",
+                data: {
+                    "_token" : "{{ csrf_token() }}",
+                    "image_id" : imageID
+                },
+                dataType: "JSON",
+                success: function (response)
+                {
+                    if(response.success == 1)
+                    {
+                        toastr.success(response.message);
+                        $('#edit_item_form #edit_images_div .edit_img_'+key).remove();
+                    }
+                    else
+                    {
+                        toastr.error(response.message);
+                    }
+                }
+            });
         }
 
     </script>

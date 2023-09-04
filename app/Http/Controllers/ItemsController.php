@@ -2,17 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdditionalLanguage;
-use App\Models\Category;
-use App\Models\CategoryProductTags;
-use App\Models\Ingredient;
-use App\Models\ItemPrice;
-use App\Models\ItemReview;
-use App\Models\Items;
-use App\Models\ItemsVisit;
-use App\Models\Languages;
-use App\Models\Option;
-use App\Models\Tags;
+use App\Models\{AdditionalLanguage,Category,CategoryProductTags,ItemImages,ItemPrice,ItemReview,Items,ItemsVisit,Languages,Option,Tags};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,14 +18,14 @@ class ItemsController extends Controller
         {
             $data['cat_id'] = $id;
             $data['category'] = Category::where('id',$id)->first();
-            $data['items'] = Items::where('category_id',$id)->orderBy('order_key')->get();
+            $data['items'] = Items::with(['itemImages'])->where('category_id',$id)->orderBy('order_key')->get();
             $data['cat_tags'] = CategoryProductTags::join('tags','tags.id','category_product_tags.tag_id')->orderBy('tags.order')->where('category_id',$id)->get()->unique('tag_id');
         }
         else
         {
             $data['cat_id'] = '';
             $data['category'] = "All";
-            $data['items'] = Items::orderBy('order_key')->get();
+            $data['items'] = Items::with(['itemImages'])->orderBy('order_key')->get();
             $data['cat_tags'] = CategoryProductTags::join('tags','tags.id','category_product_tags.tag_id')->orderBy('tags.order')->get()->unique('tag_id');
         }
 
@@ -70,7 +60,6 @@ class ItemsController extends Controller
         $category_id = $request->category;
         $type = $request->type;
         $name = $request->name;
-        $calories = $request->calories;
         $description = $request->description;
         $discount_type = $request->discount_type;
         $discount = $request->discount;
@@ -118,21 +107,32 @@ class ItemsController extends Controller
             $item->review = $review_rating;
             $item->day_special = $day_special;
 
-            // Insert Item Image if is Exists
-            if(isset($request->og_image) && !empty($request->og_image) && $request->hasFile('image'))
-            {
-                $og_image = $request->og_image;
-                $image_arr = explode(";base64,", $og_image);
-                $image_base64 = base64_decode($image_arr[1]);
+            $item->save();
 
-                $imgname = "item_".time().".". $request->file('image')->getClientOriginalExtension();
-                $img_path = public_path('client_uploads/items/'.$imgname);
-                file_put_contents($img_path,$image_base64);
-                // $request->file('image')->move(public_path('client_uploads/items/'), $imgname);
-                $item->image = $imgname;
+            // Multiple Images
+            $all_images = (isset($request->og_image)) ? $request->og_image : [];
+            if(count($all_images) > 0)
+            {
+                foreach($all_images as $image)
+                {
+                    $image_token = genratetoken(10);
+                    $og_image = $image;
+                    $image_arr = explode(";base64,", $og_image);
+                    $image_type_ext = explode("image/", $image_arr[0]);
+                    $image_base64 = base64_decode($image_arr[1]);
+
+                    $imgname = "item_".$image_token.".".$image_type_ext[1];
+                    $img_path = public_path('client_uploads/items/'.$imgname);
+                    file_put_contents($img_path,$image_base64);
+
+                    // Insert Image
+                    $new_img = new ItemImages();
+                    $new_img->item_id = $item->id;
+                    $new_img->image = $imgname;
+                    $new_img->save();
+                }
             }
 
-            $item->save();
 
             // Store Item Price
             if(count($price) > 0)
@@ -214,21 +214,12 @@ class ItemsController extends Controller
     // Function for Delete Item
     public function destroy(Request $request)
     {
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         try
         {
             $id = $request->id;
 
             $item = Items::where('id',$id)->first();
-            $item_image = isset($item->image) ? $item->image : '';
             $cat_id = isset($item->category_id) ? $item->category_id : '';
-
-            // Delete Item Image
-            if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
-            {
-                unlink('public/client_uploads/items/'.$item_image);
-            }
 
             // Delete Item Category Tags
             CategoryProductTags::where('item_id',$id)->where('category_id',$cat_id)->delete();
@@ -244,6 +235,23 @@ class ItemsController extends Controller
 
             // Delete Item
             Items::where('id',$id)->delete();
+
+            // Delete Item Images
+            $item_images = ItemImages::where('item_id',$id)->get();
+
+            if(count($item_images) > 0)
+            {
+                foreach($item_images as $item_img)
+                {
+                    $image = (isset($item_img['image'])) ? $item_img['image'] : '';
+
+                    if(!empty($image) && file_exists('public/client_uploads/items/'.$image))
+                    {
+                        unlink('public/client_uploads/items/'.$image);
+                    }
+                    ItemImages::where('id',$item_img['id'])->delete();
+                }
+            }
 
             return response()->json([
                 'success' => 1,
@@ -293,8 +301,6 @@ class ItemsController extends Controller
     // Function for Filtered Items
     public function searchItems(Request $request)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
         $keyword = $request->keywords;
         $cat_id = $request->id;
 
@@ -312,11 +318,11 @@ class ItemsController extends Controller
             $name_key = $curr_lang_code."_name";
             if(!empty($cat_id))
             {
-                $items = Items::where($name_key,'LIKE','%'.$keyword.'%')->where('category_id',$cat_id)->where('shop_id',$shop_id)->get();
+                $items = Items::where($name_key,'LIKE','%'.$keyword.'%')->where('category_id',$cat_id)->get();
             }
             else
             {
-                $items = Items::where($name_key,'LIKE','%'.$keyword.'%')->where('shop_id',$shop_id)->get();
+                $items = Items::where($name_key,'LIKE','%'.$keyword.'%')->get();
             }
             $html = '';
 
@@ -394,61 +400,43 @@ class ItemsController extends Controller
     public function edit(Request $request)
     {
         $item_id = $request->id;
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
         try
         {
             // Item Details
-            $item = Items::where('id',$item_id)->first();
+            $item = Items::with(['itemImages'])->where('id',$item_id)->first();
 
-            // Categories
-            $categories = Category::where('shop_id',$shop_id)->where('category_type','product_category')->get();
-
-            // Ingredients
-            $ingredients = Ingredient::where('shop_id',$shop_id)->get();
+            // Get all Parent Categories
+            $parent_categories = Category::where('parent_id',NULL)->get();
 
             // Order Attributes
-            $options = Option::where('shop_id',$shop_id)->get();
+            $options = Option::get();
 
             // Tags
-            $tags = Tags::where('shop_id',$shop_id)->get();
+            $tags = Tags::get();
 
             // ModalName
             $modalName = "'editItemModal'";
 
-            // Subscrption ID
-            $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-            // Get Package Permissions
-            $package_permissions = getPackagePermission($subscription_id);
-
             // Get Language Settings
-            $language_settings = clientLanguageSettings($shop_id);
+            $language_settings = clientLanguageSettings();
             $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
             // Primary Language Details
             $primary_language_detail = Languages::where('id',$primary_lang_id)->first();
             $primary_lang_code = isset($primary_language_detail->code) ? $primary_language_detail->code : '';
-            $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
             $item_name_key = $primary_lang_code."_name";
             $item_desc_key = $primary_lang_code."_description";
             $item_price_label_key = $primary_lang_code."_label";
             $option_title_key = $primary_lang_code."_title";
-            $primary_input_lang_code = "'$primary_lang_code'";
 
             // Item Details
             $item_type = (isset($item['type'])) ? $item['type'] : '';
             $category_id = (isset($item['category_id'])) ? $item['category_id'] : '';
-            $default_image = asset('public/client_images/not-found/no_image_1.jpg');
-            $item_image = (isset($item['image']) && !empty($item['image']) && file_exists('public/client_uploads/items/'.$item['image'])) ? asset('public/client_uploads/items/'.$item['image']) : "";
-            $delete_item_image_url = route('items.delete.image',$item_id);
             $item_name = (isset($item[$item_name_key])) ? $item[$item_name_key] : '';
             $item_desc = (isset($item[$item_desc_key])) ? $item[$item_desc_key] : '';
-            $item_ingredients = (isset($item['ingredients']) && !empty($item['ingredients'])) ? unserialize($item['ingredients']) : [];
-            $price_array = ItemPrice::where('item_id',$item['id'])->where('shop_id',$shop_id)->get();
+            $price_array = ItemPrice::where('item_id',$item['id'])->get();
             $item_cat_tags = CategoryProductTags::with(['hasOneTag'])->where('item_id',$item['id'])->where('category_id',$item['category_id'])->get();
-            $calories = isset($item[$primary_lang_code."_calories"]) ? $item[$primary_lang_code."_calories"] : '';
             $item_options = (isset($item['options']) && !empty($item['options'])) ? unserialize($item['options']) : [];
             $item_published = (isset($item['published']) && $item['published'] == 1) ? 'checked' : '';
             $review_rating = (isset($item['review']) && $item['review'] == 1) ? 'checked' : '';
@@ -471,7 +459,7 @@ class ItemsController extends Controller
             }
 
             // Additional Languages
-            $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+            $additional_languages = AdditionalLanguage::get();
 
             if(count($additional_languages) > 0)
             {
@@ -486,7 +474,6 @@ class ItemsController extends Controller
                         // Additional Language Details
                         $add_lang_detail = Languages::where('id',$value->language_id)->first();
                         $add_lang_code = isset($add_lang_detail->code) ? $add_lang_detail->code : '';
-                        $add_lang_name = isset($add_lang_detail->name) ? $add_lang_detail->name : '';
 
                         $html .= '<a class="text-uppercase" onclick="updateItemByCode(\''.$add_lang_code.'\')">'.$add_lang_code.'</a>';
                     }
@@ -529,16 +516,29 @@ class ItemsController extends Controller
                                     $html .= '<label class="form-label" for="category">'. __('Category').'</label>';
                                     $html .= '<select name="category" id="category" class="form-select">';
                                             $html .= '<option value="">Choose Category</option>';
-                                            if(count($categories) > 0)
+                                            if(count($parent_categories) > 0)
                                             {
-                                                foreach ($categories as $cat)
+                                                foreach ($parent_categories as $parent_cat)
                                                 {
-                                                    $html .= '<option value="'.$cat['id'].'"';
-                                                        if($category_id == $cat['id'])
-                                                        {
-                                                            $html .= 'selected';
-                                                        }
-                                                    $html .= '>'.$cat[$primary_lang_code."_name"].'</option>';
+                                                    $quote = "";
+                                                    $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                    if($parent_cat->id == $category_id)
+                                                    {
+                                                        $html .= 'selected';
+                                                    }
+
+                                                    $html .='>'.$parent_cat[$primary_lang_code."_name"].'</option>';
+
+                                                    if(count($parent_cat->subcategories) > 0)
+                                                    {
+                                                        $cat_data['quote'] = $quote;
+                                                        $cat_data['par_cat_id'] = $category_id;
+                                                        $cat_data['name_key'] = $primary_lang_code."_name";
+                                                        $cat_data['subcategories'] = $parent_cat->subcategories;
+
+                                                        $html .= $this->child_cat($cat_data);
+                                                    }
                                                 }
                                             }
                                     $html .= '</select>';
@@ -629,79 +629,49 @@ class ItemsController extends Controller
                                 $html .= '</div>';
 
                                 // Image Section
-                                $html .= '<div class="col-md-12 mb-3">';
-                                    $html .= '<label class="form-label">'.__('Image').'</label>';
-                                    $html .= '<input type="file" name="item_image" id="item_image" class="form-control item_image" onchange="imageCropper(\'edit_item_form\',this)" style="display:none">';
-                                    $html .= '<input type="hidden" name="og_image" id="og_image" class="og_image">';
-
-                                    if(!empty($item_image))
+                                $html .= '<div class="col-md-12 mt-3 mb-2 d-flex flex-wrap" id="edit_images_div">';
+                                    if(isset($item->itemImages) && count($item->itemImages) > 0)
                                     {
-                                        $html .= '<div class="row" id="edit-img">';
-                                            $html .= '<div class="col-md-3">';
-                                                $html .= '<div class="position-relative" id="itemImage">';
-                                                    $html .= '<label style="cursor:pointer" for="item_image"><img src="'.$item_image.'" class="w-100" style="border-radius:10px;"></label>';
-                                                    $html .= '<a href="'.$delete_item_image_url.'" class="btn btn-sm btn-danger" style="position: absolute; top: 0; right: -45px;"><i class="bi bi-trash"></i></a>';
-                                                $html .= '</div>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-
-                                        $html .= '<div class="row mt-2" id="rep-image" style="display:none;">';
-                                            $html .= '<div class="col-md-3" id="img-label">';
-                                                $html .= '<label for="item_image" style="cursor: pointer">';
-                                                    $html .= '<img src="" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw">';
-                                                $html .= '</label>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-                                    }
-                                    else
-                                    {
-                                        $html .= '<div class="mt-3" id="itemImage">';
-                                            $html .= '<div class="col-md-3" id="img-label">';
-                                                $html .= '<label style="cursor:pointer;" for="item_image"><img src="'.$default_image.'" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw"></label>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-                                    }
-                                    $html .= '<code>Upload Image in (400*400) Dimensions</code>';
-                                $html .= '</div>';
-
-                                // Cropper Image Section
-                                $html .= '<div class="col-md-12 mb-3">';
-                                    $html .= '<div class="row">';
-                                        $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
-                                            $html .= '<img src="" alt="" id="resize-image" class="w-100 resize-image">';
-                                            $html .= '<div class="mt-3">';
-                                                $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
-                                                $html .= '<a class="btn btn-sm btn-danger mx-2" onclick="resetCropper()">Reset</a>';
-                                                $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-                                        $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
-                                            $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-
-                                // Special Icons
-                                $html .= '<div class="col-md-12 mb-3">';
-                                    $html .= '<label class="form-label" for="ingredients">'.__('Indicative Icons').'</label>';
-                                    $html .= '<select name="ingredients[]" id="ingredients" class="form-select" multiple>';
-                                        if(count($ingredients) > 0)
+                                        foreach($item->itemImages as $key => $item_image)
                                         {
-                                            foreach($ingredients as $ing)
+                                            $no = $key + 1;
+                                            if(!empty($item_image['image']) && file_exists('public/client_uploads/items/'.$item_image['image']))
                                             {
-                                                $parent_id = (isset($ing->parent_id)) ? $ing->parent_id : NULL;
-                                                if((isset($package_permissions['special_icons']) && !empty($package_permissions['special_icons']) && $package_permissions['special_icons'] == 1) || $parent_id != NULL)
-                                                {
-                                                    $html .= '<option value="'.$ing["id"].'"';
-                                                        if(in_array($ing["id"],$item_ingredients))
-                                                        {
-                                                            $html .= 'selected';
-                                                        }
-                                                    $html .='>'.$ing["name"].'</option>';
-                                                }
+                                                $html .= '<div class="inner-img edit_img_'.$no.'">';
+                                                    $html .= '<img src="'.asset('public/client_uploads/items/'.$item_image['image']).'" class="w-100 h-100">';
+                                                    $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteItemImages('.$no.','.$item_image->id.')"><i class="fa fa-trash"></i></a>';
+                                                $html .= '</div>';
                                             }
                                         }
-                                    $html .= '</select>';
+                                    }
+                                $html .= '</div>';
+                                $html .= '<div class="col-md-12 mb-2 d-flex flex-wrap" id="images_div">
+                                </div>';
+                                $html .= '<div class="col-md-12 mul-image" id="img-val"></div>';
+                                $html .= '<div class="col-md-12">';
+                                    $html .= '<label class="form-label">'.__('Image').'</label>';
+                                $html .= '</div>';
+                                $html .= '<div class="col-md-12 mt-2 mul-image">';
+                                    $html .= '<div class="row">';
+                                        $html .= '<div class="col-md-12">';
+                                            $html .= '<div class="form-group">';
+                                                $html .= '<div id="img-label"><label for="item_image">Upload Images</label></div>';
+                                                $html .= '<input type="file" name="item_image" id="item_image" class="form-control" onchange="imageCropper(\'edit_item_form\',this)" style="display: none;">';
+                                            $html .= '</div>';
+                                        $html .= '</div>';
+                                        $html .= '<div class="col-md-12"><code class="img-upload-label">Upload Image in (400*400) Dimensions</code></div>';
+                                    $html .= '</div>';
+                                $html .= '</div>';
+                                $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
+                                    $html .= '<img src="" alt="" id="resize-image" class="w-100">';
+                                    $html .= '<div class="mt-3">';
+                                        $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
+                                        $html .= '<a class="btn btn-sm btn-danger" onclick="resetCropper()">Reset</a>';
+                                        $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
+                                    $html .= '</div>';
+                                $html .= '</div>';
+                                $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
+                                    $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
                                 $html .= '</div>';
 
                                 // Tags
@@ -723,33 +693,24 @@ class ItemsController extends Controller
                                     $html .= '</select>';
                                 $html .= '</div>';
 
-                                // Calories
-                                $html .= '<div class="col-md-12 mb-3 calories_div">';
-                                    $html .= '<label class="form-label" for="calories">'.__('Calories').'</label>';
-                                    $html .= '<input type="text" name="calories" id="calories" class="form-control" value="'.$calories.'">';
-                                $html .= '</div>';
-
                                 // Order Attributes
-                                if((isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1))
-                                {
-                                    $html .= '<div class="col-md-12 mb-3">';
-                                        $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
-                                        $html .= '<select name="options[]" id="options" class="form-select" multiple>';
-                                            if(count($options) > 0)
+                                $html .= '<div class="col-md-12 mb-3">';
+                                    $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
+                                    $html .= '<select name="options[]" id="options" class="form-select" multiple>';
+                                        if(count($options) > 0)
+                                        {
+                                            foreach($options as $opt)
                                             {
-                                                foreach($options as $opt)
-                                                {
-                                                    $html .= '<option value="'.$opt["id"].'"';
-                                                        if(in_array($opt["id"],$item_options))
-                                                        {
-                                                            $html .= 'selected';
-                                                        }
-                                                    $html .='>'.$opt[$option_title_key].'</option>';
-                                                }
+                                                $html .= '<option value="'.$opt["id"].'"';
+                                                    if(in_array($opt["id"],$item_options))
+                                                    {
+                                                        $html .= 'selected';
+                                                    }
+                                                $html .='>'.$opt[$option_title_key].'</option>';
                                             }
-                                        $html .= '</select>';
-                                    $html .= '</div>';
-                                }
+                                        }
+                                    $html .= '</select>';
+                                $html .= '</div>';
 
                                 // Toggle Buttons
                                 $html .= '<div class="col-md-12 mb-3 mt-1">';
@@ -865,16 +826,29 @@ class ItemsController extends Controller
                                     $html .= '<label class="form-label" for="category">'. __('Category').'</label>';
                                     $html .= '<select name="category" id="category" class="form-select">';
                                             $html .= '<option value="">Choose Category</option>';
-                                            if(count($categories) > 0)
+                                            if(count($parent_categories) > 0)
                                             {
-                                                foreach ($categories as $cat)
+                                                foreach ($parent_categories as $parent_cat)
                                                 {
-                                                    $html .= '<option value="'.$cat['id'].'"';
-                                                        if($category_id == $cat['id'])
-                                                        {
-                                                            $html .= 'selected';
-                                                        }
-                                                    $html .= '>'.$cat[$primary_lang_code."_name"].'</option>';
+                                                    $quote = "";
+                                                    $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                    if($parent_cat->id == $category_id)
+                                                    {
+                                                        $html .= 'selected';
+                                                    }
+
+                                                    $html .='>'.$parent_cat[$primary_lang_code."_name"].'</option>';
+
+                                                    if(count($parent_cat->subcategories) > 0)
+                                                    {
+                                                        $cat_data['quote'] = $quote;
+                                                        $cat_data['par_cat_id'] = $category_id;
+                                                        $cat_data['name_key'] = $primary_lang_code."_name";
+                                                        $cat_data['subcategories'] = $parent_cat->subcategories;
+
+                                                        $html .= $this->child_cat($cat_data);
+                                                    }
                                                 }
                                             }
                                     $html .= '</select>';
@@ -965,83 +939,58 @@ class ItemsController extends Controller
                                 $html .= '</div>';
 
                                 // Image Section
-                                $html .= '<div class="col-md-12 mb-3">';
-                                    $html .= '<label class="form-label">'.__('Image').'</label>';
-                                    $html .= '<input type="file" name="item_image" id="item_image" class="form-control item_image" onchange="imageCropper(\'edit_item_form\',this)" style="display:none">';
-                                    $html .= '<input type="hidden" name="og_image" id="og_image" class="og_image">';
-
-                                    if(!empty($item_image))
+                                $html .= '<div class="col-md-12 mt-3 mb-2 d-flex flex-wrap" id="edit_images_div">';
+                                    if(isset($item->itemImages) && count($item->itemImages) > 0)
                                     {
-                                        $html .= '<div class="row" id="edit-img">';
-                                            $html .= '<div class="col-md-3">';
-                                                $html .= '<div class="position-relative" id="itemImage">';
-                                                    $html .= '<label style="cursor:pointer" for="item_image"><img src="'.$item_image.'" class="w-100" style="border-radius:10px;"></label>';
-                                                    $html .= '<a href="'.$delete_item_image_url.'" class="btn btn-sm btn-danger" style="position: absolute; top: 0; right: -45px;"><i class="bi bi-trash"></i></a>';
+                                        foreach($item->itemImages as $key => $item_image)
+                                        {
+                                            $no = $key + 1;
+                                            if(!empty($item_image['image']) && file_exists('public/client_uploads/items/'.$item_image['image']))
+                                            {
+                                                $html .= '<div class="inner-img edit_img_'.$no.'">';
+                                                    $html .= '<img src="'.asset('public/client_uploads/items/'.$item_image['image']).'" class="w-100 h-100">';
+                                                    $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteItemImages('.$no.','.$item_image->id.')"><i class="fa fa-trash"></i></a>';
                                                 $html .= '</div>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-
-                                        $html .= '<div class="row mt-2" id="rep-image" style="display:none;">';
-                                            $html .= '<div class="col-md-3" id="img-label">';
-                                                $html .= '<label for="item_image" style="cursor: pointer">';
-                                                    $html .= '<img src="" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw">';
-                                                $html .= '</label>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
+                                            }
+                                        }
                                     }
-                                    else
-                                    {
-                                        $html .= '<div class="mt-3" id="itemImage">';
-                                            $html .= '<div class="col-md-3" id="img-label">';
-                                                $html .= '<label style="cursor:pointer;" for="item_image"><img src="'.$default_image.'" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw"></label>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-                                    }
-                                    $html .= '<code>Upload Image in (400*400) Dimensions</code>';
                                 $html .= '</div>';
 
-                                // Cropper Image Section
-                                $html .= '<div class="col-md-12 mb-3">';
+                                $html .= '<div class="col-md-12 mb-2 d-flex flex-wrap" id="images_div">
+                                </div>';
+
+                                $html .= '<div class="col-md-12 mul-image" id="img-val"></div>';
+
+                                $html .= '<div class="col-md-12">';
+                                    $html .= '<label class="form-label">'.__('Image').'</label>';
+                                $html .= '</div>';
+
+                                $html .= '<div class="col-md-12 mt-2 mul-image">';
                                     $html .= '<div class="row">';
-                                        $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
-                                            $html .= '<img src="" alt="" id="resize-image" class="w-100 resize-image">';
-                                            $html .= '<div class="mt-3">';
-                                                $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
-                                                $html .= '<a class="btn btn-sm btn-danger mx-2" onclick="resetCropper()">Reset</a>';
-                                                $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
+                                        $html .= '<div class="col-md-12">';
+                                            $html .= '<div class="form-group">';
+                                                $html .= '<div id="img-label"><label for="item_image">Upload Images</label></div>';
+                                                $html .= '<input type="file" name="item_image" id="item_image" class="form-control" onchange="imageCropper(\'edit_item_form\',this)" style="display: none;">';
                                             $html .= '</div>';
                                         $html .= '</div>';
-                                        $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
-                                            $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
-                                        $html .= '</div>';
+                                        $html .= '<div class="col-md-12"><code class="img-upload-label">Upload Image in (400*400) Dimensions</code></div>';
                                     $html .= '</div>';
                                 $html .= '</div>';
 
-                                // Special Icons
-                                $html .= '<div class="col-md-12 mb-3">';
-                                    $html .= '<label class="form-label" for="ingredients">'.__('Indicative Icons').'</label>';
-                                    $html .= '<select name="ingredients[]" id="ingredients" class="form-select" multiple>';
-                                        if(count($ingredients) > 0)
-                                        {
-                                            foreach($ingredients as $ing)
-                                            {
-                                                $parent_id = (isset($ing->parent_id)) ? $ing->parent_id : NULL;
-                                                if((isset($package_permissions['special_icons']) && !empty($package_permissions['special_icons']) && $package_permissions['special_icons'] == 1) || $parent_id != NULL)
-                                                {
-                                                    $html .= '<option value="'.$ing["id"].'"';
-                                                        if(in_array($ing["id"],$item_ingredients))
-                                                        {
-                                                            $html .= 'selected';
-                                                        }
-                                                    $html .='>'.$ing["name"].'</option>';
-                                                }
-                                            }
-                                        }
-                                    $html .= '</select>';
+                                $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
+                                    $html .= '<img src="" alt="" id="resize-image" class="w-100">';
+                                    $html .= '<div class="mt-3">';
+                                        $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
+                                        $html .= '<a class="btn btn-sm btn-danger" onclick="resetCropper()">Reset</a>';
+                                        $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
+                                    $html .= '</div>';
+                                $html .= '</div>';
+                                $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
+                                    $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
                                 $html .= '</div>';
 
                                 // Tags
-                                $html .= '<div class="col-md-12 mb-3">';
+                                $html .= '<div class="col-md-12 mt-2 mb-3">';
                                     $html .= '<label class="form-label" for="tags">'.__('Tags').'</label>';
                                     $html .= '<select name="tags[]" id="tags" class="form-select" multiple>';
                                     if(count($tags) > 0)
@@ -1059,33 +1008,24 @@ class ItemsController extends Controller
                                     $html .= '</select>';
                                 $html .= '</div>';
 
-                                // Calories
-                                $html .= '<div class="col-md-12 mb-3 calories_div">';
-                                    $html .= '<label class="form-label" for="calories">'.__('Calories').'</label>';
-                                    $html .= '<input type="text" name="calories" id="calories" class="form-control" value="'.$calories.'">';
-                                $html .= '</div>';
-
                                 // Order Attributes
-                                if((isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1))
-                                {
-                                    $html .= '<div class="col-md-12 mb-3">';
-                                        $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
-                                        $html .= '<select name="options[]" id="options" class="form-select" multiple>';
-                                            if(count($options) > 0)
+                                $html .= '<div class="col-md-12 mb-3">';
+                                    $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
+                                    $html .= '<select name="options[]" id="options" class="form-select" multiple>';
+                                        if(count($options) > 0)
+                                        {
+                                            foreach($options as $opt)
                                             {
-                                                foreach($options as $opt)
-                                                {
-                                                    $html .= '<option value="'.$opt["id"].'"';
-                                                        if(in_array($opt["id"],$item_options))
-                                                        {
-                                                            $html .= 'selected';
-                                                        }
-                                                    $html .='>'.$opt[$option_title_key].'</option>';
-                                                }
+                                                $html .= '<option value="'.$opt["id"].'"';
+                                                    if(in_array($opt["id"],$item_options))
+                                                    {
+                                                        $html .= 'selected';
+                                                    }
+                                                $html .='>'.$opt[$option_title_key].'</option>';
                                             }
-                                        $html .= '</select>';
-                                    $html .= '</div>';
-                                }
+                                        }
+                                    $html .= '</select>';
+                                $html .= '</div>';
 
                                 // Toggle Buttons
                                 $html .= '<div class="col-md-12 mb-3 mt-1">';
@@ -1174,19 +1114,50 @@ class ItemsController extends Controller
 
 
 
+    // Get Child Categories
+    function child_cat($data)
+    {
+        $quote = $data['quote'];
+        $quote .= '-';
+        $quote_array = strlen($quote);
+        $fw = ($quote_array == 1) ? 600 : 400;
+
+        $html = '';
+
+        foreach($data['subcategories'] as $subcategory)
+        {
+            $html .= '<option value="'.$subcategory->id.'" style="font-weight: '.$fw.'"';
+
+            if($data['par_cat_id'] == $subcategory->id)
+            {
+                $html .= 'selected';
+            }
+
+            $html .= '> &nbsp;'.$quote.' '.$subcategory[$data['name_key']].'</option>';
+
+            if(count($subcategory->subcategories) > 0)
+            {
+                $new_data['quote'] = $quote;
+                $new_data['par_cat_id'] = $data['par_cat_id'];
+                $new_data['name_key'] = $data['name_key'];
+                $new_data['subcategories'] = $subcategory->subcategories;
+
+                $html .= $this->child_cat($new_data);
+            }
+        }
+
+        return $html;
+    }
+
+
     // Function for Update Existing Item
     public function update(Request $request)
     {
-        // Shop ID
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $request->validate([
             'item_name'   => 'required',
             'category'   => 'required',
         ]);
 
-        $lang_code = $request->lang_code;
         $item_id = $request->item_id;
         $item_type = $request->type;
         $category = $request->category;
@@ -1194,7 +1165,6 @@ class ItemsController extends Controller
         $discount_type = $request->discount_type;
         $discount = $request->discount;
         $item_description = $request->item_description;
-        $item_calories = $request->calories;
         $is_new = isset($request->is_new) ? $request->is_new : 0;
         $is_sign = isset($request->is_sign) ? $request->is_sign : 0;
         $day_special = isset($request->day_special) ? $request->day_special : 0;
@@ -1207,7 +1177,6 @@ class ItemsController extends Controller
         $price_array['label'] = isset($request->price['label']) ? $request->price['label'] : [];
         $price_array['priceID'] = isset($request->price['priceID']) ? $request->price['priceID'] : [];
 
-        $ingredients = (isset($request->ingredients) && count($request->ingredients) > 0) ? serialize($request->ingredients) : '';
         $options = (isset($request->options) && count($request->options) > 0) ? serialize($request->options) : '';
         $tags = isset($request->tags) ? $request->tags : [];
 
@@ -1226,7 +1195,6 @@ class ItemsController extends Controller
             $name_key = $active_lang_code."_name";
             $description_key = $active_lang_code."_description";
             $price_label_key = $active_lang_code."_label";
-            $calories_key = $active_lang_code."_calories";
 
             $item = Items::find($item_id);
 
@@ -1238,7 +1206,6 @@ class ItemsController extends Controller
                 $item->as_sign = $is_sign;
                 $item->day_special = $day_special;
                 $item->review = $review_rating;
-                $item->ingredients = $ingredients;
                 $item->options = $options;
                 $item->type = $item_type;
                 $item->discount_type = $discount_type;
@@ -1246,30 +1213,32 @@ class ItemsController extends Controller
 
                 $item->name = $item_name;
                 $item->description = $item_description;
-                $item->calories = $item_calories;
 
                 $item->$name_key = $item_name;
                 $item->$description_key = $item_description;
-                $item->$calories_key = $item_calories;
 
-                // Insert Item Image if is Exists
-                if(isset($request->og_image) && !empty($request->og_image) && $request->hasFile('item_image'))
+                // Multiple Images
+                $all_images = (isset($request->og_image)) ? $request->og_image : [];
+                if(count($all_images) > 0)
                 {
-                    $og_image = $request->og_image;
-                    $image_arr = explode(";base64,", $og_image);
-                    $image_base64 = base64_decode($image_arr[1]);
-
-                    // Delete old Image
-                    $item_image = isset($item->image) ? $item->image : '';
-                    if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
+                    foreach($all_images as $image)
                     {
-                        unlink('public/client_uploads/items/'.$item_image);
-                    }
+                        $image_token = genratetoken(10);
+                        $og_image = $image;
+                        $image_arr = explode(";base64,", $og_image);
+                        $image_type_ext = explode("image/", $image_arr[0]);
+                        $image_base64 = base64_decode($image_arr[1]);
 
-                    $imgname = "item_".time().".". $request->file('item_image')->getClientOriginalExtension();
-                    $img_path = public_path('client_uploads/items/'.$imgname);
-                    file_put_contents($img_path,$image_base64);
-                    $item->image = $imgname;
+                        $imgname = "item_".$image_token.".".$image_type_ext[1];
+                        $img_path = public_path('client_uploads/items/'.$imgname);
+                        file_put_contents($img_path,$image_base64);
+
+                        // Insert Image
+                        $new_img = new ItemImages();
+                        $new_img->item_id = $item_id;
+                        $new_img->image = $imgname;
+                        $new_img->save();
+                    }
                 }
 
                 $item->update();
@@ -1300,7 +1269,6 @@ class ItemsController extends Controller
                             {
                                 $new_price = new ItemPrice();
                                 $new_price->item_id = $item_id;
-                                $new_price->shop_id = $shop_id;
                                 $new_price->price = $price_val;
                                 $new_price->label = $label_val;
                                 $new_price->$price_label_key = $label_val;
@@ -1318,7 +1286,7 @@ class ItemsController extends Controller
                 {
                     foreach($tags as $val)
                     {
-                        $findTag = Tags::where($name_key,$val)->where('shop_id',$shop_id)->first();
+                        $findTag = Tags::where($name_key,$val)->first();
                         $tag_id = (isset($findTag->id) && !empty($findTag->id)) ? $findTag->id : '';
 
                         if(!empty($tag_id) || $tag_id != '')
@@ -1334,7 +1302,6 @@ class ItemsController extends Controller
                             $order = (isset($max_order) && !empty($max_order)) ? ($max_order + 1) : 1;
 
                             $tag = new Tags();
-                            $tag->shop_id = $shop_id;
                             $tag->name = $val;
                             $tag->$name_key = $val;
                             $tag->order = $order;
@@ -1375,16 +1342,11 @@ class ItemsController extends Controller
     // Function for Update Category By Language Code
     public function updateByLangCode(Request $request)
     {
-        // Shop ID & Shop Slug
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         $item_id = $request->item_id;
         $item_type = $request->type;
         $category = $request->category;
         $item_name = $request->item_name;
         $item_description = $request->item_description;
-        $item_calories = $request->calories;
         $discount_type = $request->discount_type;
         $discount = $request->discount;
         $is_new = isset($request->is_new) ? $request->is_new : 0;
@@ -1397,7 +1359,6 @@ class ItemsController extends Controller
         $price_array['label'] = isset($request->price['label']) ? $request->price['label'] : [];
         $price_array['priceID'] = isset($request->price['priceID']) ? $request->price['priceID'] : [];
 
-        $ingredients = (isset($request->ingredients) && count($request->ingredients) > 0) ? serialize($request->ingredients) : '';
         $options = (isset($request->options) && count($request->options) > 0) ? serialize($request->options) : '';
         $tags = isset($request->tags) ? $request->tags : [];
 
@@ -1414,7 +1375,6 @@ class ItemsController extends Controller
         $next_lang_code = $request->next_lang_code;
         $act_lang_name_key = $active_lang_code."_name";
         $act_lang_description_key = $active_lang_code."_description";
-        $act_lang_calories_key = $active_lang_code."_calories";
         $act_lang_price_key = $active_lang_code."_label";
 
         $request->validate([
@@ -1435,7 +1395,6 @@ class ItemsController extends Controller
                 $item->as_sign = $is_sign;
                 $item->day_special = $day_special;
                 $item->review = $review_rating;
-                $item->ingredients = $ingredients;
                 $item->options = $options;
                 $item->type = $item_type;
                 $item->discount_type = $discount_type;
@@ -1443,30 +1402,32 @@ class ItemsController extends Controller
 
                 $item->name = $item_name;
                 $item->description = $item_description;
-                $item->calories = $item_calories;
 
                 $item->$act_lang_name_key = $item_name;
                 $item->$act_lang_description_key = $item_description;
-                $item->$act_lang_calories_key = $item_calories;
 
-                // Insert Item Image if is Exists
-                if(isset($request->og_image) && !empty($request->og_image) && $request->hasFile('item_image'))
+                // Multiple Images
+                $all_images = (isset($request->og_image)) ? $request->og_image : [];
+                if(count($all_images) > 0)
                 {
-                    $og_image = $request->og_image;
-                    $image_arr = explode(";base64,", $og_image);
-                    $image_base64 = base64_decode($image_arr[1]);
-
-                    // Delete old Image
-                    $item_image = isset($item->image) ? $item->image : '';
-                    if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
+                    foreach($all_images as $image)
                     {
-                        unlink('public/client_uploads/items/'.$item_image);
-                    }
+                        $image_token = genratetoken(10);
+                        $og_image = $image;
+                        $image_arr = explode(";base64,", $og_image);
+                        $image_type_ext = explode("image/", $image_arr[0]);
+                        $image_base64 = base64_decode($image_arr[1]);
 
-                    $imgname = "item_".time().".". $request->file('item_image')->getClientOriginalExtension();
-                    $img_path = public_path('client_uploads/items/'.$imgname);
-                    file_put_contents($img_path,$image_base64);
-                    $item->image = $imgname;
+                        $imgname = "item_".$image_token.".".$image_type_ext[1];
+                        $img_path = public_path('client_uploads/items/'.$imgname);
+                        file_put_contents($img_path,$image_base64);
+
+                        // Insert Image
+                        $new_img = new ItemImages();
+                        $new_img->item_id = $item_id;
+                        $new_img->image = $imgname;
+                        $new_img->save();
+                    }
                 }
 
                 $item->update();
@@ -1497,7 +1458,6 @@ class ItemsController extends Controller
                             {
                                 $new_price = new ItemPrice();
                                 $new_price->item_id = $item_id;
-                                $new_price->shop_id = $shop_id;
                                 $new_price->price = $price_val;
                                 $new_price->label = $label_val;
                                 $new_price->$act_lang_price_key = $label_val;
@@ -1515,7 +1475,7 @@ class ItemsController extends Controller
                 {
                     foreach($tags as $val)
                     {
-                        $findTag = Tags::where($act_lang_name_key,$val)->where('shop_id',$shop_id)->first();
+                        $findTag = Tags::where($act_lang_name_key,$val)->first();
                         $tag_id = (isset($findTag->id) && !empty($findTag->id)) ? $findTag->id : '';
 
                         if(!empty($tag_id) || $tag_id != '')
@@ -1531,7 +1491,6 @@ class ItemsController extends Controller
                             $order = (isset($max_order) && !empty($max_order)) ? ($max_order + 1) : 1;
 
                             $tag = new Tags();
-                            $tag->shop_id = $shop_id;
                             $tag->name = $val;
                             $tag->$act_lang_name_key = $val;
                             $tag->order = $order;
@@ -1575,25 +1534,20 @@ class ItemsController extends Controller
     // Function for Get Item Data
     public function getEditItemData($current_lang_code,$item_id)
     {
-        $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-
         // Get Language Settings
-        $language_settings = clientLanguageSettings($shop_id);
+        $language_settings = clientLanguageSettings();
         $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
 
         // Primary Language Details
         $primary_language_detail = Languages::where('id',$primary_lang_id)->first();
         $primary_lang_code = isset($primary_language_detail->code) ? $primary_language_detail->code : '';
-        $primary_lang_name = isset($primary_language_detail->name) ? $primary_language_detail->name : '';
 
         // Additional Languages
-        $additional_languages = AdditionalLanguage::where('shop_id',$shop_id)->get();
+        $additional_languages = AdditionalLanguage::get();
         if(count($additional_languages) > 0)
         {
             $name_key = $current_lang_code."_name";
             $description_key = $current_lang_code."_description";
-            $calories_key = $current_lang_code."_calories";
             $price_label_key = $current_lang_code."_label";
             $option_title_key = $current_lang_code."_title";
         }
@@ -1601,46 +1555,31 @@ class ItemsController extends Controller
         {
             $name_key = $primary_lang_code."_name";
             $description_key = $primary_lang_code."_description";
-            $calories_key = $primary_lang_code."_calories";
             $price_label_key = $primary_lang_code."_label";
             $option_title_key = $primary_lang_code."_title";
         }
 
         // Item Details
-        $item = Items::where('id',$item_id)->first();
+        $item = Items::with(['itemImages'])->where('id',$item_id)->first();
 
-        // Categories
-        $categories = Category::where('shop_id',$shop_id)->where('category_type','product_category')->get();
-
-        // Ingredients
-        $ingredients = Ingredient::where('shop_id',$shop_id)->get();
+        // Get all Parent Categories
+        $parent_categories = Category::where('parent_id',NULL)->get();
 
         // Order Attributes
-        $options = Option::where('shop_id',$shop_id)->get();
+        $options = Option::get();
 
         // Tags
-        $tags = Tags::where('shop_id',$shop_id)->get();
+        $tags = Tags::get();
 
         // ModalName
         $modalName = "'editItemModal'";
 
-        // Subscrption ID
-        $subscription_id = Auth::user()->hasOneSubscription['subscription_id'];
-
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-
         // Item Details
         $item_type = (isset($item['type'])) ? $item['type'] : '';
         $category_id = (isset($item['category_id'])) ? $item['category_id'] : '';
-        $default_image = asset('public/client_images/not-found/no_image_1.jpg');
-        $item_image = (isset($item['image']) && !empty($item['image']) && file_exists('public/client_uploads/items/'.$item['image'])) ? asset('public/client_uploads/items/'.$item['image']) : "";
-        $delete_item_image_url = route('items.delete.image',$item_id);
         $item_name = (isset($item[$name_key])) ? $item[$name_key] : '';
         $item_desc = (isset($item[$description_key])) ? $item[$description_key] : '';
-        $calories = isset($item[$calories_key]) ? $item[$calories_key] : '';
-        $item_ingredients = (isset($item['ingredients']) && !empty($item['ingredients'])) ? unserialize($item['ingredients']) : [];
-        $price_array = ItemPrice::where('item_id',$item['id'])->where('shop_id',$shop_id)->get();
+        $price_array = ItemPrice::where('item_id',$item['id'])->get();
         $item_cat_tags = CategoryProductTags::with(['hasOneTag'])->where('item_id',$item['id'])->where('category_id',$item['category_id'])->get();
         $item_options = (isset($item['options']) && !empty($item['options'])) ? unserialize($item['options']) : [];
         $item_published = (isset($item['published']) && $item['published'] == 1) ? 'checked' : '';
@@ -1679,7 +1618,6 @@ class ItemsController extends Controller
                     // Additional Language Details
                     $add_lang_detail = Languages::where('id',$value->language_id)->first();
                     $add_lang_code = isset($add_lang_detail->code) ? $add_lang_detail->code : '';
-                    $add_lang_name = isset($add_lang_detail->name) ? $add_lang_detail->name : '';
 
                     // Additional Active Tab
                     $additional_active_tab = ($add_lang_code == $current_lang_code) ? 'active' : '';
@@ -1719,22 +1657,36 @@ class ItemsController extends Controller
                             $html .= '</div>';
                         $html .= '</div>';
 
+
                         // Category
                         $html .= '<div class="row mb-3">';
                             $html .= '<div class="col-md-12">';
                                 $html .= '<label class="form-label" for="category">'. __('Category').'</label>';
                                 $html .= '<select name="category" id="category" class="form-select">';
                                         $html .= '<option value="">Choose Category</option>';
-                                        if(count($categories) > 0)
+                                        if(count($parent_categories) > 0)
                                         {
-                                            foreach ($categories as $cat)
+                                            foreach ($parent_categories as $parent_cat)
                                             {
-                                                $html .= '<option value="'.$cat['id'].'"';
-                                                    if($category_id == $cat['id'])
-                                                    {
-                                                        $html .= 'selected';
-                                                    }
-                                                $html .= '>'.$cat[$name_key].'</option>';
+                                                $quote = "";
+                                                $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                if($parent_cat->id == $category_id)
+                                                {
+                                                    $html .= 'selected';
+                                                }
+
+                                                $html .='>'.$parent_cat[$name_key].'</option>';
+
+                                                if(count($parent_cat->subcategories) > 0)
+                                                {
+                                                    $cat_data['quote'] = $quote;
+                                                    $cat_data['par_cat_id'] = $category_id;
+                                                    $cat_data['name_key'] = $name_key;
+                                                    $cat_data['subcategories'] = $parent_cat->subcategories;
+
+                                                    $html .= $this->child_cat($cat_data);
+                                                }
                                             }
                                         }
                                 $html .= '</select>';
@@ -1825,79 +1777,49 @@ class ItemsController extends Controller
                             $html .= '</div>';
 
                             // Image Section
-                            $html .= '<div class="col-md-12 mb-3">';
-                                $html .= '<label class="form-label">'.__('Image').'</label>';
-                                $html .= '<input type="file" name="item_image" id="item_image" class="form-control item_image" onchange="imageCropper(\'edit_item_form\',this)" style="display:none">';
-                                $html .= '<input type="hidden" name="og_image" id="og_image" class="og_image">';
-
-                                if(!empty($item_image))
+                            $html .= '<div class="col-md-12 mt-3 mb-2 d-flex flex-wrap" id="edit_images_div">';
+                                if(isset($item->itemImages) && count($item->itemImages) > 0)
                                 {
-                                    $html .= '<div class="row" id="edit-img">';
-                                        $html .= '<div class="col-md-3">';
-                                            $html .= '<div class="position-relative" id="itemImage">';
-                                                $html .= '<label style="cursor:pointer" for="item_image"><img src="'.$item_image.'" class="w-100" style="border-radius:10px;"></label>';
-                                                $html .= '<a href="'.$delete_item_image_url.'" class="btn btn-sm btn-danger" style="position: absolute; top: 0; right: -45px;"><i class="bi bi-trash"></i></a>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-
-                                    $html .= '<div class="row mt-2" id="rep-image" style="display:none;">';
-                                        $html .= '<div class="col-md-3" id="img-label">';
-                                            $html .= '<label for="item_image" style="cursor: pointer">';
-                                                $html .= '<img src="" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw">';
-                                            $html .= '</label>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                }
-                                else
-                                {
-                                    $html .= '<div class="mt-3" id="itemImage">';
-                                        $html .= '<div class="col-md-3" id="img-label">';
-                                            $html .= '<label style="cursor:pointer;" for="item_image"><img src="'.$default_image.'" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw"></label>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                }
-                                $html .= '<code>Upload Image in (400*400) Dimensions</code>';
-                            $html .= '</div>';
-
-                            // Cropper Image Section
-                            $html .= '<div class="col-md-12 mb-3">';
-                                $html .= '<div class="row">';
-                                    $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
-                                        $html .= '<img src="" alt="" id="resize-image" class="w-100 resize-image">';
-                                        $html .= '<div class="mt-3">';
-                                            $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
-                                            $html .= '<a class="btn btn-sm btn-danger mx-2" onclick="resetCropper()">Reset</a>';
-                                            $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                    $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
-                                        $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-
-                            // Special Icons
-                            $html .= '<div class="col-md-12 mb-3">';
-                                $html .= '<label class="form-label" for="ingredients">'.__('Indicative Icons').'</label>';
-                                $html .= '<select name="ingredients[]" id="ingredients" class="form-select" multiple>';
-                                    if(count($ingredients) > 0)
+                                    foreach($item->itemImages as $key => $item_image)
                                     {
-                                        foreach($ingredients as $ing)
+                                        $no = $key + 1;
+                                        if(!empty($item_image['image']) && file_exists('public/client_uploads/items/'.$item_image['image']))
                                         {
-                                            $parent_id = (isset($ing->parent_id)) ? $ing->parent_id : NULL;
-                                            if((isset($package_permissions['special_icons']) && !empty($package_permissions['special_icons']) && $package_permissions['special_icons'] == 1) || $parent_id != NULL)
-                                            {
-                                                $html .= '<option value="'.$ing["id"].'"';
-                                                    if(in_array($ing["id"],$item_ingredients))
-                                                    {
-                                                        $html .= 'selected';
-                                                    }
-                                                $html .='>'.$ing["name"].'</option>';
-                                            }
+                                            $html .= '<div class="inner-img edit_img_'.$no.'">';
+                                                $html .= '<img src="'.asset('public/client_uploads/items/'.$item_image['image']).'" class="w-100 h-100">';
+                                                $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteItemImages('.$no.','.$item_image->id.')"><i class="fa fa-trash"></i></a>';
+                                            $html .= '</div>';
                                         }
                                     }
-                                $html .= '</select>';
+                                }
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-12 mb-2 d-flex flex-wrap" id="images_div">
+                            </div>';
+                            $html .= '<div class="col-md-12 mul-image" id="img-val"></div>';
+                            $html .= '<div class="col-md-12">';
+                                $html .= '<label class="form-label">'.__('Image').'</label>';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-12 mt-2 mul-image">';
+                                $html .= '<div class="row">';
+                                    $html .= '<div class="col-md-12">';
+                                        $html .= '<div class="form-group">';
+                                            $html .= '<div id="img-label"><label for="item_image">Upload Images</label></div>';
+                                            $html .= '<input type="file" name="item_image" id="item_image" class="form-control" onchange="imageCropper(\'edit_item_form\',this)" style="display: none;">';
+                                        $html .= '</div>';
+                                    $html .= '</div>';
+                                    $html .= '<div class="col-md-12"><code class="img-upload-label">Upload Image in (400*400) Dimensions</code></div>';
+                                $html .= '</div>';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
+                                $html .= '<img src="" alt="" id="resize-image" class="w-100">';
+                                $html .= '<div class="mt-3">';
+                                    $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
+                                    $html .= '<a class="btn btn-sm btn-danger" onclick="resetCropper()">Reset</a>';
+                                    $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
+                                $html .= '</div>';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
+                                $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
                             $html .= '</div>';
 
                             // Tags
@@ -1919,33 +1841,24 @@ class ItemsController extends Controller
                                 $html .= '</select>';
                             $html .= '</div>';
 
-                            // Calories
-                            $html .= '<div class="col-md-12 mb-3 calories_div">';
-                                $html .= '<label class="form-label" for="calories">'.__('Calories').'</label>';
-                                $html .= '<input type="text" name="calories" id="calories" class="form-control" value="'.$calories.'">';
-                            $html .= '</div>';
-
                             // Order Attributes
-                            if((isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1))
-                            {
-                                $html .= '<div class="col-md-12 mb-3">';
-                                    $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
-                                    $html .= '<select name="options[]" id="options" class="form-select" multiple>';
-                                        if(count($options) > 0)
+                            $html .= '<div class="col-md-12 mb-3">';
+                                $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
+                                $html .= '<select name="options[]" id="options" class="form-select" multiple>';
+                                    if(count($options) > 0)
+                                    {
+                                        foreach($options as $opt)
                                         {
-                                            foreach($options as $opt)
-                                            {
-                                                $html .= '<option value="'.$opt["id"].'"';
-                                                    if(in_array($opt["id"],$item_options))
-                                                    {
-                                                        $html .= 'selected';
-                                                    }
-                                                $html .='>'.$opt[$option_title_key].'</option>';
-                                            }
+                                            $html .= '<option value="'.$opt["id"].'"';
+                                                if(in_array($opt["id"],$item_options))
+                                                {
+                                                    $html .= 'selected';
+                                                }
+                                            $html .='>'.$opt[$option_title_key].'</option>';
                                         }
-                                    $html .= '</select>';
-                                $html .= '</div>';
-                            }
+                                    }
+                                $html .= '</select>';
+                            $html .= '</div>';
 
                             // Toggle Buttons
                             $html .= '<div class="col-md-12 mb-3 mt-1">';
@@ -2060,16 +1973,29 @@ class ItemsController extends Controller
                                 $html .= '<label class="form-label" for="category">'. __('Category').'</label>';
                                 $html .= '<select name="category" id="category" class="form-select">';
                                         $html .= '<option value="">Choose Category</option>';
-                                        if(count($categories) > 0)
+                                        if(count($parent_categories) > 0)
                                         {
-                                            foreach ($categories as $cat)
+                                            foreach ($parent_categories as $parent_cat)
                                             {
-                                                $html .= '<option value="'.$cat['id'].'"';
-                                                    if($category_id == $cat['id'])
-                                                    {
-                                                        $html .= 'selected';
-                                                    }
-                                                $html .= '>'.$cat[$name_key].'</option>';
+                                                $quote = "";
+                                                $html .= '<option value="'. $parent_cat->id.'" style="font-weight: 900"';
+
+                                                if($parent_cat->id == $category_id)
+                                                {
+                                                    $html .= 'selected';
+                                                }
+
+                                                $html .='>'.$parent_cat[$name_key].'</option>';
+
+                                                if(count($parent_cat->subcategories) > 0)
+                                                {
+                                                    $cat_data['quote'] = $quote;
+                                                    $cat_data['par_cat_id'] = $category_id;
+                                                    $cat_data['name_key'] = $name_key;
+                                                    $cat_data['subcategories'] = $parent_cat->subcategories;
+
+                                                    $html .= $this->child_cat($cat_data);
+                                                }
                                             }
                                         }
                                 $html .= '</select>';
@@ -2160,79 +2086,49 @@ class ItemsController extends Controller
                             $html .= '</div>';
 
                             // Image Section
-                            $html .= '<div class="col-md-12 mb-3">';
-                                $html .= '<label class="form-label">'.__('Image').'</label>';
-                                $html .= '<input type="file" name="item_image" id="item_image" class="form-control item_image" onchange="imageCropper(\'edit_item_form\',this)" style="display:none">';
-                                $html .= '<input type="hidden" name="og_image" id="og_image" class="og_image">';
-
-                                if(!empty($item_image))
+                            $html .= '<div class="col-md-12 mt-3 mb-2 d-flex flex-wrap" id="edit_images_div">';
+                                if(isset($item->itemImages) && count($item->itemImages) > 0)
                                 {
-                                    $html .= '<div class="row" id="edit-img">';
-                                        $html .= '<div class="col-md-3">';
-                                            $html .= '<div class="position-relative" id="itemImage">';
-                                                $html .= '<label style="cursor:pointer" for="item_image"><img src="'.$item_image.'" class="w-100" style="border-radius:10px;"></label>';
-                                                $html .= '<a href="'.$delete_item_image_url.'" class="btn btn-sm btn-danger" style="position: absolute; top: 0; right: -45px;"><i class="bi bi-trash"></i></a>';
-                                            $html .= '</div>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-
-                                    $html .= '<div class="row mt-2" id="rep-image" style="display:none;">';
-                                        $html .= '<div class="col-md-3" id="img-label">';
-                                            $html .= '<label for="item_image" style="cursor: pointer">';
-                                                $html .= '<img src="" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw">';
-                                            $html .= '</label>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                }
-                                else
-                                {
-                                    $html .= '<div class="mt-3" id="itemImage">';
-                                        $html .= '<div class="col-md-3" id="img-label">';
-                                            $html .= '<label style="cursor:pointer;" for="item_image"><img src="'.$default_image.'" class="w-100 h-100" style="border-radius:10px;" id="crp-img-prw"></label>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                }
-                                $html .= '<code>Upload Image in (400*400) Dimensions</code>';
-                            $html .= '</div>';
-
-                            // Cropper Image Section
-                            $html .= '<div class="col-md-12 mb-3">';
-                                $html .= '<div class="row">';
-                                    $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
-                                        $html .= '<img src="" alt="" id="resize-image" class="w-100 resize-image">';
-                                        $html .= '<div class="mt-3">';
-                                            $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
-                                            $html .= '<a class="btn btn-sm btn-danger mx-2" onclick="resetCropper()">Reset</a>';
-                                            $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                    $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
-                                        $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-
-                            // Special Icons
-                            $html .= '<div class="col-md-12 mb-3">';
-                                $html .= '<label class="form-label" for="ingredients">'.__('Indicative Icons').'</label>';
-                                $html .= '<select name="ingredients[]" id="ingredients" class="form-select" multiple>';
-                                    if(count($ingredients) > 0)
+                                    foreach($item->itemImages as $key => $item_image)
                                     {
-                                        foreach($ingredients as $ing)
+                                        $no = $key + 1;
+                                        if(!empty($item_image['image']) && file_exists('public/client_uploads/items/'.$item_image['image']))
                                         {
-                                            $parent_id = (isset($ing->parent_id)) ? $ing->parent_id : NULL;
-                                            if((isset($package_permissions['special_icons']) && !empty($package_permissions['special_icons']) && $package_permissions['special_icons'] == 1) || $parent_id != NULL)
-                                            {
-                                                $html .= '<option value="'.$ing["id"].'"';
-                                                    if(in_array($ing["id"],$item_ingredients))
-                                                    {
-                                                        $html .= 'selected';
-                                                    }
-                                                $html .='>'.$ing["name"].'</option>';
-                                            }
+                                            $html .= '<div class="inner-img edit_img_'.$no.'">';
+                                                $html .= '<img src="'.asset('public/client_uploads/items/'.$item_image['image']).'" class="w-100 h-100">';
+                                                $html .= '<a class="btn btn-sm btn-danger del-pre-btn" onclick="deleteItemImages('.$no.','.$item_image->id.')"><i class="fa fa-trash"></i></a>';
+                                            $html .= '</div>';
                                         }
                                     }
-                                $html .= '</select>';
+                                }
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-12 mb-2 d-flex flex-wrap" id="images_div">
+                            </div>';
+                            $html .= '<div class="col-md-12 mul-image" id="img-val"></div>';
+                            $html .= '<div class="col-md-12">';
+                                $html .= '<label class="form-label">'.__('Image').'</label>';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-12 mt-2 mul-image">';
+                                $html .= '<div class="row">';
+                                    $html .= '<div class="col-md-12">';
+                                        $html .= '<div class="form-group">';
+                                            $html .= '<div id="img-label"><label for="item_image">Upload Images</label></div>';
+                                            $html .= '<input type="file" name="item_image" id="item_image" class="form-control" onchange="imageCropper(\'edit_item_form\',this)" style="display: none;">';
+                                        $html .= '</div>';
+                                    $html .= '</div>';
+                                    $html .= '<div class="col-md-12"><code class="img-upload-label">Upload Image in (400*400) Dimensions</code></div>';
+                                $html .= '</div>';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-8 img-crop-sec mb-2" style="display: none">';
+                                $html .= '<img src="" alt="" id="resize-image" class="w-100">';
+                                $html .= '<div class="mt-3">';
+                                    $html .= '<a class="btn btn-sm btn-success" onclick="saveCropper(\'edit_item_form\')">Save</a>';
+                                    $html .= '<a class="btn btn-sm btn-danger" onclick="resetCropper()">Reset</a>';
+                                    $html .= '<a class="btn btn-sm btn-secondary" onclick="cancelCropper(\'edit_item_form\')">Cancel</a>';
+                                $html .= '</div>';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-4 img-crop-sec" style="display: none;">';
+                                $html .= '<div class="preview" style="width: 200px; height:200px; overflow: hidden;margin: 0 auto;"></div>';
                             $html .= '</div>';
 
                             // Tags
@@ -2254,33 +2150,24 @@ class ItemsController extends Controller
                                 $html .= '</select>';
                             $html .= '</div>';
 
-                            // Calories
-                            $html .= '<div class="col-md-12 mb-3 calories_div">';
-                                $html .= '<label class="form-label" for="calories">'.__('Calories').'</label>';
-                                $html .= '<input type="text" name="calories" id="calories" class="form-control" value="'.$calories.'">';
-                            $html .= '</div>';
-
                             // Order Attributes
-                            if((isset($package_permissions['ordering']) && !empty($package_permissions['ordering']) && $package_permissions['ordering'] == 1))
-                            {
-                                $html .= '<div class="col-md-12 mb-3">';
-                                    $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
-                                    $html .= '<select name="options[]" id="options" class="form-select" multiple>';
-                                        if(count($options) > 0)
+                            $html .= '<div class="col-md-12 mb-3">';
+                                $html .= '<label class="form-label" for="options">'.__('Attributes').'</label>';
+                                $html .= '<select name="options[]" id="options" class="form-select" multiple>';
+                                    if(count($options) > 0)
+                                    {
+                                        foreach($options as $opt)
                                         {
-                                            foreach($options as $opt)
-                                            {
-                                                $html .= '<option value="'.$opt["id"].'"';
-                                                    if(in_array($opt["id"],$item_options))
-                                                    {
-                                                        $html .= 'selected';
-                                                    }
-                                                $html .='>'.$opt[$option_title_key].'</option>';
-                                            }
+                                            $html .= '<option value="'.$opt["id"].'"';
+                                                if(in_array($opt["id"],$item_options))
+                                                {
+                                                    $html .= 'selected';
+                                                }
+                                            $html .='>'.$opt[$option_title_key].'</option>';
                                         }
-                                    $html .= '</select>';
-                                $html .= '</div>';
-                            }
+                                    }
+                                $html .= '</select>';
+                            $html .= '</div>';
 
                             // Toggle Buttons
                             $html .= '<div class="col-md-12 mb-3 mt-1">';
@@ -2359,26 +2246,36 @@ class ItemsController extends Controller
 
 
     // Function Delete Item Image
-    public function deleteItemImage($id)
+    public function deleteItemImage(Request $request)
     {
-        $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-        $item = Items::find($id);
+        $image_id = $request->image_id;
 
-        if($item)
+        try
         {
-            $item_image = isset($item['image']) ? $item['image'] : '';
+            $item_image = ItemImages::find($image_id);
 
-            if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
+            $image = isset($item_image['image']) ? $item_image['image'] : '';
+
+            if(!empty($image) && file_exists('public/client_uploads/items/'.$image))
             {
-                unlink('public/client_uploads/items/'.$item_image);
+                unlink('public/client_uploads/items/'.$image);
             }
 
-            $item->image = "";
-            $item->update();
+            ItemImages::where('id',$image_id)->delete();
+
+            return response()->json([
+                'success' => 1,
+                'message' => 'Item Image has been Removed SuccessFully..',
+            ]);
+
         }
-
-        return redirect()->route('items')->with('success',"Item Image has been Removed SuccessFully...");
-
+        catch (\Throwable $th)
+        {
+            return response()->json([
+                'success' => 0,
+                'message' => 'Internal Server Error!',
+            ]);
+        }
     }
 
 

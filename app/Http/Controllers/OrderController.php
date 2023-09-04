@@ -455,25 +455,13 @@ class OrderController extends Controller
     {
         $all_data['delivery'] = (isset($request->delivery)) ? $request->delivery : 0;
         $all_data['takeaway'] = (isset($request->takeaway)) ? $request->takeaway : 0;
-        $all_data['room_delivery'] = (isset($request->room_delivery)) ? $request->room_delivery : 0;
-        $all_data['table_service'] = (isset($request->table_service)) ? $request->table_service : 0;
-        $all_data['office_service'] = (isset($request->office_service)) ? $request->office_service : 0;
-        $all_data['only_cart'] = (isset($request->only_cart)) ? $request->only_cart : 0;
-        $all_data['auto_order_approval'] = (isset($request->auto_order_approval)) ? $request->auto_order_approval : 0;
         $all_data['scheduler_active'] = (isset($request->scheduler_active)) ? $request->scheduler_active : 0;
         $all_data['min_amount_for_delivery'] = (isset($request->min_amount_for_delivery)) ? $request->min_amount_for_delivery : '';
         $all_data['discount_percentage'] = (isset($request->discount_percentage)) ? $request->discount_percentage : '';
         $all_data['order_arrival_minutes'] = (isset($request->order_arrival_minutes)) ? $request->order_arrival_minutes : 30;
         $all_data['schedule_array'] = $request->schedule_array;
-        $all_data['default_printer'] = (isset($request->default_printer)) ? $request->default_printer : '';
-        $all_data['receipt_intro'] = $request->receipt_intro;
         $all_data['discount_type'] = $request->discount_type;
-        $all_data['auto_print'] = (isset($request->auto_print)) ? $request->auto_print : 0;
         $all_data['play_sound'] = (isset($request->play_sound)) ? $request->play_sound : 0;
-        $all_data['enable_print'] = (isset($request->enable_print)) ? $request->enable_print : 0;
-        $all_data['printer_paper'] = (isset($request->printer_paper)) ? $request->printer_paper : '';
-        $all_data['printer_tray'] = (isset($request->printer_tray)) ? $request->printer_tray : '';
-        $all_data['print_font_size'] = (isset($request->print_font_size)) ? $request->print_font_size : '';
         $all_data['notification_sound'] = (isset($request->notification_sound)) ? $request->notification_sound : 'buzzer-01.mp3';
 
         try

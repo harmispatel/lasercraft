@@ -37,7 +37,7 @@
                                     @php
                                         $menu_count = 1;
                                     @endphp
-                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">{{ $parent_cat[$name_key] }}</a>
+                                    <a class="nav-link dropdown-toggle" href="{{ route('categories.collections',$parent_cat['id']) }}" data-bs-toggle="dropdown">{{ $parent_cat[$name_key] }}</a>
 
                                     @if(count($parent_cat->subcategories) > 0)
                                         @include('frontend.child_categories_menu',['subcategories' => $parent_cat->subcategories,'parent_key'=>$menu_count])
