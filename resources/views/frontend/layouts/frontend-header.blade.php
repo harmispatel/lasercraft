@@ -13,6 +13,9 @@
     $name_key = $lang_code."_name";
 
     $parent_categories = \App\Models\Category::where('parent_id',NULL)->get();
+
+
+    $client_settings = getClientSettings();
 @endphp
 
 
@@ -52,16 +55,17 @@
                     </ul>
                 </div>
                 <a class="navbar-brand m-0" href="{{ route('home') }}">
-                    <img src="{{asset('public/frontend/image/logo.jpeg')}}" height="60" />
+                    @if(isset($client_settings['shop_view_header_logo']) && !empty($client_settings['shop_view_header_logo']) && file_exists('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']))
+                        <img src="{{ asset('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']) }}" height="80">
+                    @else
+                        <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" height="80">
+                    @endif
                 </a>
                 <div class="header_right">
-                    <div class="search_box position-relative">
-                        <input class="form-control" placeholder="search..." />
-                        <i class="fa-solid fa-search src_icon"></i>
-                    </div>
                     <ul>
+                        <li><a class="icon" data-bs-toggle="modal" data-bs-target="#globalSearchModal"><i class="fa-solid fa-search"></i></a></li>
                         <li><a class="icon" href="#"><i class="fa-solid fa-user"></i></a></li>
-                        <li><a class="icon" href="#"><i class="fa-solid fa-bag-shopping"></i></a></li>
+                        <li><a class="icon" href="{{ route('my.cart') }}"><i class="fa-solid fa-bag-shopping"></i></a></li>
                     </ul>
                 </div>
             </div>

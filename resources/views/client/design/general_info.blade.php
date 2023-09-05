@@ -87,19 +87,10 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <div class="form-group">
-                                <label class="form-label" for="foursquare_link">{{ __('Foursquare')}}</label>
+                                <label class="form-label" for="youtube_link">{{ __('Foursquare')}}</label>
                                 <div class="position-relative">
-                                    <input type="text" class="form-control icon-input" name="foursquare_link" id="foursquare_link" value="{{ (isset($client_settings['foursquare_link']) && !empty($client_settings['foursquare_link'])) ? $client_settings['foursquare_link'] : '' }}">
-                                    <i class="fa-brands fa-foursquare input-icon"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="form-group">
-                                <label class="form-label" for="tripadvisor_link">{{ __('Tripadvisor')}}</label>
-                                <div class="position-relative">
-                                    <input type="text" class="form-control icon-input" name="tripadvisor_link" id="tripadvisor_link" value="{{ (isset($client_settings['tripadvisor_link']) && !empty($client_settings['tripadvisor_link'])) ? $client_settings['tripadvisor_link'] : '' }}">
-                                    <i class="fa-solid fa-mask input-icon"></i>
+                                    <input type="text" class="form-control icon-input" name="youtube_link" id="youtube_link" value="{{ (isset($client_settings['youtube_link']) && !empty($client_settings['youtube_link'])) ? $client_settings['youtube_link'] : '' }}">
+                                    <i class="fa-brands fa-youtube input-icon"></i>
                                 </div>
                             </div>
                         </div>
@@ -109,6 +100,15 @@
                                 <div class="position-relative">
                                     <input type="text" class="form-control icon-input" name="pinterest_link" id="pinterest_link" value="{{ (isset($client_settings['pinterest_link']) && !empty($client_settings['pinterest_link'])) ? $client_settings['pinterest_link'] : '' }}">
                                     <i class="fa-brands fa-pinterest input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label" for="map_url">{{ __('Map')}}</label>
+                                <div class="position-relative">
+                                    <input type="text" class="form-control icon-input" name="map_url" id="map_url" value="{{ (isset($client_settings['map_url']) && !empty($client_settings['map_url'])) ? $client_settings['map_url'] : '' }}">
+                                    <i class="fa-solid fa-map input-icon"></i>
                                 </div>
                             </div>
                         </div>
@@ -128,26 +128,6 @@
                         <div class="form-group">
                             <label class="form-label" for="delivery_message">{{ __('Delivery out of range Message') }}</label>
                             <textarea name="delivery_message" id="delivery_message" class="form-control">{{ (isset($client_settings['delivery_message']) && !empty($client_settings['delivery_message'])) ? $client_settings['delivery_message'] : '' }}</textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label" for="map_url">{{ __('Map')}}</label>
-                            <div class="position-relative">
-                                <input type="text" class="form-control icon-input" name="map_url" id="map_url" value="{{ (isset($client_settings['map_url']) && !empty($client_settings['map_url'])) ? $client_settings['map_url'] : '' }}">
-                                <i class="fa-solid fa-map input-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label" for="website_url">{{ __('Website')}}</label>
-                            <div class="position-relative">
-                                <input type="text" class="form-control icon-input" name="website_url" id="website_url" value="{{ (isset($client_settings['website_url']) && !empty($client_settings['website_url'])) ? $client_settings['website_url'] : '' }}">
-                                <i class="fa-solid fa-globe input-icon"></i>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,20 +1,42 @@
+@php
+    $current_year = \Carbon\Carbon::now()->format('Y');
+    $copyright_text = isset($client_settings['homepage_intro']) ? $client_settings['homepage_intro'] : '';
+    $copyright_text = str_replace('[year]',$current_year,$copyright_text);
+@endphp
+
 <footer class="footer">
     <div class="footer_inr">
         <div class="footer_top">
-            {{-- <div class="newsletter_box">
-                <h3>Subscribe to Our Newsletter</h3>
-                <div class="newsletter_box_inr">
-                    <input type="email" placeholder="Enter your email" class="form-control"/>
-                    <i class="fa-solid fa-envelope icon"></i>
-                </div>
-            </div> --}}
             <div class="social_media_box">
                 <h3>Follow Us</h3>
                 <ul>
-                    <li><a href="#"><i class="fa-brands fa-square-instagram"></i></a></li>
-                    <li><a href="#"><i class="fa-brands fa-square-facebook"></i></a></li>
-                    <li><a href="#"><i class="fa-brands fa-square-pinterest"></i></a></li>
-                    <li><a href="#"><i class="fa-brands fa-square-youtube"></i></a></li>
+                    @if(isset($client_settings['instagram_link']) && !empty($client_settings['instagram_link']))
+                        <li><a target="_blank" href="{{ $client_settings['instagram_link'] }}"><i class="fa-brands fa-square-instagram"></i></a></li>
+                    @endif
+
+                    @if(isset($client_settings['facebook_link']) && !empty($client_settings['facebook_link']))
+                        <li><a target="_blank" href="{{ $client_settings['facebook_link'] }}"><i class="fa-brands fa-square-facebook"></i></a></li>
+                    @endif
+
+                    @if(isset($client_settings['pinterest_link']) && !empty($client_settings['pinterest_link']))
+                        <li><a target="_blank" href="{{ $client_settings['pinterest_link'] }}"><i class="fa-brands fa-square-pinterest"></i></a></li>
+                    @endif
+
+                    @if(isset($client_settings['twitter_link']) && !empty($client_settings['twitter_link']))
+                        <li><a target="_blank" href="{{ $client_settings['twitter_link'] }}"><i class="fa-brands fa-square-twitter"></i></a></li>
+                    @endif
+
+                    @if(isset($client_settings['youtube_link']) && !empty($client_settings['youtube_link']))
+                        <li><a target="_blank" href="{{ $client_settings['youtube_link'] }}"><i class="fa-brands fa-square-youtube"></i></a></li>
+                    @endif
+
+                    @if(isset($client_settings['map_url']) && !empty($client_settings['map_url']))
+                        <li><a target="_blank" href="{{ $client_settings['map_url'] }}"><i class="fa-solid fa-location-dot"></i></a></li>
+                    @endif
+
+                    @if(isset($client_settings['business_telephone']) && !empty($client_settings['business_telephone']))
+                        <li><a target="_blank" href="tel:{{ $client_settings['business_telephone'] }}"><i class="fa-solid fa-phone"></i></a></li>
+                    @endif
                 </ul>
             </div>
         </div>
@@ -53,11 +75,17 @@
                 </ul>
             </div>
             <div class="footer_menu_inr text-center">
-                <img src="{{ asset('public/frontend/image/logo.jpeg')}}" height="200">
+                <a href="{{ route('home') }}">
+                    @if(isset($client_settings['shop_view_header_logo']) && !empty($client_settings['shop_view_header_logo']) && file_exists('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']))
+                        <img src="{{ asset('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']) }}" width="180">
+                    @else
+                        <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" width="150">
+                    @endif
+                </a>
             </div>
         </div>
     </div>
-    <div class="footer_right">
-        <p>© 2023 - Mahantam  </p>
+    <div class="footer_right text-center text-white">
+        {!! $copyright_text !!}
     </div>
 </footer>

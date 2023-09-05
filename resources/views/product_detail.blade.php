@@ -137,137 +137,39 @@
         </div>
     </section>
 
-    @if($item_details['review'] == 1)
-        <section class="item_review sec_main">
-            <div class="sec_title">
-                <h2><span>Customer Reviews</span></h2>
-            </div>
-            <div class="container">
-                <div class="row justify-content-center align-items-center">
-                    @if(count($item_details->ratings) > 0)
-                    @php
-                        $all_rat_key = [1,2,3,4,5];
-                        $rating_array = $item_details->ratings->groupBy('rating')->mapWithKeys(function ($reviews, $rating){return [$rating => $reviews->count()];})->toArray();
-                        $rating_array = collect($rating_array)->union(array_fill_keys(array_diff($all_rat_key, array_keys($rating_array)), 0))->all();
-                        krsort($rating_array);
-                        $avg_rat = round((number_format($averageRating,2)));
-                    @endphp
-                        <div class="col-md-4">
-                            <div class="product_review">
-                                <div class="review_product_inr">
-                                    @php
-                                        $remain_avg_star = 5 - $avg_rat;
-                                    @endphp
-
-                                    @for($i=1; $i <=$avg_rat; $i++)
-                                        <i class="fa-solid fa-star text-warning"></i>
-                                    @endfor
-
-                                    @if($remain_avg_star > 0)
-                                        @for ($i=1; $i<=$remain_avg_star; $i++)
-                                        <i class="fa-regular fa-star text-warning"></i>
-                                        @endfor
-                                    @endif
-                                </div>
-                                <p>{{ (number_format($averageRating,2)) }} out of 5 Based on {{ count($item_details->ratings) }} reviews</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="product_review_point">
-                                <ul>
-                                    @if(count($rating_array) > 0)
-                                    @foreach ($rating_array as $rat_key => $rat_arr)
-                                        <li>
-                                            <div class="review_product_inr">
-                                                @php
-                                                    $remain_star = 5 - $rat_key;
-                                                @endphp
-
-                                                @for ($i=1; $i<=$rat_key; $i++)
-                                                    <i class="fa-solid fa-star text-warning"></i>
-                                                @endfor
-
-                                                @if($remain_star > 0)
-                                                    @for ($i=1; $i<=$remain_star; $i++)
-                                                    <i class="fa-regular fa-star text-warning"></i>
-                                                    @endfor
-                                                @endif
-                                            </div>
-                                            <div class="review_number">
-                                                <span>({{ $rat_arr }})</span>
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                    @endif
-                                </ul>
-                            </div>
-                        </div>
-                    @else
-                        <div class="col-md-4">
-                            <div class="product_review">
-                                <div class="review_product_inr">
-                                    <i class="fa-solid fa-star text-warning"></i>
-                                    <i class="fa-solid fa-star text-warning"></i>
-                                    <i class="fa-solid fa-star text-warning"></i>
-                                    <i class="fa-solid fa-star text-warning"></i>
-                                    <i class="fa-solid fa-star text-warning"></i>
-                                </div>
-                                <p class="m-0">Be the first to write a review</p>
-                            </div>
-                        </div>
-                    @endif
-                    <div class="col-md-4">
-                        <div class="add_review text-center">
-                            <a class="btn add_review_btn">Write a Review.</a>
-                        </div>
+    <section class="item_review sec_main">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="add_review">
+                        <button class="btn add_review_btn">Write a review</button>
                     </div>
                 </div>
-                <div class="row justify-content-center">
-                    <div class="col-md-10 col-lg-7" id="review-info" style="display: none;margin-top: 30px;">
-                        <div class="review_info">
-                            <form id="itemReviewForm" enctype="multipart/form-data">
-                                @csrf
-                                <input type="hidden" name="item_id" value="{{ $item_details['id'] }}">
-                                <div class="from-group">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Enter Your Name">
-                                </div>
-                                <div class="from-group">
-                                    <label class="form-label">Email</label>
-                                    <input type="text" name="email" class="form-control" placeholder="Enter Your email">
-                                </div>
-                                <div class="from-group">
-                                    <label class="mb-0">Review</label>
-                                    <div>
-                                        <div class="rate">
-                                            <input type="radio" id="star5" class="rate" name="rating" value="5" />
-                                            <label for="star5" title="text">5 stars</label>
-                                            <input type="radio" id="star4" class="rate" name="rating" value="4" checked />
-                                            <label for="star4" title="text">4 stars</label>
-                                            <input type="radio" id="star3" class="rate" name="rating" value="3"/>
-                                            <label for="star3" title="text">3 stars</label>
-                                            <input type="radio" id="star2" class="rate" name="rating" value="2"/>
-                                            <label for="star2" title="text">2 stars</label>
-                                            <input type="radio" id="star1" class="rate" name="rating" value="1"/>
-                                            <label for="star1" title="text">1 star</label>
-                                        </div>
-                                    </div>
-                                    <textarea class="form-control" rows="3" placeholder="Write Your Message" name="message"></textarea>
-                                </div>
-                                <div class="from-group">
-                                    <a class="btn review_sub" onclick="submitItemReview()">Submit</a>
-                                </div>
-                            </form>
-                        </div>
+                <div class="col-lg-8 col-md-10">
+                    <div class="review_info">
+                        <form>
+                            <div class="from-group">
+                                <label>Name : </label>
+                                <input type="text" name="name" class="form-control" placeholder="Enter Your Name">
+                            </div>
+                            <div class="from-group">
+                                <label>E-mail : </label>
+                                <input type="email" name="email" class="form-control" placeholder="Enter Your Email">
+                            </div>
+                            <div class="from-group">
+                                <label>Review</label>
+                                <textarea class="form-control" placeholder="Your Message" rows="3"></textarea>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-        </section>
-    @endif
+        </div>
+    </section>
 
     <section class="sec_main releted_product">
         <div class="sec_title">
-            <h2><span>Related Products</span></h2>
+            <h2><span>Related Products.</span></h2>
         </div>
         @if(count($related_items) > 0)
             <div class="product_items">

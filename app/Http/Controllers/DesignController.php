@@ -311,12 +311,10 @@ class DesignController extends Controller
         $all_data['instagram_link'] = $request->instagram_link;
         $all_data['twitter_link'] = $request->twitter_link;
         $all_data['facebook_link'] = $request->facebook_link;
-        $all_data['foursquare_link'] = $request->foursquare_link;
-        $all_data['tripadvisor_link'] = $request->tripadvisor_link;
-        $all_data['homepage_intro'] = $request->homepage_intro;
-        $all_data['map_url'] = $request->map_url;
-        $all_data['website_url'] = $request->website_url;
+        $all_data['youtube_link'] = $request->youtube_link;
         $all_data['pinterest_link'] = $request->pinterest_link;
+        $all_data['map_url'] = $request->map_url;
+        $all_data['homepage_intro'] = $request->homepage_intro;
         $all_data['delivery_message'] = $request->delivery_message;
 
         // Insert or Update Settings

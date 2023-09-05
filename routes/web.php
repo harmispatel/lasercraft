@@ -30,6 +30,9 @@ Route::get('config-clear', function () {
 Route::get('/',[FrontendController::class,'index'])->name('home');
 Route::get('/collections/{cat_id}',[FrontendController::class,'collectionByCategory'])->name('categories.collections');
 Route::get('/product-details/{item_id}',[FrontendController::class,'productDetails'])->name('product.deatails');
+Route::get('/my-cart',[FrontendController::class,'viewCart'])->name('my.cart');
+Route::post('/send-item-review',[FrontendController::class,'sendItemReview'])->name('send.item.review');
+Route::post('/products-search',[FrontendController::class,'searchProducts'])->name('products.search');
 
 // Auth Routes
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
@@ -322,7 +325,6 @@ Route::post('{my_shop_slug}/my/cart/checkout/processing/',[ShopController::class
 Route::get('{my_shop_slug}/checkout/success/{id}',[ShopController::class,'checkoutSuccess'])->name('shop.checkout.success');
 Route::post('set-checkout-type',[ShopController::class,'setCheckoutType'])->name('set.checkout.type');
 Route::post('check-order-status',[ShopController::class,'checkOrderStatus'])->name('check.order.status');
-Route::post('send-item-review',[ShopController::class,'sendItemReview'])->name('send.item.review');
 Route::post('/set-delivery-address',[OrderController::class,'setDeliveryAddress'])->name('set.delivery.address');
 
 // Paypal Payment

@@ -18,6 +18,7 @@ class CreateItemReviewsTable extends Migration
             $table->integer('category_id');
             $table->integer('item_id');
             $table->integer('rating');
+            $table->string('name')->nullable();
             $table->string('ip_address');
             $table->string('email')->nullable();
             $table->longText('comment');
