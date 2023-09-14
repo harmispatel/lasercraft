@@ -194,6 +194,14 @@
             </a>
         </li>
 
+        {{-- Customer Quotes --}}
+        <li class="nav-item">
+            <a class="nav-link {{ ($routeName == 'customer.quotes') ? 'active-tab' : '' }}" href="{{ route('customer.quotes') }}">
+                <i class="fa-solid fa-comments {{ ($routeName == 'customer.quotes') ? 'icon-tab' : '' }}"></i>
+            <span>{{ __('Customer Quotes') }}</span>
+            </a>
+        </li>
+
 
         {{-- Schedule Nav --}}
         <li class="nav-item">

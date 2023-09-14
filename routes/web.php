@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CategoryController,DashboardController,ContactController,DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
+use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CategoryController,DashboardController,ContactController, CustomerQuoteController, DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -282,6 +282,11 @@ Route::group(['prefix' => 'client'], function()
         // Shop Schedule
         Route::get('/shop-schedule',[ShopScheduleController::class,'index'])->name('shop.schedule');
         Route::post('/shop-schedule-update',[ShopScheduleController::class,'updateShopSchedule'])->name('update.shop.schedule');
+
+        // Customer Quotes
+        Route::get('/customer-quotes',[CustomerQuoteController::class,'index'])->name('customer.quotes');
+        Route::post('/customer-quote-details',[CustomerQuoteController::class,'quoteDetails'])->name('customer.quote.details');
+        Route::post('/customer-quote-reply',[CustomerQuoteController::class,'quoteReply'])->name('customer.quote.reply');
 
     });
 });
