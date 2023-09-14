@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title')</title>
+    <!-- Favicons -->
+    <link href="{{ asset('public/admin_images/favicons/glob.png') }}" rel="icon">
     {{-- css --}}
     @include('frontend.layouts.frontend-css')
 </head>
@@ -52,7 +54,6 @@
     @include('frontend.layouts.frontend-js')
 
     @yield('page-js')
-
 
 </body>
 

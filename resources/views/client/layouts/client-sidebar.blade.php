@@ -114,7 +114,7 @@
 
                 <li>
                     <a href="{{ route('categories','check_in') }}" class="{{ (($routeName == 'categories') && (isset($routeParams['cat_id']) && $routeParams['cat_id'] == 'check_in')) ? 'active-link' : '' }}">
-                        <span>{{ __('Check In Pages') }}</span>
+                        <span>{{ __('Contact US') }}</span>
                     </a>
                 </li>
 
@@ -204,12 +204,12 @@
         </li>
 
         {{-- Contact Nav --}}
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link {{ ($routeName == 'contact') ? 'active-tab' : '' }}" href="{{ route('contact') }}">
                 <i class="fa-solid fa-address-card {{ ($routeName == 'contact') ? 'icon-tab' : '' }}"></i>
             <span>{{ __('Contact') }}</span>
             </a>
-        </li>
+        </li> --}}
 
         {{-- Logout Nav --}}
         <li class="nav-item">

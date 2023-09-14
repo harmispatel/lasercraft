@@ -334,3 +334,16 @@
 </section> --}}
 
 @endsection
+
+@section('page-js')
+
+<script type="text/javascript">
+
+    // Error Messages
+    @if (Session::has('error'))
+        toastr.error('{{ Session::get('error') }}')
+    @endif
+
+</script>
+
+@endsection

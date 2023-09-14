@@ -1,6 +1,6 @@
 @php
     $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-    $title = ($parent_cat_id == 'pdf_page') ? 'PDF' : ($parent_cat_id == 'check_in' ? 'Check In Pages' : ucfirst($parent_cat_id).'s');
+    $title = ($parent_cat_id == 'pdf_page') ? 'PDF' : ($parent_cat_id == 'check_in' ? 'Contact US' : ucfirst($parent_cat_id).'s');
 
     $shop_id = isset(Auth::user()->hasOneShop->shop['id']) ? Auth::user()->hasOneShop->shop['id'] : '';
 
@@ -437,7 +437,11 @@
                                     <h3>{{ __($title)}}</h3>
                                 </div>
                                 <div class="col-md-6 text-end">
-                                    <a data-bs-toggle="modal" data-bs-target="#addCategoryModal" class="btn btn-sm btn-primary" id="NewCategoryBtn"><i class="bi bi-plus-circle"></i> {{ __('Create') }}</a>
+                                    @if($parent_cat_id == 'check_in' && count($categories) == 1)
+                                        {{-- <button class="btn btn-sm btn-primary" disabled><i class="bi bi-plus-circle"></i> {{ __('Create') }}</button> --}}
+                                    @else
+                                        <a data-bs-toggle="modal" data-bs-target="#addCategoryModal" class="btn btn-sm btn-primary" id="NewCategoryBtn"><i class="bi bi-plus-circle"></i> {{ __('Create') }}</a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -470,7 +474,10 @@
                                                     @endif
                                                 @endif
                                                 <a onclick="editCategory({{ $category->id }})" class="btn btn-sm btn-primary opt_edit_btn"><i class="bi bi-pencil"></i></a>
-                                                <a onclick="deleteCategory({{ $category->id }})" class="btn btn-sm btn-danger opt_del_btn"><i class="bi bi-trash"></i></a>
+                                                @if($parent_cat_id == 'check_in' && count($categories) == 1)
+                                                @else
+                                                    <a onclick="deleteCategory({{ $category->id }})" class="btn btn-sm btn-danger opt_del_btn"><i class="bi bi-trash"></i></a>
+                                                @endif
                                             </div>
                                         </div>
                                     </li>

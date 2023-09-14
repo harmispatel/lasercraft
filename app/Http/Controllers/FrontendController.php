@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{ShopBanner, Category, ItemReview, Items};
+use App\Models\{ShopBanner, Category, CustomerQuote, ItemReview, Items, User};
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
 class FrontendController extends Controller
@@ -197,6 +197,118 @@ class FrontendController extends Controller
             ]);
         }
 
+    }
+
+
+    // Function for Contact US
+    function contactUS()
+    {
+        // Child Categories
+        $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
+        $contact_page = \App\Models\Category::where('category_type','check_in')->first();
+
+        return view('frontend.contact_us',compact(['child_categories','contact_page']));
+    }
+
+
+    // Function for Submit Contact US
+    function submitContactUS(Request $request)
+    {
+        $request->validate([
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'email' => 'required|email',
+            'phone' => 'required|min:10',
+            'company_name' => 'required',
+            'message' => 'required|min:50',
+            'document' => 'mimes:pdf,xls,csv,xlsx,jpg,jpeg,png,psd',
+        ]);
+
+        $shop_settings = getClientSettings();
+
+        // CheckIN Mail Template
+        $quote_mail_form = (isset($shop_settings['check_in_mail_form'])) ? $shop_settings['check_in_mail_form'] : '';
+
+        $firstname = $request->firstname;
+        $lastname = $request->lastname;
+        $customer_mail = $request->email;
+        $phone = $request->phone;
+        $message = $request->message;
+        $company_name = $request->company_name;
+
+        $from_mail = $customer_mail;
+        $subject = "New Customer Quote";
+
+        $user_details = User::where('id',1)->where('user_type',2)->first();
+        $contact_emails = (isset($user_details['contact_emails']) && !empty($user_details['contact_emails'])) ? unserialize($user_details['contact_emails']) : [];
+
+        try
+        {
+            if(count($contact_emails) > 0 && !empty($quote_mail_form))
+            {
+                foreach($contact_emails as $mail)
+                {
+                    $to = $mail;
+
+                    $html = $quote_mail_form;
+                    $html = str_replace('{firstname}',$firstname,$html);
+                    $html = str_replace('{lastname}',$lastname,$html);
+                    $html = str_replace('{phone}',$phone,$html);
+                    $html = str_replace('{company}',$company_name,$html);
+                    $html = str_replace('{message}',$message,$html);
+
+                    $headers = "MIME-Version: 1.0" . "\r\n";
+                    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+
+                    // More headers
+                    $headers .= 'From: <'.$from_mail.'>' . "\r\n";
+
+                    mail($to,$subject,$html,$headers);
+                }
+            }
+
+            // Insert Check In Info
+            $new_customer_quote = new CustomerQuote();
+            $new_customer_quote->firstname = $firstname;
+            $new_customer_quote->lastname = $lastname;
+            $new_customer_quote->email = $customer_mail;
+            $new_customer_quote->phone = $phone;
+            $new_customer_quote->company_name = $company_name;
+            $new_customer_quote->message = $message;
+
+            if($request->hasFile('document'))
+            {
+                $filename = "quote_file_".time().".". $request->file('document')->getClientOriginalExtension();
+                $request->file('document')->move(public_path('client_uploads/customer_docs/'), $filename);
+                $new_customer_quote->document = $filename;
+            }
+
+            $new_customer_quote->save();
+
+            return redirect()->back()->with('success','Message has been Sent SuccessFully....');
+
+        }
+        catch (\Throwable $th)
+        {
+            return redirect()->back()->with('error','Internal Server Error!');
+        }
+    }
+
+
+    // Function for Print Details Page
+    function printsPage($pageID)
+    {
+        try
+        {
+            // Child Categories
+            $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
+            $page_details = Category::where('id',decrypt($pageID))->first();
+            return view('frontend.print_page',compact(['child_categories','page_details']));
+        }
+        catch (\Throwable $th)
+        {
+            return redirect()->route('home')->with('error','Something Went Wrong !');
+        }
     }
 
 }

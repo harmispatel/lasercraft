@@ -346,7 +346,7 @@ class DesignController extends Controller
     {
         $all_data['orders_mail_form_client'] = $request->orders_mail_form_client;
         $all_data['orders_mail_form_customer'] = $request->orders_mail_form_customer;
-        // $all_data['check_in_mail_form'] = $request->check_in_mail_form;
+        $all_data['check_in_mail_form'] = $request->check_in_mail_form;
 
         // Insert or Update Settings
         foreach($all_data as $key => $value)

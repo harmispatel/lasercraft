@@ -12,8 +12,9 @@
     $image_key = $lang_code."_image";
     $name_key = $lang_code."_name";
 
-    $parent_categories = \App\Models\Category::where('parent_id',NULL)->get();
+    $parent_categories = \App\Models\Category::where('parent_id',NULL)->where('category_type','product_category')->get();
 
+    $dynamic_pages = \App\Models\Category::where('category_type','page')->get();
 
     $client_settings = getClientSettings();
 @endphp
@@ -36,7 +37,7 @@
 
                         @if(count($parent_categories) > 0)
                             @foreach ($parent_categories as $parent_cat)
-                                <li class="nav-item dropdown" id="myDropdown">
+                                <li class="nav-item dropdown">
                                     @php
                                         $menu_count = 1;
                                     @endphp
@@ -49,9 +50,24 @@
                             @endforeach
                         @endif
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Shop</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="" data-bs-toggle="dropdown">Custom PRINTS</a>
+                            <ul class="dropdown-menu">
+                                @if(count($dynamic_pages) > 0)
+                                    @foreach ($dynamic_pages as $dpage)
+                                        <li><a class="dropdown-item" href="{{ route('prints.page',encrypt($dpage['id'])) }}">{{ $dpage[$name_key] }}</a></li>
+                                    @endforeach
+                                @endif
+                            </ul>
                         </li>
+
+                        {{-- <li class="nav-item">
+                            <a class="nav-link" href="{{ route('contact.us') }}">Contact US</a>
+                        </li> --}}
+
+                        {{-- <li class="nav-item">
+                            <a class="nav-link" href="#">Shop</a>
+                        </li> --}}
                     </ul>
                 </div>
                 <a class="navbar-brand m-0" href="{{ route('home') }}">

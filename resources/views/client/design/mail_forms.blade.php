@@ -31,15 +31,15 @@
                         </div>
                     </div>
                 </div>
-                {{-- <div class="row mb-4">
+                <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label class="form-label" for="check_in_mail_form">{{ __('Check In Mail Form') }}</label>
+                            <label class="form-label" for="check_in_mail_form">{{ __('Quote Mail Form') }}</label>
                             <textarea name="check_in_mail_form" id="check_in_mail_form" class="form-control editor">{{ (isset($client_settings['check_in_mail_form']) && !empty($client_settings['check_in_mail_form'])) ? $client_settings['check_in_mail_form'] : '' }}</textarea>
-                            <code>Tags : ({shop_logo}, {shop_name}, {firstname}, {lastname}, {phone}, {passport_no}, {room_no}, {nationality}, {age}, {address}, {arrival_date}, {departure_date}, {message})</code>
+                            <code>Tags : ({firstname}, {lastname}, {phone}, {company}, {message})</code>
                         </div>
                     </div>
-                </div> --}}
+                </div>
                 <div class="row mb-4">
                     <div class="col-md-3">
                         <button class="btn btn-success">{{ __('Update')}}</button>

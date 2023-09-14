@@ -60,4 +60,28 @@
         }
     }
 
+
+    .check-in-form {
+        padding: 20px 30px;
+        border-radius: 10px;
+        box-shadow: 6px 6px 6px #cbced1, -6px -6px 6px #fff;
+    }
+
+    .check-in-page .form-control {
+        padding: 10px 18px;
+        box-shadow: inset 5px 5px 5px #cbced1, inset -5px -5px 5px #fff;
+        background-color: #ffffffc7;
+    }
+
+    .check-in-page button {
+        padding: 10px 22px;
+        font-size: 15px;
+        box-shadow: 0px 2px 5px rgb(0 0 0 / 30%);
+        font-weight: 700;
+    }
+
+    .check-in-page textarea {
+        height: calc(100% - 24px);
+    }
+
 </style>

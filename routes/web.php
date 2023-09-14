@@ -31,8 +31,11 @@ Route::get('/',[FrontendController::class,'index'])->name('home');
 Route::get('/collections/{cat_id}',[FrontendController::class,'collectionByCategory'])->name('categories.collections');
 Route::get('/product-details/{item_id}',[FrontendController::class,'productDetails'])->name('product.deatails');
 Route::get('/my-cart',[FrontendController::class,'viewCart'])->name('my.cart');
+Route::get('/contact-us',[FrontendController::class,'contactUS'])->name('contact.us');
+Route::get('/prints/{page_id}',[FrontendController::class,'printsPage'])->name('prints.page');
 Route::post('/send-item-review',[FrontendController::class,'sendItemReview'])->name('send.item.review');
 Route::post('/products-search',[FrontendController::class,'searchProducts'])->name('products.search');
+Route::post('/submit-contact-us',[FrontendController::class,'submitContactUS'])->name('submit.contact.us');
 
 // Auth Routes
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
