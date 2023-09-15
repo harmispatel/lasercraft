@@ -57,7 +57,7 @@
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
                                             <input type="hidden" name="user_id" id="user_id" value="{{ $user->id }}">
-                                            <label for="firstname" class="form-label">{{ __('First Name')}}</label>
+                                            <label for="firstname" class="form-label">{{ __('First Name')}} <span class="text-danger">*</span></label>
                                             <input type="text" name="firstname" id="firstname" class="form-control {{ ($errors->has('firstname')) ? 'is-invalid' : '' }}" value="{{ $user->firstname }}">
                                             @if($errors->has('firstname'))
                                                 <div class="invalid-feedback">
@@ -74,7 +74,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
-                                            <label for="email" class="form-label">{{ __('Email')}}</label>
+                                            <label for="email" class="form-label">{{ __('Email')}} <span class="text-danger">*</span></label>
                                             <input type="text" name="email" id="email" class="form-control {{ ($errors->has('email')) ? 'is-invalid' : '' }}" value="{{ $user->email }}">
                                             @if($errors->has('email'))
                                                 <div class="invalid-feedback">
@@ -96,11 +96,8 @@
                                     @endphp
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
-                                            <label for="contact_emails" class="form-label">{{ __('Contact Emails')}}</label>
+                                            <label for="contact_emails" class="form-label">{{ __('Contact Email')}}</label>
                                             <input type="text" name="contact_emails" id="contact_emails" class="form-control" value="{{ $emails }}">
-                                            <code>Notes</code> <br>
-                                            <code>1) enter mail id's in this format : abc@gmail.com,xyz@gmail.com</code> <br>
-                                            <code>2) Space Not Allowed after email</code>
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
@@ -127,6 +124,52 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
+                                            <label for="mobile_no" class="form-label">{{ __('Mobile No.') }} <span class="text-danger">*</span></label>
+                                            <input type="text" name="mobile_no" id="mobile_no" class="form-control {{ ($errors->has('mobile_no')) ? 'is-invalid' : '' }}" value="{{ $user->mobile }}">
+                                            @if($errors->has('mobile_no'))
+                                                <div class="invalid-feedback">
+                                                    {{ $errors->first('mobile_no') }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="gst_number" class="form-label">{{ __('GST No.') }}</label>
+                                            <input type="text" name="gst_number" id="gst_number" class="form-control {{ ($errors->has('gst_number')) ? 'is-invalid' : '' }}" value="{{ $user->gst_number }}" maxlength="15">
+                                            @if($errors->has('gst_number'))
+                                                <div class="invalid-feedback">
+                                                    {{ $errors->first('gst_number') }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="sgst" class="form-label">{{ __('SGST (%)') }}</label>
+                                            <input type="text" name="sgst" id="sgst" class="form-control" value="{{ (isset($user->sgst) && !empty($user->sgst)) ? $user->sgst : 0 }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="cgst" class="form-label">{{ __('CGST (%)') }}</label>
+                                            <input type="text" name="cgst" id="cgst" class="form-control" value="{{ (isset($user->cgst) && !empty($user->cgst)) ? $user->cgst : 0 }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="vat_id" class="form-label">{{ __('VAT ID')}}</label>
+                                            <input type="text" name="vat_id" id="vat_id" value="{{ $user->vat_id }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="gemi_id" class="form-label">{{ __('G.E.M.I ID')}}</label>
+                                            <input type="text" name="gemi_id" id="gemi_id" class="form-control" value="{{ $user->gemi_id }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
                                             <label for="profile_picture" class="form-label">{{ __('Profile Picture')}}</label>
                                             <input type="file" name="profile_picture" id="profile_picture" class="form-control {{ ($errors->has('profile_picture')) ? 'is-invalid' : '' }}" value="">
                                             @if($errors->has('profile_picture'))
@@ -147,6 +190,17 @@
                                                     <img src="{{ asset('public/admin_images/not-found/not-found2.png') }}" width="100">
                                                 @endif
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">{{ __('Address')}} <span class="text-danger">*</span></label>
+                                            <textarea name="address" id="address" rows="5" class="form-control {{ ($errors->has('address')) ? 'is-invalid' : '' }}">{{ $user->address }}</textarea>
+                                            @if($errors->has('address'))
+                                                <div class="invalid-feedback">
+                                                    {{ $errors->first('address') }}
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

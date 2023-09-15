@@ -795,10 +795,13 @@ class UserController extends Controller
         else
         {
             $request->validate([
-                'firstname'             =>      'required',
-                'email'                 =>      'required|email|unique:users,email,'.$request->user_id,
-                'confirm_password'      =>      'same:password',
-                'profile_picture'       =>      'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
+                'firstname'         =>      'required',
+                'email'             =>      'required|email|unique:users,email,'.$request->user_id,
+                'confirm_password'  =>      'same:password',
+                'profile_picture'   =>      'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
+                'address'           =>      'required',
+                'mobile_no'         =>      'required',
+                'gst_number'        => 'nullable|min:15',
             ]);
 
             $explode_emails = explode(',',str_replace(' ','',$request->contact_emails));
@@ -809,6 +812,13 @@ class UserController extends Controller
             $user->lastname = $request->lastname;
             $user->email = $request->email;
             $user->contact_emails = $contact_emails;
+            $user->mobile = $request->mobile_no;
+            $user->gst_number = $request->gst_number;
+            $user->sgst = $request->sgst;
+            $user->cgst = $request->cgst;
+            $user->vat_id = $request->vat_id;
+            $user->gemi_id = $request->gemi_id;
+            $user->address = $request->address;
 
             if(!empty($request->password))
             {

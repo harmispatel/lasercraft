@@ -156,7 +156,6 @@ class CustomerQuoteController extends Controller
             $quote_id = $request->quote_id;
             $price = $request->price;
             $message = $request->message;
-            $subject = "Customer Quotation";
 
             $shop_settings = getClientSettings();
             $currency = (isset($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'USD';
@@ -171,25 +170,13 @@ class CustomerQuoteController extends Controller
 
             if(!empty($from_email) && !empty($to_email))
             {
-                $html = '';
-                $html .= '<h2 style="text-align:center;">';
-                    $html .= '<strong>Mahantam Laser Crafts</strong>';
-                $html .= '</h2>';
-                $html .= '<p>';
-                    $html .= $message;
-                $html .= '</p>';
-                $html .= '<p>';
-                    $html .= 'Your Quotation Final Price is : '. Currency::currency($currency)->format($price);
-                $html .= '</p>';
-                $html .= '<p style="text-align:center;">© [year] Copyright all Rights reserved by <a href="https://mahantamlasercrafts.com.au/" target="_blank"><strong>Mahantam Laser Crafts</strong></a></p>';
+                $details['user'] = $user_details;
+                $details['quote_details'] = $quote_details;
+                $details['price'] = $price;
+                $details['message'] = $message;
+                $details['currency'] = $currency;
+                \Mail::to($to_email)->send(new \App\Mail\QuoteReplyMail($details));
 
-                $headers = "MIME-Version: 1.0" . "\r\n";
-                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-
-                // More headers
-                $headers .= 'From: <'.$from_email.'>' . "\r\n";
-
-                mail($to_email,$subject,$html,$headers);
             }
 
             // Insert Customer Quote Reply
