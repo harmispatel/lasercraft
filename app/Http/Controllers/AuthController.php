@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -20,6 +21,55 @@ class AuthController extends Controller
     {
         return view('auth.login');
     }
+
+
+    /**
+     * Show Register Form
+     */
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+
+    /**
+     * Register the User
+     */
+    public function register(Request $request)
+    {
+        $request->validate([
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'confirm_password' => 'required|same:password',
+        ]);
+
+        $input = $request->except(['_token','password','confirm_password']);
+        $input['password'] = Hash::make($request->password);
+        $input['user_type'] = 3;
+
+        $user = $this->create($input);
+
+        if($user){
+            Auth::login($user);
+
+            $username = $user['firstname'] ." ". $user["lastname"];
+
+            return redirect()->route('home')->with('success','Hello, '. $username);
+        }
+        else{
+            return redirect()->back()->with('error','Something Went Wrong!');
+        }
+
+    }
+
+
+    public function create(array $input)
+    {
+        return User::create($input);
+    }
+
 
 
     /**
@@ -44,7 +94,7 @@ class AuthController extends Controller
                 $username = Auth::user()->firstname." ".Auth::user()->lastname;
                 return redirect()->route('admin.dashboard')->with('success', 'Welcome '.$username);
             }
-            else
+            elseif(Auth::user()->user_type == 2)
             {
                 $user_verify = (isset(Auth::user()->user_verify) && Auth::user()->user_verify == 1) ? Auth::user()->user_verify : 0;
                 $user_status = (isset(Auth::user()->status) && Auth::user()->status == 1) ? Auth::user()->status : 0;
@@ -58,6 +108,10 @@ class AuthController extends Controller
                 $username = Auth::user()->firstname." ".Auth::user()->lastname;
                 return redirect()->route('client.dashboard')->with('success', 'Welcome '.$username);
             }
+            else{
+                $username = Auth::user()->firstname." ".Auth::user()->lastname;
+                return redirect()->route('home')->with('success','Hello, '. $username);
+            }
             // return back()->with('error', 'Kindly Login with Active Admin User.');
         }
 
@@ -70,7 +124,12 @@ class AuthController extends Controller
      */
     public function logout()
     {
-        Auth::logout();
-        return redirect()->route('login');
+        if(Auth::user()->user_type == 3){
+            Auth::logout();
+            return redirect()->route('home');
+        }else{
+            Auth::logout();
+            return redirect()->route('login');
+        }
     }
 }

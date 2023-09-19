@@ -16,6 +16,8 @@
 {{-- <link rel="stylesheet" type="text/css" href="{{asset('public/frontend/css/font-awsome.min.css')}}"> --}}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
 
+<link href="{{ asset('public/admin/assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+
 
 
 <!-- font-family -->

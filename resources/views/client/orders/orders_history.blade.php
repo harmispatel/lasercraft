@@ -32,13 +32,13 @@
     <section class="section dashboard">
         <div class="row">
             <div class="col-md-12 mb-2 text-end d-flex align-items-center justify-content-end">
-                <div class="orderhisexp">
+                {{-- <div class="orderhisexp">
                     <a class="btn btn-sm btn-primary me-2" onclick="exportOrderHistory()" data-bs-toggle="tooltip" title="Export Order History"><i class="fa-sharp fa-solid fa-file-export icon-tab"></i> Export</a>
                     <form action="{{ route('orders.history.export') }}" method="POST" id="orderhistoryExportForm">
                         @csrf
                         <input type="hidden" name="day_value" id="day_value" value="{{ $day_filter }}">
                     </form>
-                </div>
+                </div> --}}
                 <a class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Clear Filters." href="{{ route('client.orders.history') }}"><i class="bi bi-trash"></i> Clear</a>
             </div>
             <div class="col-md-12">
@@ -131,7 +131,7 @@
                                                 {{ date('d-m-Y h:i:s',strtotime($order->created_at)) }}
                                             </td>
                                             <td>
-                                                <a href="{{ route('view.order',encrypt($order->id)) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View Order"><i class="bi bi-eye"></i></a>
+                                                {{-- <a href="{{ route('view.order',encrypt($order->id)) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View Order"><i class="bi bi-eye"></i></a> --}}
                                             </td>
                                         </tr>
                                     @endforeach

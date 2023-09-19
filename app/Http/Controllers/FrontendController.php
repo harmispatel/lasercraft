@@ -48,16 +48,6 @@ class FrontendController extends Controller
     }
 
 
-    // Function for View Customer Cart
-    function viewCart()
-    {
-        // Child Categories
-        $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
-
-        return view('frontend.view_cart',compact(['child_categories']));
-    }
-
-
     // Function for Send Item Review
     public function sendItemReview(Request $request)
     {

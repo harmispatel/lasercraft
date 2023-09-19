@@ -14,6 +14,7 @@
     $description_key = $lang_code."_description";
     $image_key = $lang_code."_image";
     $name_key = $lang_code."_name";
+    $title_key = $lang_code."_title";
 
     $item_price = (isset($item_details->itemPrices) && count($item_details->itemPrices) > 0) ? $item_details->itemPrices[0]->price : 0.00;
 @endphp
@@ -80,58 +81,66 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="item_detail_info">
-                        <div class="item_name">
-                            <h3>{{ $item_details[$name_key] }}</h3>
-                            <label>{{ Currency::currency($default_currency)->format($item_price); }}</label>
-                        </div>
-                        {{-- <p>Tax included.</p>
-                        <div class="color_opation">
-                            <div class="d-flex align-items">
-                                <h4>Color : </h4>
-                                <ul>
-                                    <li>
-                                        <label class="bg-dark"></label>
-                                    </li>
-                                    <li>
-                                        <label class="bg-info"></label>
-                                    </li>
-                                    <li>
-                                        <label class="bg-danger"></label>
-                                    </li>
-                                </ul>
+                    <form id="cartForm" method="POST" action="{{ route('cart.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="item_detail_info">
+                            <div class="item_name">
+                                <h3>{{ $item_details[$name_key] }}</h3>
+                                <label>{{ Currency::currency($default_currency)->format($item_price); }}</label>
+                                <input type="hidden" name="item_price" id="item_price" value="{{ $item_price }}">
+                                <input type="hidden" name="item_id" id="item_id" value="{{ $item_details['id'] }}">
                             </div>
-                        </div> --}}
-                        {{-- <div class="design_opation">
-                            <h4>Design</h4>
-                            <div class="design_opation_inr">
-                                <label>Greatest Day By Par</label>
-                                <label>Blink if you think i am the best dad</label>
-                                <label>Man Myth Legend</label>
-                                <label>Own personalisation</label>
+                            @php
+                                // Options
+                                $option_ids = (isset($item_details['options']) && !empty($item_details['options'])) ? unserialize($item_details['options']) : [];
+                            @endphp
+                            @if(count($option_ids) > 0)
+                                @foreach($option_ids as $outer_key => $opt_id)
+                                    @php
+                                        $opt_dt = App\Models\Option::with(['optionPrices'])->where('id',$opt_id)->first();
+                                        $enable_price = (isset($opt_dt['enabled_price'])) ? $opt_dt['enabled_price'] : '';
+                                        $option_prices = (isset($opt_dt['optionPrices'])) ? $opt_dt['optionPrices'] : [];
+                                    @endphp
+                                    <div class="design_opation">
+                                        <h4>{{ $opt_dt[$title_key] }}</h4>
+                                        <div class="design_opation_inr">
+                                            @if(count($option_prices) > 0)
+                                                @foreach($option_prices as $key => $option_price)
+                                                    @php
+                                                        $opt_price = Currency::currency($default_currency)->format($option_price['price']);
+                                                        $opt_price_label = (isset($option_price[$name_key])) ? $option_price[$name_key] : "";
+                                                    @endphp
+                                                    <div class="opt_radio_box">
+                                                        <input type="radio" id="opt_{{ $outer_key }}_{{ $key }}" name="attr_option[{{ $outer_key }}]" class="d-none" value="{{ $option_price['id'] }}" />
+                                                        <label class="btn btn-default" for="opt_{{ $outer_key }}_{{ $key }}">{{ $opt_price_label }}</label>
+                                                    </div>
+                                                @endforeach
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
+                            <div class="add_design_text mb-3">
+                                <div class="from-group">
+                                    <label class="mb-2">Personalised Message</label>
+                                    <textarea class="form-control" name="personalised_message" placeholder="Add your Text" rows="3"></textarea>
+                                </div>
                             </div>
-                        </div> --}}
-                        <div class="add_design_text mb-3">
-                            <div class="from-group">
-                                <label class="mb-2">Personalised Message</label>
-                                <textarea class="form-control" placeholder="Add your Text" rows="3"></textarea>
+                            <div class="add_cart_group">
+                                <div class="quantity">
+                                    <button class="btn"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="form-control" name="quantity" type="text" min="1" value="1" />
+                                    <button class="btn"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <button class="btn add_cart_btn"><i class="fa-solid fa-cart-shopping me-2"></i>Add to Cart</button>
                             </div>
-                        </div>
-                        <div class="add_cart_group">
-                            <div class="quantity">
-                                <button class="btn"><i class="fa-solid fa-minus"></i></button>
-                                <input class="form-control" type="text" min={1} value="1" />
-                                <button class="btn"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                            <button class="btn add_cart_btn"><i class="fa-solid fa-cart-shopping me-2"></i>Add to
-                                Cart</button>
-                        </div>
 
-                        <div class="des_text">
-                            <h4>Description</h4>
-                            <div>{!! $item_details[$description_key] !!}</div>
+                            <div class="des_text">
+                                <h4>Description</h4>
+                                <div>{!! $item_details[$description_key] !!}</div>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>

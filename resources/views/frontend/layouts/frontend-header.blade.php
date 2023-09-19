@@ -80,8 +80,32 @@
                 <div class="header_right">
                     <ul>
                         <li><a class="icon" data-bs-toggle="modal" data-bs-target="#globalSearchModal"><i class="fa-solid fa-search"></i></a></li>
-                        <li><a class="icon" href="#"><i class="fa-solid fa-user"></i></a></li>
-                        <li><a class="icon" href="{{ route('my.cart') }}"><i class="fa-solid fa-bag-shopping"></i></a></li>
+
+                        @if(Auth::user() && Auth::user()->user_type == 3)
+                            <li>
+                                <div class="login_user">
+                                    <div class="user_name">
+                                        @if(!empty(Auth::user()->image) && file_exists('public/admin_uploads/users/'.Auth::user()->image))
+                                            <img src="{{ asset('public/admin_uploads/users/'.Auth::user()->image) }}" width="40px" height="40px" style="border-radius: 50%">
+                                        @else
+                                            <img src="{{ asset('public/admin_images/demo_images/profiles/profile1.jpg') }}" width="40px" height="40px" style="border-radius: 50%">
+                                        @endif
+                                        <h3>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</h3>
+                                    </div>
+                                    <div class="user_dropdown">
+                                        <ul>
+                                            <li><a href="#">Dashboard</a></li>
+                                            <li><a href="{{ route('logout') }}">Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                        @else
+                            <li>
+                                <a class="icon" href="{{ route('login') }}"><i class="fa-solid fa-user"></i></a>
+                            </li>
+                        @endif
+                        <li class="position-relative"><a class="icon" href="{{ route('cart.list') }}"><i class="fa-solid fa-bag-shopping"></i></a> <span class="cart-qty">{{ Cart::getTotalQuantity()}}</span></li>
                     </ul>
                 </div>
             </div>

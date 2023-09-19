@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 use App\Exports\OrdersHistoryExport;
+use App\Models\Languages;
+use App\Models\OptionPrice;
 
 class OrderController extends Controller
 {
@@ -37,6 +39,19 @@ class OrderController extends Controller
         $order_setting = getOrderSettings();
         $auto_print = (isset($order_setting['auto_print']) && !empty($order_setting['auto_print'])) ? $order_setting['auto_print'] : 0;
         $enable_print = (isset($order_setting['enable_print']) && !empty($order_setting['enable_print'])) ? $order_setting['enable_print'] : 0;
+
+        // Language Settings
+        $language_settings = clientLanguageSettings();
+        $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
+
+        // Language Details
+        $language_detail = Languages::where('id',$primary_lang_id)->first();
+        $lang_code = isset($language_detail->code) ? $language_detail->code : '';
+
+        $description_key = $lang_code."_description";
+        $image_key = $lang_code."_image";
+        $name_key = $lang_code."_name";
+        $title_key = $lang_code."_title";
 
         // Orders
         $orders = Order::whereIn('order_status',['pending','accepted'])->orderBy('id','DESC')->get();
@@ -83,41 +98,17 @@ class OrderController extends Controller
                             $html .= '<li><strong>'.__('Order Date').' : </strong>'.date('d-m-Y h:i:s',strtotime($order->created_at)).'</li>';
                             $html .= '<li><strong>'.__('Order Type').' : </strong>'.$order->checkout_type.'</li>';
                             $html .= '<li><strong>'.__('Payment Method').' : </strong>'.$order->payment_method.'</li>';
+                            $html .= '<li><strong>'.__('Customer').' : </strong>'.$order->firstname.' '.$order->lastname.'</li>';
+                            $html .= '<li><strong>'.__('Phone No.').' : </strong> '.$order->phone.'</li>';
+                            $html .= '<li><strong>'.__('Email').' : </strong> '.$order->email.'</li>';
+                            $html .= '<li><strong>'.__('Comments').' : </strong> '.$order->instructions.'</li>';
 
-                            if($order->checkout_type == 'takeaway')
+                            if($order->checkout_type == 'delivery')
                             {
-                                $html .= '<li><strong>'.__('Customer').' : </strong>'.$order->firstname.' '.$order->lastname.'</li>';
-                                $html .= '<li><strong>'.__('Telephone').' : </strong> '.$order->phone.'</li>';
-                                $html .= '<li><strong>'.__('Email').' : </strong> '.$order->email.'</li>';
-                            }
-                            elseif($order->checkout_type == 'table_service')
-                            {
-                                $html .= '<li><strong>'.__('Table No.').' : </strong> '.$order->table.'</li>';
-                            }
-                            elseif($order->checkout_type == 'office_service')
-                            {
-                                $html .= '<li><strong>'.__('Building').' : </strong> '.$order->building.'</li>';
-                                $html .= '<li><strong>'.__('Office No.').' : </strong> '.$order->office_no.'</li>';
-                            }
-                            elseif($order->checkout_type == 'room_delivery')
-                            {
-                                $html .= '<li><strong>'.__('Customer').' : </strong>'.$order->firstname.' '.$order->lastname.'</li>';
-                                $html .= '<li><strong>'.__('Room No.').' : </strong> '.$order->room.'</li>';
-                                if(!empty($order->delivery_time ))
-                                {
-                                    $html .= '<li><strong>'.__('Delivery Time').' : </strong> '.$order->delivery_time.'</li>';
-                                }
-                            }
-                            elseif($order->checkout_type == 'delivery')
-                            {
-                                $html .= '<li><strong>'.__('Customer').' : </strong>'.$order->firstname.' '.$order->lastname.'</li>';
-                                $html .= '<li><strong>'.__('Telephone').' : </strong> '.$order->phone.'</li>';
-                                $html .= '<li><strong>'.__('Email').' : </strong> '.$order->email.'</li>';
                                 $html .= '<li><strong>'.__('Address').' : </strong> '.$order->address.'</li>';
                                 $html .= '<li><strong>'.__('Floor').' : </strong> '.$order->floor.'</li>';
                                 $html .= '<li><strong>'.__('Door Bell').' : </strong> '.$order->door_bell.'</li>';
                                 $html .= '<li><strong>'.__('Google Map').' : </strong> <a href="https://maps.google.com?q='.$order->address.'" target="_blank">Address Link</a></li>';
-                                $html .= '<li><strong>'.__('Comments').' : </strong> '.$order->instructions.'</li>';
                             }
 
                         $html .= '</ul>';
@@ -181,19 +172,25 @@ class OrderController extends Controller
                         $html .= '<div class="row">';
                             if(count($order->order_items) > 0)
                             {
-                                $html .= '<div class="col-md-8">';
+                                $html .= '<div class="col-md-12">';
                                     $html .= '<table class="table">';
                                         foreach ($order->order_items as $ord_item)
                                         {
                                             $sub_total = ( $ord_item['sub_total'] / $ord_item['item_qty']);
-                                            $option = unserialize($ord_item['options']);
+                                            $options = (isset($ord_item['options']) && !empty($ord_item['options'])) ? unserialize($ord_item['options']) : [];
 
                                             $html .= '<tr>';
                                                 $html .= '<td>';
                                                     $html .= '<b>'.$ord_item['item_qty'].' x '.$ord_item['item_name'].'</b>';
-                                                    if(!empty($option))
+                                                    if(count($options) > 0)
                                                     {
-                                                        $html .= '<br> '.implode(', ',$option);
+                                                        foreach ($options as $option)
+                                                        {
+                                                            $option_price = OptionPrice::with(['option'])->where('id',$option)->first();
+                                                            $option_name = (isset($option_price['option'][$title_key])) ? $option_price['option'][$title_key] : '';
+                                                            $price_name = (isset($option_price[$name_key])) ? $option_price[$name_key] : '';
+                                                            $html .= '<p class="m-0"><strong> - '.$option_name.' :</strong> '.$price_name.'</p>';
+                                                        }
                                                     }
                                                 $html .= '</td>';
                                                 $html .= '<td width="25%" class="text-end">'.Currency::currency($currency)->format($sub_total).'</td>';
@@ -565,203 +562,11 @@ class OrderController extends Controller
         $order_id = $request->order_id;
         try
         {
-            // Shop ID
-            $shop_id = (isset(Auth::user()->hasOneShop->shop['id'])) ? Auth::user()->hasOneShop->shop['id'] : '';
-            $shop_name = isset(Auth::user()->hasOneShop->shop['name']) ? Auth::user()->hasOneShop->shop['name'] : '';
-            $shop_url = (isset(Auth::user()->hasOneShop->shop['shop_slug'])) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-            $shop_slug = (isset(Auth::user()->hasOneShop->shop['shop_slug'])) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
-            $shop_url = asset($shop_url);
-            $shop_name = '<a href="'.$shop_url.'">'.$shop_name.'</a>';
-            $shop_logo = (isset(Auth::user()->hasOneShop->shop['logo'])) ? Auth::user()->hasOneShop->shop['logo'] : '';
-            $shop_logo = '<img src="'.$shop_logo.'" width="200">';
-
             // Update Order Status
             $order = Order::find($order_id);
             $order->order_status = 'accepted';
             $order->is_new = 0;
             $order->update();
-
-            // Get Shop Settings
-            $shop_settings = getClientSettings($shop_id);
-            $orders_mail_form_customer = (isset($shop_settings['orders_mail_form_customer'])) ? $shop_settings['orders_mail_form_customer'] : '';
-
-            // Shop Currency
-            $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'EUR';
-
-            // Get Contact Emails
-            $shop_user = UserShop::with(['user'])->where('shop_id',$shop_id)->first();
-            $contact_emails = (isset($shop_user->user['contact_emails']) && !empty($shop_user->user['contact_emails'])) ? unserialize($shop_user->user['contact_emails']) : '';
-
-            // Sent Mail to Customer
-            if($order->id)
-            {
-                $order_items = (isset($order->order_items) && count($order->order_items) > 0) ? $order->order_items : [];
-                $discount_type = (isset($order->discount_type) && !empty($order->discount_type)) ? $order->discount_type : 'percentage';
-
-                $checkout_type =  (isset($order->checkout_type)) ? $order->checkout_type : '';
-                $payment_method =  (isset($order->payment_method)) ? $order->payment_method : '';
-
-                $from_email = (isset($order->email)) ? $order->email : '';
-
-                if($checkout_type == 'takeaway' || $checkout_type == 'delivery')
-                {
-                    if(!empty($from_email) && count($contact_emails) > 0 && !empty($orders_mail_form_customer))
-                    {
-                        $to = $from_email;
-                        $from = $contact_emails[0];
-                        $subject = "Order Placed";
-                        $fname = (isset($order->firstname)) ? $order->firstname : '';
-                        $lname = (isset($order->lastname)) ? $order->lastname : '';
-                        $estimated_time = (isset($order->estimated_time)) ? $order->estimated_time : '';
-
-                        $message = $orders_mail_form_customer;
-                        $message = str_replace('{shop_logo}',$shop_logo,$message);
-                        $message = str_replace('{shop_name}',$shop_name,$message);
-                        $message = str_replace('{firstname}',$fname,$message);
-                        $message = str_replace('{lastname}',$lname,$message);
-                        $message = str_replace('{order_id}',$order->id,$message);
-                        $message = str_replace('{order_type}',$checkout_type,$message);
-                        $message = str_replace('{payment_method}',$payment_method,$message);
-                        $message = str_replace('{order_status}','Accepted',$message);
-                        $message = str_replace('{estimated_time}',$estimated_time,$message);
-
-                        // Order Items
-                        $order_html  = "";
-                        $order_html .= '<div>';
-                            $order_html .= '<table style="width:100%; border:1px solid gray;border-collapse: collapse;">';
-                                $order_html .= '<thead style="background:lightgray; color:white">';
-                                    $order_html .= '<tr style="text-transform: uppercase!important;    font-weight: 700!important;">';
-                                        $order_html .= '<th style="text-align: left!important;width: 60%;padding:10px">Item</th>';
-                                        $order_html .= '<th style="text-align: center!important;padding:10px">Qty.</th>';
-                                        $order_html .= '<th style="text-align: right!important;padding:10px">Item Total</th>';
-                                    $order_html .= '</tr>';
-                                $order_html .= '</thead>';
-                                $order_html .= '<tbody style="font-weight: 600!important;">';
-
-                                    if(count($order_items) > 0)
-                                    {
-                                        foreach($order_items as $order_item)
-                                        {
-                                            $item_dt = itemDetails($order_item['item_id']);
-                                            $item_image = (isset($item_dt['image']) && !empty($item_dt['image']) && file_exists('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_dt['image'])) ? asset('public/client_uploads/shops/'.$shop_slug.'/items/'.$item_dt['image']) : asset('public/client_images/not-found/no_image_1.jpg');
-                                            $options_array = (isset($order_item['options']) && !empty($order_item['options'])) ? unserialize($order_item['options']) : '';
-                                            if(count($options_array) > 0)
-                                            {
-                                                $options_array = implode(', ',$options_array);
-                                            }
-
-                                            $order_html .= '<tr>';
-
-                                                $order_html .= '<td style="text-align: left!important;padding:10px; border-bottom:1px solid gray;">';
-                                                    $order_html .= '<div style="align-items: center!important;display: flex!important;">';
-                                                        $order_html .= '<a style="display: inline-block;
-                                                        flex-shrink: 0;position: relative;border-radius: 0.75rem;">';
-                                                            $order_html .= '<span style="width: 50px;
-                                                            height: 50px;display: flex;
-                                                            align-items: center;
-                                                            justify-content: center;
-                                                            font-weight: 500;background-repeat: no-repeat;
-                                                            background-position: center center;
-                                                            background-size: cover;
-                                                            border-radius: 0.75rem; background-image:url('.$item_image.')"></span>';
-                                                        $order_html .= '</a>';
-                                                        $order_html .= '<div style="display: block;    margin-left: 3rem!important;">';
-                                                            $order_html .= '<a style="font-weight: 700!important;color: #7e8299;
-                                                            ">'.$order_item->item_name.'</a>';
-
-                                                            if(!empty($options_array))
-                                                            {
-                                                                $order_html .= '<div style="color: #a19e9e;display: block;">'.$options_array.'</div>';
-                                                            }
-                                                            else
-                                                            {
-                                                                $order_html .= '<div style="color: #a19e9e;display: block;"></div>';
-                                                            }
-
-                                                        $order_html .= '</div>';
-                                                    $order_html .= '</div>';
-                                                $order_html .= '</td>';
-
-                                                $order_html .= '<td style="text-align: center!important;padding:10px; border-bottom:1px solid gray;">';
-                                                    $order_html .= $order_item['item_qty'];
-                                                $order_html .= '</td>';
-
-                                                $order_html .= '<td style="text-align: right!important;padding:10px; border-bottom:1px solid gray;">';
-                                                    $order_html .= Currency::currency($currency)->format($order_item['sub_total']);
-                                                $order_html .= '</td>';
-
-                                            $order_html .= '</tr>';
-                                        }
-                                    }
-
-                                $order_html .= '</tbody>';
-                            $order_html .= '</table>';
-                        $order_html .= '</div>';
-                        $message = str_replace('{items}',$order_html,$message);
-
-                        // Order Total
-                        $order_total_html = "";
-                                $order_total_html .= '<div>';
-                                    $order_total_html .= '<table style="width:50%; border:1px solid gray;border-collapse: collapse;">';
-                                        $order_total_html .= '<tbody style="font-weight: 700!important;">';
-                                            $order_total_html .= '<tr>';
-                                                $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">Sub Total : </td>';
-                                                $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">'.Currency::currency($currency)->format($order->order_subtotal).'</td>';
-                                            $order_total_html .= '</tr>';
-
-                                            if($order->discount_per > 0)
-                                            {
-                                                $order_total_html .= '<tr>';
-                                                    $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">Discount : </td>';
-                                                    if($order->discount_per == 'fixed')
-                                                    {
-                                                        $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">- '.Currency::currency($currency)->format($order->discount_per).'</td>';
-                                                    }
-                                                    else
-                                                    {
-                                                        $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">- '.$order->discount_per.'%</td>';
-                                                    }
-                                                $order_total_html .= '</tr>';
-                                            }
-
-                                            if($order->cgst > 0 && $order->sgst > 0)
-                                            {
-                                                $gst_amt = $order->cgst + $order->sgst;
-                                                $gst_amt = $order->gst_amount / $gst_amt;
-
-                                                $order_total_html .= '<tr>';
-                                                    $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">'.__('CGST.').' ('.$order->cgst.'%)</td>';
-                                                    $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">+ '.Currency::currency($currency)->format($order->cgst * $gst_amt).'</td>';
-                                                $order_total_html .= '</tr>';
-                                                $order_total_html .= '<tr>';
-                                                    $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">'.__('SGST.').' ('.$order->sgst.'%)</td>';
-                                                    $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">+ '.Currency::currency($currency)->format($order->sgst * $gst_amt).'</td>';
-                                                $order_total_html .= '</tr>';
-                                            }
-
-                                            $order_total_html .= '<tr>';
-                                                $order_total_html .= '<td style="padding:10px;">Total : </td>';
-                                                $order_total_html .= '<td style="padding:10px;">';
-                                                    $order_total_html .= Currency::currency($currency)->format($order->order_total);
-                                                $order_total_html .= '</td>';
-                                            $order_total_html .= '</tr>';
-
-                                        $order_total_html .= '</tbody>';
-                                    $order_total_html .= '</table>';
-                                $order_total_html .= '</div>';
-                                $message = str_replace('{total}',$order_total_html,$message);
-
-                        $headers = "MIME-Version: 1.0" . "\r\n";
-                        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-
-                        // More headers
-                        $headers .= 'From: <'.$from.'>' . "\r\n";
-
-                        mail($to,$subject,$message,$headers);
-
-                    }
-                }
-            }
 
             return response()->json([
                 'success' => 1,

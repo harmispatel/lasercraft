@@ -1,4 +1,18 @@
 @php
+
+    // Language Settings
+    $language_settings = clientLanguageSettings();
+    $primary_lang_id = isset($language_settings['primary_language']) ? $language_settings['primary_language'] : '';
+
+    // Language Details
+    $language_detail = App\Models\Languages::where('id',$primary_lang_id)->first();
+    $lang_code = isset($language_detail->code) ? $language_detail->code : '';
+
+    $description_key = $lang_code."_description";
+    $image_key = $lang_code."_image";
+    $name_key = $lang_code."_name";
+    $title_key = $lang_code."_title";
+
     $shop_settings = getClientSettings();
 
     // Order Settings
@@ -81,30 +95,15 @@
                                         <li><strong>{{ __('Order Date') }} : </strong>{{ date('d-m-Y h:i:s',strtotime($order->created_at)) }}</li>
                                         <li><strong>{{ __('Order Type') }} : </strong>{{ $order->checkout_type }}</li>
                                         <li><strong>{{ __('Payment Method') }} : </strong>{{ $order->payment_method }}</li>
-                                        @if($order->checkout_type == 'takeaway')
-                                            <li><strong>{{ __('Customer') }} : </strong> {{ $order->firstname }} {{ $order->lastname }}</li>
-                                            <li><strong>{{ __('Telephone') }} : </strong> {{ $order->phone }}</li>
-                                            <li><strong>{{ __('Email') }} : </strong> {{ $order->email }}</li>
-                                        @elseif($order->checkout_type == 'table_service')
-                                            <li><strong>{{ __('Table No.') }} : </strong> {{ $order->table }}</li>
-                                        @elseif($order->checkout_type == 'office_service')
-                                            <li><strong>{{ __('Building') }} : </strong> {{ $order->building }}</li>
-                                            <li><strong>{{ __('Office No.') }} : </strong> {{ $order->office_no }}</li>
-                                        @elseif($order->checkout_type == 'room_delivery')
-                                            <li><strong>{{ __('Customer') }} : </strong> {{ $order->firstname }} {{ $order->lastname }}</li>
-                                            <li><strong>{{ __('Room No.') }} : </strong> {{ $order->room }}</li>
-                                            @if(!empty($order->delivery_time ))
-                                                <li><strong>{{ __('Delivery Time') }} : </strong> {{ $order->delivery_time }}</li>
-                                            @endif
-                                        @elseif($order->checkout_type == 'delivery')
-                                            <li><strong>{{ __('Customer') }} : </strong> {{ $order->firstname }} {{ $order->lastname }}</li>
-                                            <li><strong>{{ __('Telephone') }} : </strong> {{ $order->phone }}</li>
-                                            <li><strong>{{ __('Email') }} : </strong> {{ $order->email }}</li>
+                                        <li><strong>{{ __('Customer') }} : </strong> {{ $order->firstname }} {{ $order->lastname }}</li>
+                                        <li><strong>{{ __('Phone No.') }} : </strong> {{ $order->phone }}</li>
+                                        <li><strong>{{ __('Email') }} : </strong> {{ $order->email }}</li>
+                                        <li><strong>{{ __('Comments') }} : </strong> {{ $order->instructions }}</li>
+                                        @if($order->checkout_type == 'delivery')
                                             <li><strong>{{ __('Address') }} : </strong> {{ $order->address }}</li>
                                             <li><strong>{{ __('Floor') }} : </strong> {{ $order->floor }}</li>
                                             <li><strong>{{ __('Door Bell') }} : </strong> {{ $order->door_bell }}</li>
                                             <li><strong>{{ __('Google Map') }} : </strong> <a href="https://maps.google.com?q={{ $order->address }}" target="_blank">Address Link</a></li>
-                                            <li><strong>{{ __('Comments') }} : </strong> {{ $order->instructions }}</li>
                                         @endif
                                     </ul>
                                 </div>
@@ -155,18 +154,25 @@
                                 <div class="order-items">
                                     <div class="row">
                                         @if(count($order->order_items) > 0)
-                                            <div class="col-md-8">
+                                            <div class="col-md-12">
                                                 <table class="table">
                                                     @foreach ($order->order_items as $ord_item)
                                                         <tr>
                                                             @php
                                                                 $sub_total = ( $ord_item['sub_total'] / $ord_item['item_qty']);
-                                                                $option = unserialize($ord_item['options']);
+                                                                $options = (isset($ord_item['options']) && !empty($ord_item['options'])) ? unserialize($ord_item['options']) : [];
                                                             @endphp
                                                             <td>
                                                                 <b>{{ $ord_item['item_qty'] }} x {{ $ord_item['item_name'] }}</b>
-                                                                @if(!empty($option))
-                                                                    <br> {{ implode(', ',$option) }}
+                                                                @if(count($options) > 0)
+                                                                    @foreach ($options as $option)
+                                                                        @php
+                                                                            $option_price = App\Models\OptionPrice::with(['option'])->where('id',$option)->first();
+                                                                            $option_name = (isset($option_price['option'][$title_key])) ? $option_price['option'][$title_key] : '';
+                                                                            $price_name = (isset($option_price[$name_key])) ? $option_price[$name_key] : '';
+                                                                        @endphp
+                                                                        <p class="m-0"><strong> - {{ $option_name }} :</strong> {{ $price_name }}</p>
+                                                                    @endforeach
                                                                 @endif
                                                             </td>
                                                             <td width="25%" class="text-end">{{ Currency::currency($currency)->format($sub_total) }}</td>

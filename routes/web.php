@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CategoryController,DashboardController,ContactController, CustomerQuoteController, DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
+use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CartController, CategoryController,DashboardController,ContactController, CustomerAuthController, CustomerQuoteController, DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -30,19 +30,18 @@ Route::get('config-clear', function () {
 Route::get('/',[FrontendController::class,'index'])->name('home');
 Route::get('/collections/{cat_id}',[FrontendController::class,'collectionByCategory'])->name('categories.collections');
 Route::get('/product-details/{item_id}',[FrontendController::class,'productDetails'])->name('product.deatails');
-Route::get('/my-cart',[FrontendController::class,'viewCart'])->name('my.cart');
 Route::get('/contact-us',[FrontendController::class,'contactUS'])->name('contact.us');
 Route::get('/prints/{page_id}',[FrontendController::class,'printsPage'])->name('prints.page');
 Route::post('/send-item-review',[FrontendController::class,'sendItemReview'])->name('send.item.review');
 Route::post('/products-search',[FrontendController::class,'searchProducts'])->name('products.search');
 Route::post('/submit-contact-us',[FrontendController::class,'submitContactUS'])->name('submit.contact.us');
 
-// Auth Routes
+// Auth Routes for ADMIN
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
 Route::post('/login', [AuthController::class,'login'])->name('doLogin');
-
-// Logout
 Route::get('/logout', [AuthController::class,'logout'])->name('logout');
+Route::get('/resgister', [AuthController::class,'showRegister'])->name('register');
+Route::post('/resgister', [AuthController::class,'register'])->name('doRegister');
 
 
 // Route::group(['prefix' => 'admin'], function ()
@@ -134,6 +133,23 @@ Route::get('/logout', [AuthController::class,'logout'])->name('logout');
 // });
 
 
+// Customer Routes
+Route::group(['prefix' => 'user'], function(){
+    Route::group(['middleware' => ['auth','is_customer']], function (){
+        // Cart
+        Route::get('/my-cart',[CartController::class,'cartList'])->name('cart.list');
+        Route::post('/store-cart-item', [CartController::class, 'addToCart'])->name('cart.store');
+        Route::get('/remove-cart-item/{id}', [CartController::class, 'removeCart'])->name('cart.remove');
+        Route::get('/cart-checkout',[CartController::class,'cartCheckout'])->name('cart.checkout');
+        Route::post('/cart-checkout-post',[CartController::class,'cartCheckoutPost'])->name('cart.checkout.post');
+        Route::get('/cart-checkout-suceess/{id}',[CartController::class,'cartCheckoutSuccess'])->name('cart.checkout.success');
+        Route::post('/user-check-order-status',[CartController::class,'checkOrderStatus'])->name('check.order.status.user');
+    });
+});
+
+
+
+// Client Routes
 Route::group(['prefix' => 'client'], function()
 {
     // If Auth Login
