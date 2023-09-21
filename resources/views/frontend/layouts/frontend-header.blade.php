@@ -12,9 +12,9 @@
     $image_key = $lang_code."_image";
     $name_key = $lang_code."_name";
 
-    $parent_categories = \App\Models\Category::where('parent_id',NULL)->where('category_type','product_category')->get();
+    $parent_categories = \App\Models\Category::where('parent_id',NULL)->where('category_type','product_category')->where('published',1)->get();
 
-    $dynamic_pages = \App\Models\Category::where('category_type','page')->get();
+    $dynamic_pages = \App\Models\Category::where('category_type','page')->where('published',1)->get();
 
     $client_settings = getClientSettings();
 @endphp
