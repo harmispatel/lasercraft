@@ -139,14 +139,21 @@ Route::group(['prefix' => 'user'], function(){
         // Cart
         Route::get('/my-cart',[CartController::class,'cartList'])->name('cart.list');
         Route::post('/store-cart-item', [CartController::class, 'addToCart'])->name('cart.store');
+        Route::post('/update-cart', [CartController::class, 'updateCart'])->name('cart.update');
         Route::get('/remove-cart-item/{id}', [CartController::class, 'removeCart'])->name('cart.remove');
         Route::get('/cart-checkout',[CartController::class,'cartCheckout'])->name('cart.checkout');
         Route::post('/cart-checkout-post',[CartController::class,'cartCheckoutPost'])->name('cart.checkout.post');
         Route::get('/cart-checkout-suceess/{id}',[CartController::class,'cartCheckoutSuccess'])->name('cart.checkout.success');
         Route::post('/user-check-order-status',[CartController::class,'checkOrderStatus'])->name('check.order.status.user');
+        Route::post('/set-checkout-type',[CartController::class,'setCartCheckoutType'])->name('cart.set.checkout.type');
+        Route::post('/set-delivery-address',[CartController::class,'setDeliveryAddress'])->name('cart.set.delivery.address');
+
+        // Paypal Payment
+        Route::get('/paypal/payment/',[PaypalController::class,'payWithpaypal'])->name('paypal.payment');
+        Route::get('/paypal/payment/status',[PaypalController::class,'getPaymentStatus'])->name('paypal.payment.status');
+        Route::get('/paypal/payment/cancel',[PaypalController::class,'paymentCancel'])->name('paypal.payment.cancel');
     });
 });
-
 
 
 // Client Routes
@@ -350,11 +357,6 @@ Route::get('{my_shop_slug}/checkout/success/{id}',[ShopController::class,'checko
 Route::post('set-checkout-type',[ShopController::class,'setCheckoutType'])->name('set.checkout.type');
 Route::post('check-order-status',[ShopController::class,'checkOrderStatus'])->name('check.order.status');
 Route::post('/set-delivery-address',[OrderController::class,'setDeliveryAddress'])->name('set.delivery.address');
-
-// Paypal Payment
-Route::get('{my_shop_slug}/paypal/payment/',[PaypalController::class,'payWithpaypal'])->name('paypal.payment');
-Route::get('{my_shop_slug}/paypal/payment/status',[PaypalController::class,'getPaymentStatus'])->name('paypal.payment.status');
-Route::get('{my_shop_slug}/paypal/payment/cancel',[PaypalController::class,'paymentCancel'])->name('paypal.payment.cancel');
 
 // EveryPay Payment
 Route::post('{my_shop_slug}/everypay/payment/',[EveryPayController::class,'payWithEveryPay'])->name('everypay.payment');

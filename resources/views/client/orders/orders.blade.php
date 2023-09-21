@@ -101,6 +101,7 @@
                                         <li><strong>{{ __('Comments') }} : </strong> {{ $order->instructions }}</li>
                                         @if($order->checkout_type == 'delivery')
                                             <li><strong>{{ __('Address') }} : </strong> {{ $order->address }}</li>
+                                            <li><strong>{{ __('Street') }} : </strong> {{ $order->street_number }}</li>
                                             <li><strong>{{ __('Floor') }} : </strong> {{ $order->floor }}</li>
                                             <li><strong>{{ __('Door Bell') }} : </strong> {{ $order->door_bell }}</li>
                                             <li><strong>{{ __('Google Map') }} : </strong> <a href="https://maps.google.com?q={{ $order->address }}" target="_blank">Address Link</a></li>

@@ -125,6 +125,7 @@ class AuthController extends Controller
     public function logout()
     {
         if(Auth::user()->user_type == 3){
+            \Cart::clear();
             Auth::logout();
             return redirect()->route('home');
         }else{

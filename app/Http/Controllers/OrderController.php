@@ -106,6 +106,7 @@ class OrderController extends Controller
                             if($order->checkout_type == 'delivery')
                             {
                                 $html .= '<li><strong>'.__('Address').' : </strong> '.$order->address.'</li>';
+                                $html .= '<li><strong>'.__('Street').' : </strong> '.$order->street_number.'</li>';
                                 $html .= '<li><strong>'.__('Floor').' : </strong> '.$order->floor.'</li>';
                                 $html .= '<li><strong>'.__('Door Bell').' : </strong> '.$order->door_bell.'</li>';
                                 $html .= '<li><strong>'.__('Google Map').' : </strong> <a href="https://maps.google.com?q='.$order->address.'" target="_blank">Address Link</a></li>';

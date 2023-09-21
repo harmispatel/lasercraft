@@ -82,7 +82,7 @@
                                     @endif
                                 </div>
                             </div>
-                            <hr>
+                            {{-- <hr>
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="card-title d-flex justify-content-between align-items-center">
@@ -128,7 +128,7 @@
                                         @endif
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <hr>
                             <div class="row">
                                 <div class="col-md-12">

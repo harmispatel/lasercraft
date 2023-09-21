@@ -128,9 +128,9 @@
                             </div>
                             <div class="add_cart_group">
                                 <div class="quantity">
-                                    <button class="btn"><i class="fa-solid fa-minus"></i></button>
-                                    <input class="form-control" name="quantity" type="text" min="1" value="1" />
-                                    <button class="btn"><i class="fa-solid fa-plus"></i></button>
+                                    <button type="button" class="btn btn-danger quantity-left-minus"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="form-control" name="quantity" id="quantity" type="text" value="1" readonly />
+                                    <button type="button" class="btn btn-success quantity-right-plus"><i class="fa-solid fa-plus"></i></button>
                                 </div>
                                 <button class="btn add_cart_btn"><i class="fa-solid fa-cart-shopping me-2"></i>Add to Cart</button>
                             </div>
@@ -310,5 +310,51 @@
             </div>
         @endif
     </section>
+
+@endsection
+
+@section('page-js')
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        // Qty Increment Descrement Function
+        var qty = parseInt($('#quantity').val());
+        if(qty == 1){
+            $('.quantity-left-minus').attr("disabled",true);
+        }
+
+        $('.quantity-right-plus').on('click',function(e){
+            e.preventDefault();
+            var quantity = parseInt($('#quantity').val()) + 1;
+
+            if(quantity > 1){
+                $('.quantity-left-minus').attr("disabled",false);
+            }
+
+            $('#quantity').val(quantity);
+            if(quantity == 20){
+                $(this).attr("disabled",true);
+                return false;
+            }
+        });
+
+        $('.quantity-left-minus').on('click',function(e){
+            e.preventDefault();
+            var quantity = parseInt($('#quantity').val()) - 1;
+            $('#quantity').val(quantity);
+            if(quantity <= 20){
+                $('.quantity-right-plus').attr("disabled",false);
+            }
+
+            if(quantity == 1){
+                $(this).attr("disabled",true);
+                return false;
+            }
+        });
+    });
+
+</script>
 
 @endsection

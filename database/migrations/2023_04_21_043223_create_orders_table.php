@@ -32,6 +32,7 @@ class CreateOrdersTable extends Migration
             $table->string('longitude')->nullable();
             $table->string('floor')->nullable();
             $table->string('door_bell')->nullable();
+            $table->string('street_number')->nullable();
             $table->text('instructions')->nullable();
             $table->string('delivery_time')->nullable();
             $table->string('table',50)->nullable();

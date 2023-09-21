@@ -75,10 +75,10 @@
                                     <select name="filter_by_payment_method" id="filter_by_payment_method" class="form-select">
                                         <option value="">-- Filter by Payment --</option>
                                         <option value="cash" {{ ($payment_method == 'cash') ? 'selected' : '' }}>Cash</option>
-                                        <option value="cash_pos" {{ ($payment_method == 'cash_pos') ? 'selected' : '' }}>Cash POS</option>
+                                        {{-- <option value="cash_pos" {{ ($payment_method == 'cash_pos') ? 'selected' : '' }}>Cash POS</option> --}}
                                         {{-- <option value="every_pay" {{ ($payment_method == 'every_pay') ? 'selected' : '' }}>Credit/Debit Card</option> --}}
                                         <option value="paypal" {{ ($payment_method == 'paypal') ? 'selected' : '' }}>PayPal</option>
-                                        <option value="upi_payment" {{ ($payment_method == 'upi_payment') ? 'selected' : '' }}>UPI Payment</option>
+                                        {{-- <option value="upi_payment" {{ ($payment_method == 'upi_payment') ? 'selected' : '' }}>UPI Payment</option> --}}
                                     </select>
                                 </div>
                                 <div class="col-md-3 mb-2">
@@ -131,7 +131,7 @@
                                                 {{ date('d-m-Y h:i:s',strtotime($order->created_at)) }}
                                             </td>
                                             <td>
-                                                {{-- <a href="{{ route('view.order',encrypt($order->id)) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View Order"><i class="bi bi-eye"></i></a> --}}
+                                                <a href="{{ route('view.order',encrypt($order->id)) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View Order"><i class="bi bi-eye"></i></a>
                                             </td>
                                         </tr>
                                     @endforeach

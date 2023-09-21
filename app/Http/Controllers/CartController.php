@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
 class CartController extends Controller
@@ -83,6 +84,13 @@ class CartController extends Controller
     // Cart Checkout
     public function cartCheckout()
     {
+        $cart = \Cart::getContent();
+
+        if(count($cart) == 0)
+        {
+            return redirect()->route('home');
+        }
+
         // Child Categories
         $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
 
@@ -90,16 +98,58 @@ class CartController extends Controller
     }
 
 
+    // Cart Update
+    public function updateCart(Request $request)
+    {
+        try {
+
+            \Cart::update(
+                $request->id,
+                [
+                    'quantity' => [
+                        'relative' => false,
+                        'value' => $request->quantity
+                    ],
+                ]
+            );
+
+            return response()->json([
+                'success' => 1,
+                'message' => 'Cart has been Updated Successfully !',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => 0,
+                'message' => 'Internal Server Error !',
+            ]);
+        }
+    }
+
+
     // Cart Checkout Process
     public function cartCheckoutPost(Request $request)
     {
-        $request->validate([
+        $checkout_type = session('checkout_type','');
+
+        $rules = [
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required|email',
             'phone_number' => 'required',
             'payment_method' => 'required',
-        ]);
+        ];
+
+        if($checkout_type == 'delivery')
+        {
+            $rules += [
+                'address' => 'required',
+                'street_number' => 'required',
+                'floor' => 'required',
+                'door_bell' => 'required',
+            ];
+        }
+
+        $request->validate($rules);
 
         try
         {
@@ -120,17 +170,34 @@ class CartController extends Controller
             $cart_subtotal = \Cart::getTotal();
             $cart_subtotal_text = Currency::currency($currency)->format($cart_subtotal);
             $user_ip = $request->ip();
-            $checkout_type = 'takeaway';
             $payment_method = $request->payment_method;
             $email = $request->email;
             $phone_number = $request->phone_number;
             $instructions = $request->instructions;
             $firstname = $request->firstname;
             $lastname = $request->lastname;
+            $latitude = (isset($request->latitude)) ? $request->latitude : '';
+            $longitude = (isset($request->longitude)) ? $request->longitude : '';
+            $address = (isset($request->address)) ? $request->address : '';
+            $street_number = (isset($request->street_number)) ? $request->street_number : '';
+            $floor = (isset($request->floor)) ? $request->floor : '';
+            $door_bell = (isset($request->door_bell)) ? $request->door_bell : '';
             $discount_per = session()->get('discount_per');
             $discount_type = session()->get('discount_type');
             $cart = \Cart::getContent();
             $cart_qty = \Cart::getTotalQuantity();
+
+            if($checkout_type == 'delivery')
+            {
+                $delivey_avaialbility = checkDeliveryAvilability($latitude,$longitude);
+
+                if($delivey_avaialbility == 0)
+                {
+                    $validator = Validator::make([], []);
+                    $validator->getMessageBag()->add('address', 'Sorry your address is out of our delivery range.');
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
+            }
 
             if(count($cart) == 0)
             {
@@ -153,6 +220,18 @@ class CartController extends Controller
                 $order->email = $email;
                 $order->phone = $phone_number;
                 $order->instructions = $instructions;
+
+                // If Checkout Type is Delivery Then Insert More Details
+                if($checkout_type == 'delivery')
+                {
+                    $order->address = $address;
+                    $order->latitude = $latitude;
+                    $order->longitude = $longitude;
+                    $order->floor = $floor;
+                    $order->door_bell = $door_bell;
+                    $order->street_number = $street_number;
+                }
+
                 $order->save();
 
                 // Insert Order Items
@@ -221,10 +300,19 @@ class CartController extends Controller
 
                 }
             }
+            elseif($payment_method == 'paypal'){
+                session()->put('order_details',$request->all());
+                session()->save();
+                return redirect()->route('paypal.payment');
+            }
 
             \Cart::clear();
             session()->forget('discount_per');
             session()->forget('discount_type');
+            session()->forget('checkout_type');
+            session()->forget('cust_lat');
+            session()->forget('cust_long');
+            session()->forget('cust_address');
 
             return redirect()->route('cart.checkout.success',[encrypt($order->id)]);
 
@@ -232,6 +320,64 @@ class CartController extends Controller
         catch (\Throwable $th)
         {
             return redirect()->back()->with('error','Internal Server Error!');
+        }
+    }
+
+
+    // Function for Set Delivery Address in Session
+    public function setDeliveryAddress(Request $request)
+    {
+        $lat = $request->latitude;
+        $lng = $request->longitude;
+        $address = $request->address;
+
+        try
+        {
+            session()->put('cust_lat',$lat);
+            session()->put('cust_long',$lng);
+            session()->put('cust_address',$address);
+            session()->save();
+
+            $delivey_avaialbility = checkDeliveryAvilability($lat,$lng);
+
+            return response()->json([
+                'success' => 1,
+                'message' => 'Address has been set successfully...',
+                'available' => $delivey_avaialbility,
+            ]);
+        }
+        catch (\Throwable $th)
+        {
+            return response()->json([
+                'success' => 0,
+                'message' => 'Internal Server Error!',
+            ]);
+        }
+
+    }
+
+
+    // Set Checkout Type
+    public function setCartCheckoutType(Request $request)
+    {
+        $checkout_type = $request->check_type;
+
+        try
+        {
+            session()->put('checkout_type',$checkout_type);
+            session()->save();
+
+            return response()->json([
+                'success' => 1,
+                "message" => "Redirecting to Checkout SuccessFully...",
+            ]);
+        }
+        catch (\Throwable $th)
+        {
+            return response()->json([
+                'success' => 0,
+                "message" => "Internal server error!",
+            ]);
         }
     }
 

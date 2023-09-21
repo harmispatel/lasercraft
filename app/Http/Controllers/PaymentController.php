@@ -23,9 +23,9 @@ class PaymentController extends Controller
         $paypal_mode = (isset($request->paypal_mode)) ? $request->paypal_mode : 'sandbox';
         $paypal_public_key = (isset($request->paypal_public_key)) ? $request->paypal_public_key : '';
         $paypal_private_key = (isset($request->paypal_private_key)) ? $request->paypal_private_key : '';
-        $upi_payment = (isset($request->upi_payment)) ? $request->upi_payment : 0;
-        $upi_id = (isset($request->upi_id)) ? $request->upi_id : '';
-        $payee_name = (isset($request->payee_name)) ? $request->payee_name : '';
+        // $upi_payment = (isset($request->upi_payment)) ? $request->upi_payment : 0;
+        // $upi_id = (isset($request->upi_id)) ? $request->upi_id : '';
+        // $payee_name = (isset($request->payee_name)) ? $request->payee_name : '';
 
         $rules = [];
         if($paypal == 1)
@@ -36,20 +36,20 @@ class PaymentController extends Controller
             ];
         }
 
-        if($upi_payment == 1)
-        {
-            $rules += [
-                'upi_id' => 'required',
-                'payee_name' => 'required'
-            ];
-        }
+        // if($upi_payment == 1)
+        // {
+        //     $rules += [
+        //         'upi_id' => 'required',
+        //         'payee_name' => 'required'
+        //     ];
+        // }
 
-        if($request->hasFile('upi_qr'))
-        {
-            $rules += [
-                'upi_qr' => 'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
-            ];
-        }
+        // if($request->hasFile('upi_qr'))
+        // {
+        //     $rules += [
+        //         'upi_qr' => 'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
+        //     ];
+        // }
 
         $this->validate($request,$rules);
 
@@ -61,17 +61,17 @@ class PaymentController extends Controller
                 'paypal_mode' => $paypal_mode,
                 'paypal_public_key' => $paypal_public_key,
                 'paypal_private_key' => $paypal_private_key,
-                'upi_payment' => $upi_payment,
-                'upi_id' => $upi_id,
-                'payee_name' => $payee_name,
+                // 'upi_payment' => $upi_payment,
+                // 'upi_id' => $upi_id,
+                // 'payee_name' => $payee_name,
             ];
 
-            if($request->hasFile('upi_qr'))
-            {
-                $imgname = "upi_".time().".". $request->file('upi_qr')->getClientOriginalExtension();
-                $request->file('upi_qr')->move(public_path('admin_uploads/upi_qr/'), $imgname);
-                $datas['upi_qr'] = $imgname;
-            }
+            // if($request->hasFile('upi_qr'))
+            // {
+            //     $imgname = "upi_".time().".". $request->file('upi_qr')->getClientOriginalExtension();
+            //     $request->file('upi_qr')->move(public_path('admin_uploads/upi_qr/'), $imgname);
+            //     $datas['upi_qr'] = $imgname;
+            // }
 
             // Insert or Update Settings
             foreach($datas as $key => $value)

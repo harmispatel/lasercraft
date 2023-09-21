@@ -116,10 +116,10 @@
             'paypal_mode',
             'paypal_public_key',
             'paypal_private_key',
-            'upi_payment',
-            'upi_id',
-            'payee_name',
-            'upi_qr',
+            // 'upi_payment',
+            // 'upi_id',
+            // 'payee_name',
+            // 'upi_qr',
         ];
 
         $settings = [];
@@ -667,13 +667,10 @@
 
 
     // Function for get client PayPal Config
-    function getPayPalConfig($shop_slug)
+    function getPayPalConfig()
     {
-        $shop = Shop::where('shop_slug',$shop_slug)->first();
-        $shop_id = isset($shop['id']) ? $shop['id'] : '';
-
         // Get Payment Settings
-        $payment_settings = getPaymentSettings($shop_id);
+        $payment_settings = getPaymentSettings();
 
         $paypal_config = [
             'client_id' => (isset($payment_settings['paypal_public_key'])) ? $payment_settings['paypal_public_key'] : '',
