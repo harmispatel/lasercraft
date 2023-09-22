@@ -14,6 +14,7 @@
 
     $parent_categories = \App\Models\Category::where('parent_id',NULL)->where('category_type','product_category')->where('published',1)->get();
 
+
     $dynamic_pages = \App\Models\Category::where('category_type','page')->where('published',1)->get();
 
     $client_settings = getClientSettings();
@@ -27,7 +28,11 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                    <div class="burger_menu">
+                        <span class="bar-icon"></span>
+                        <span class="bar-icon"></span>
+                        <span class="bar-icon"></span>
+                    </div>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mb-2 mb-lg-0">
@@ -60,14 +65,6 @@
                                 @endif
                             </ul>
                         </li>
-
-                        {{-- <li class="nav-item">
-                            <a class="nav-link" href="{{ route('contact.us') }}">Contact US</a>
-                        </li> --}}
-
-                        {{-- <li class="nav-item">
-                            <a class="nav-link" href="#">Shop</a>
-                        </li> --}}
                     </ul>
                 </div>
                 <a class="navbar-brand m-0" href="{{ route('home') }}">
@@ -94,7 +91,7 @@
                                     </div>
                                     <div class="user_dropdown">
                                         <ul>
-                                            <li><a href="#">Dashboard</a></li>
+                                            <li><a href="#">My Profile</a></li>
                                             <li><a href="{{ route('logout') }}">Logout</a></li>
                                         </ul>
                                     </div>

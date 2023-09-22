@@ -22,6 +22,6 @@ class Category extends Model
     // Get SubCategories
     public function subcategories()
     {
-        return $this->hasMany(Category::class, 'parent_id');
+        return $this->hasMany(Category::class, 'parent_id')->where('published',1);
     }
 }

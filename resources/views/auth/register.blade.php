@@ -28,6 +28,8 @@
     <link href="{{ asset('public/admin/assets/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
     <link href="{{ asset('public/admin/assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
     <link href="{{ asset('public/admin/assets/css/custom.css') }}" rel="stylesheet">
+    {{-- Toastr --}}
+    <link rel="stylesheet" href="{{ asset('public/admin/assets/vendor/css/toastr.min.css') }}">
 
     <!-- Template Main CSS File -->
     <link href="{{ asset('public/admin/assets/vendor/css/style.css') }}" rel="stylesheet">
@@ -138,14 +140,27 @@
     <script src="{{ asset('public/admin/assets/vendor/tinymce/tinymce.min.js') }}"></script>
     <script src="{{ asset('public/admin/assets/vendor/php-email-form/validate.js') }}"></script>
 
+
     <!-- Template Main JS File -->
     <script src="{{ asset('public/admin/assets/vendor/js/main.js') }}"></script>
 
     {{-- Jquery --}}
     <script src="{{ asset('public/admin/assets/vendor/js/jquery.min.js') }}"></script>
 
+    <script src="{{ asset('public/admin/assets/vendor/js/toastr.min.js') }}"></script>
+
     {{-- Custom Script --}}
     <script type="text/javascript">
+
+        // Error Messages
+        @if (Session::has('error'))
+            toastr.error('{{ Session::get('error') }}')
+        @endif
+
+        // Success Messages
+        @if (Session::has('success'))
+            toastr.success('{{ Session::get('success') }}')
+        @endif
 
     </script>
 

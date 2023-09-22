@@ -4,6 +4,7 @@ use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoCont
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
@@ -27,6 +28,7 @@ Route::get('config-clear', function () {
 
 
 
+
 Route::get('/',[FrontendController::class,'index'])->name('home');
 Route::get('/collections/{cat_id}',[FrontendController::class,'collectionByCategory'])->name('categories.collections');
 Route::get('/product-details/{item_id}',[FrontendController::class,'productDetails'])->name('product.deatails');
@@ -35,6 +37,8 @@ Route::get('/prints/{page_id}',[FrontendController::class,'printsPage'])->name('
 Route::post('/send-item-review',[FrontendController::class,'sendItemReview'])->name('send.item.review');
 Route::post('/products-search',[FrontendController::class,'searchProducts'])->name('products.search');
 Route::post('/submit-contact-us',[FrontendController::class,'submitContactUS'])->name('submit.contact.us');
+Route::get('/customer-verify/{userID}',[FrontendController::class,'customerVerify'])->name('customer.verify');
+Route::post('/customer-verify',[FrontendController::class,'customerVerifyPost'])->name('customer.verify.post');
 
 // Auth Routes for ADMIN
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');

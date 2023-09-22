@@ -71,6 +71,15 @@
                                     </div>
                                 @endif
 
+                                @if (session()->has('success'))
+                                    <div class="col-md-12 mt-2">
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                            {{ session('success') }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <div class="card mb-3">
                                     <div class="card-body">
                                         <div class="pt-4 pb-2">

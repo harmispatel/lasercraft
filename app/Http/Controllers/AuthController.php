@@ -45,20 +45,38 @@ class AuthController extends Controller
             'confirm_password' => 'required|same:password',
         ]);
 
+        $user_verify_token = genratetoken(8);
         $input = $request->except(['_token','password','confirm_password']);
         $input['password'] = Hash::make($request->password);
         $input['user_type'] = 3;
+        $input['user_verify'] = 0;
+        $input['verify_token'] = $user_verify_token;
 
-        $user = $this->create($input);
+        try {
 
-        if($user){
-            Auth::login($user);
+            $user = $this->create($input);
 
-            $username = $user['firstname'] ." ". $user["lastname"];
+            if($user){
 
-            return redirect()->route('home')->with('success','Hello, '. $username);
-        }
-        else{
+                $to_email = $user->email;
+                $details['firstname'] = $user->firstname;
+                $details['lastname'] = $user->lastname;
+                $details['user_token'] = $user_verify_token;
+                $details['verification_link'] = route('customer.verify',encrypt($user->id));
+
+                \Mail::to($to_email)->send(new \App\Mail\VerifyUser($details));
+
+                // Auth::login($user);
+                // $username = $user['firstname'] ." ". $user["lastname"];
+                // return redirect()->route('home')->with('success','Hello, '. $username);
+
+                return redirect()->route('customer.verify',encrypt($user->id))->with('success','Your Account has been Registerd SuccessFully, Please Verify Your Account to Access It.');
+
+            }else{
+                return redirect()->back()->with('error','Something Went Wrong!');
+            }
+
+        } catch (\Throwable $th) {
             return redirect()->back()->with('error','Something Went Wrong!');
         }
 
@@ -89,6 +107,9 @@ class AuthController extends Controller
 
         if (Auth::attempt($input))
         {
+            $user_verify = (isset(Auth::user()->user_verify) && Auth::user()->user_verify == 1) ? Auth::user()->user_verify : 0;
+            $user_id = (isset(Auth::user()->id)) ? Auth::user()->id : '';
+
             if (Auth::user()->user_type == 1)
             {
                 $username = Auth::user()->firstname." ".Auth::user()->lastname;
@@ -96,7 +117,6 @@ class AuthController extends Controller
             }
             elseif(Auth::user()->user_type == 2)
             {
-                $user_verify = (isset(Auth::user()->user_verify) && Auth::user()->user_verify == 1) ? Auth::user()->user_verify : 0;
                 $user_status = (isset(Auth::user()->status) && Auth::user()->status == 1) ? Auth::user()->status : 0;
 
                 if($user_verify == 0 || $user_status == 0)
@@ -109,6 +129,12 @@ class AuthController extends Controller
                 return redirect()->route('client.dashboard')->with('success', 'Welcome '.$username);
             }
             else{
+
+                if($user_verify == 0)
+                {
+                    Auth::logout();
+                    return redirect()->route('customer.verify',encrypt($user_id))->with('error','Please Verify Your Account to Access Login');
+                }
                 $username = Auth::user()->firstname." ".Auth::user()->lastname;
                 return redirect()->route('home')->with('success','Hello, '. $username);
             }

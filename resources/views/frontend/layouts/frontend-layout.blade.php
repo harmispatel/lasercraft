@@ -1,3 +1,7 @@
+@php
+    $child_categories = \App\Models\Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 

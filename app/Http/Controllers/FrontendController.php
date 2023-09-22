@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\{ShopBanner, Category, CustomerQuote, ItemReview, Items, User};
+use Illuminate\Support\Facades\Validator;
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
 class FrontendController extends Controller
@@ -298,6 +299,69 @@ class FrontendController extends Controller
         catch (\Throwable $th)
         {
             return redirect()->route('home')->with('error','Something Went Wrong !');
+        }
+    }
+
+    function customerVerify($id)
+    {
+        try {
+
+            $userID = decrypt($id);
+            $user = User::find($userID);
+            $user_verify = (isset($user['user_verify']) && $user['user_verify'] == 1) ? $user['user_verify'] : 0;
+
+            if(!isset($user))
+            {
+                return redirect()->route('home')->with('error','User Not Found!');
+            }
+
+            if($user_verify == 1)
+            {
+                return redirect()->route('home')->with('success','Your Shop has been Already Registerd.');
+            }
+            else
+            {
+                $data['user_id'] = $id;
+                return view('frontend.verify_customer',$data);
+            }
+
+        } catch (\Throwable $th) {
+            return redirect()->route('home')->with('error','Something Went Wrong!');
+        }
+    }
+
+
+    function customerVerifyPost(Request $request)
+    {
+        $request->validate([
+            'verification_code' => 'required',
+        ]);
+
+        try {
+
+            $user_id = decrypt($request->user_id);
+            $verify_token = $request->verification_code;
+
+            $user = User::find($user_id);
+            $user_verify_token = (isset($user['verify_token'])) ? $user['verify_token'] : '';
+
+            if(!empty($user_verify_token) && ($user_verify_token == $verify_token))
+            {
+                $user->verify_token = NULL;
+                $user->user_verify = 1;
+                $user->update();
+
+                return redirect()->route('login')->with('success','Your Account has been Verified.');
+            }
+            else
+            {
+                $validator = Validator::make([], []);
+                $validator->getMessageBag()->add('verification_code', 'Please Enter a Valid Token to Verify Your Account !');
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+        } catch (\Throwable $th) {
+            return redirect()->route('home')->with('error','Internal Server Error!');
         }
     }
 
