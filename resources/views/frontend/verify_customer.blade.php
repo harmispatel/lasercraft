@@ -34,7 +34,7 @@
 
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('View Cart'))
+@section('title', __('Verify Account'))
 
 @section('content')
 

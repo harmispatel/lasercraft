@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\{ShopBanner, Category, CustomerQuote, ItemReview, Items, User};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
@@ -302,6 +304,8 @@ class FrontendController extends Controller
         }
     }
 
+
+    // Customer Verification Form
     function customerVerify($id)
     {
         try {
@@ -331,6 +335,7 @@ class FrontendController extends Controller
     }
 
 
+    // Function for Customer Verification
     function customerVerifyPost(Request $request)
     {
         $request->validate([
@@ -363,6 +368,69 @@ class FrontendController extends Controller
         } catch (\Throwable $th) {
             return redirect()->route('home')->with('error','Internal Server Error!');
         }
+    }
+
+
+    // Function for view Customer Profile
+    function profile()
+    {
+        return view('frontend.customer_profile');
+    }
+
+
+    // Function for Edit Profile
+    function editProfile($id)
+    {
+        try {
+
+            $user_id = decrypt($id);
+
+            $data['user_details'] = User::find($user_id);
+            return view('frontend.edit_customer',$data);
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error','Something Went Wrong !');
+        }
+    }
+
+
+    // Function for Update Profile
+    function updateProfile(Request $request)
+    {
+        $rules = [
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'email' => 'required|email|unique:users,email,'.$request->user_id,
+            'phone' => 'required',
+            'confirm_password' => 'same:password',
+            'profile_picture' => 'mimes:png,jpg,svg,jpeg,PNG,SVG,JPG,JPEG',
+        ];
+
+        $request->validate($rules);
+
+        $user = User::find($request->user_id);
+        $user->firstname = $request->firstname;
+        $user->lastname = $request->lastname;
+        $user->email = $request->email;
+        $user->mobile = $request->phone;
+
+        if(!empty($request->password))
+        {
+            $password = Hash::make($request->password);
+            $user->password = $password;
+        }
+
+        if($request->hasFile('profile_picture'))
+        {
+            // Insert New Image
+            $imgname = time().".". $request->file('profile_picture')->getClientOriginalExtension();
+            $request->file('profile_picture')->move(public_path('admin_uploads/users/'), $imgname);
+            $user->image = $imgname;
+        }
+
+        $user->update();
+
+        return redirect()->route('customer.profile')->with('success','Profile has been Updated SuccessFully...');
+
     }
 
 }

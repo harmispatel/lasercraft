@@ -39,6 +39,9 @@ Route::post('/products-search',[FrontendController::class,'searchProducts'])->na
 Route::post('/submit-contact-us',[FrontendController::class,'submitContactUS'])->name('submit.contact.us');
 Route::get('/customer-verify/{userID}',[FrontendController::class,'customerVerify'])->name('customer.verify');
 Route::post('/customer-verify',[FrontendController::class,'customerVerifyPost'])->name('customer.verify.post');
+Route::get('/profile',[FrontendController::class,'profile'])->name('customer.profile');
+Route::get('/edit-profile/{id}',[FrontendController::class,'editProfile'])->name('customer.profile.edit');
+Route::post('/update-profile',[FrontendController::class,'updateProfile'])->name('customer.profile.update');
 
 // Auth Routes for ADMIN
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');

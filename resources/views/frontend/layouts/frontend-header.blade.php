@@ -69,9 +69,9 @@
                 </div>
                 <a class="navbar-brand m-0" href="{{ route('home') }}">
                     @if(isset($client_settings['shop_view_header_logo']) && !empty($client_settings['shop_view_header_logo']) && file_exists('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']))
-                        <img src="{{ asset('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']) }}" height="80">
+                        <img src="{{ asset('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']) }}" height="100">
                     @else
-                        <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" height="80">
+                        <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" height="100">
                     @endif
                 </a>
                 <div class="header_right">
@@ -91,7 +91,7 @@
                                     </div>
                                     <div class="user_dropdown">
                                         <ul>
-                                            <li><a href="#">My Profile</a></li>
+                                            <li><a href="{{ route('customer.profile') }}">My Profile</a></li>
                                             <li><a href="{{ route('logout') }}">Logout</a></li>
                                         </ul>
                                     </div>
