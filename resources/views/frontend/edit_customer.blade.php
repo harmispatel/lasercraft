@@ -33,7 +33,7 @@
 <section class="profile_main sec_main">
     <div class="container">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4 col-lg-3">
                 <div class="profile_sidebar">
                     <div class="profile_info_box">
                         @if(!empty(Auth::user()->image) && file_exists('public/admin_uploads/users/'.Auth::user()->image))
@@ -67,7 +67,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-9">
+            <div class="col-md-8 col-lg-9">
                 <div class="profile_info_main">
                     <div class="card">
                         <div class="card-body">
