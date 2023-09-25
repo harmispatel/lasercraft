@@ -26,7 +26,7 @@
 
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('My Profile'))
+@section('title', __('Orders'))
 
 @section('content')
 
@@ -69,29 +69,42 @@
             </div>
             <div class="col-md-8 col-lg-9">
                 <div class="profile_info_main">
-                    <div class="card position-relative">
-                        <a href="{{ route('customer.profile.edit',encrypt(Auth::user()->id)) }}" class="btn btn-sm btn-primary edit-profile-btn"><i class="bi bi-pencil"></i></a>
-                        <div class="card-body pt-3">
-                            <h5 class="card-title">Profile Details</h5>
-                            <div class="row mb-2">
-                                <div class="col-lg-3 col-md-4 label"><b>First Name</b></div>
-                                <div class="col-lg-9 col-md-8">{{ Auth::user()->firstname }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-lg-3 col-md-4 label"><b>Last Name</b></div>
-                                <div class="col-lg-9 col-md-8">{{ Auth::user()->lastname }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-lg-3 col-md-4 label"><b>Email</b></div>
-                                <div class="col-lg-9 col-md-8">{{ Auth::user()->email }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-lg-3 col-md-4 label"><b>Phone No.</b></div>
-                                <div class="col-lg-9 col-md-8">{{ (Auth::user()->mobile) ? Auth::user()->mobile : '-' }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-lg-3 col-md-4 label"><b>Joined At</b></div>
-                                <div class="col-lg-9 col-md-8">{{ date('d-m-Y h:i:s',strtotime(Auth::user()->created_at)) }}</div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Orders</h3>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped" id="ordersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sr.</th>
+                                                    <th>FirstName</th>
+                                                    <th>LastName</th>
+                                                    <th>Email</th>
+                                                    <th>Total Amount</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if(count($orders) > 0)
+                                                    @foreach ($orders as $order)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>{{ $order->firstname }}</td>
+                                                            <td>{{ $order->lastname }}</td>
+                                                            <td>{{ $order->email }}</td>
+                                                            <td>{{ $order->order_total_text }}</td>
+                                                            <td>
+                                                                <a href="{{ route('customer.orders.details',encrypt($order->id)) }}" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -116,6 +129,8 @@
     @if (Session::has('success'))
         toastr.success('{{ Session::get('success') }}')
     @endif
+
+    $('#ordersTable').DataTable();
 
 </script>
 

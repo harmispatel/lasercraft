@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{ShopBanner, Category, CustomerQuote, ItemReview, Items, User};
+use App\Models\{ShopBanner, Category, CustomerQuote, ItemReview, Items, Order, User};
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -374,7 +374,11 @@ class FrontendController extends Controller
     // Function for view Customer Profile
     function profile()
     {
-        return view('frontend.customer_profile');
+        if(Auth::user() && Auth::user()->user_type == 3){
+            return view('frontend.customer_profile');
+        }else{
+            return redirect()->route('home');
+        }
     }
 
 
@@ -386,7 +390,12 @@ class FrontendController extends Controller
             $user_id = decrypt($id);
 
             $data['user_details'] = User::find($user_id);
-            return view('frontend.edit_customer',$data);
+
+            if(Auth::user() && Auth::user()->user_type == 3){
+                return view('frontend.edit_customer',$data);
+            }else{
+                return redirect()->route('home');
+            }
         } catch (\Throwable $th) {
             return redirect()->back()->with('error','Something Went Wrong !');
         }
@@ -431,6 +440,32 @@ class FrontendController extends Controller
 
         return redirect()->route('customer.profile')->with('success','Profile has been Updated SuccessFully...');
 
+    }
+
+
+    // Function for view Customer Orders
+    function orders()
+    {
+        if(Auth::user() && Auth::user()->user_type == 3){
+            $data['orders'] = Order::where('user_id',Auth::user()->id)->get();
+            return view('frontend.customer_orders',$data);
+        }else{
+            return redirect()->route('home');
+        }
+    }
+
+
+    // Function for view Customer Orders
+    function ordersDetails($id)
+    {
+        try {
+            $order_id = decrypt($id);
+            $data['order_details'] = Order::with(['order_items'])->where('id',$order_id)->first();
+            return view('frontend.customer_order_details',$data);
+
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error','Internal Server Error !');
+        }
     }
 
 }

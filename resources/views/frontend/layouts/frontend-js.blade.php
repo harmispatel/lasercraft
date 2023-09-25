@@ -3,6 +3,7 @@
 <script src="{{ asset('public/frontend/js/custom.js') }}"></script>
 <script src="{{ asset('public/frontend/js/swiper-bundle.min.js') }}"></script>
 <script src="{{ asset('public/admin/assets/vendor/js/toastr.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
 
 <script type="text/javascript">
 

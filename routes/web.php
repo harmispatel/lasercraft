@@ -42,6 +42,8 @@ Route::post('/customer-verify',[FrontendController::class,'customerVerifyPost'])
 Route::get('/profile',[FrontendController::class,'profile'])->name('customer.profile');
 Route::get('/edit-profile/{id}',[FrontendController::class,'editProfile'])->name('customer.profile.edit');
 Route::post('/update-profile',[FrontendController::class,'updateProfile'])->name('customer.profile.update');
+Route::get('/my-orders',[FrontendController::class,'orders'])->name('customer.orders');
+Route::get('/order-details/{id}',[FrontendController::class,'ordersDetails'])->name('customer.orders.details');
 
 // Auth Routes for ADMIN
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');

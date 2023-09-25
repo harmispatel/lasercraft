@@ -8,6 +8,7 @@ use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use App\Models\{Items,Shop,AdditionalLanguage,ItemPrice, OptionPrice, Order, OrderItems, User, UserShop};
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
 class PaypalController extends Controller
@@ -240,6 +241,7 @@ class PaypalController extends Controller
         {
             // New Order
             $order = new Order();
+            $order->user_id = Auth::user()->id;
             $order->ip_address = $user_ip;
             $order->currency = $currency;
             $order->checkout_type = $checkout_type;

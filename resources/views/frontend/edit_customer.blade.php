@@ -52,7 +52,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="">
+                                <a href="{{ route('customer.orders') }}" class="{{ (($routeName == 'customer.orders') || ($routeName == 'customer.orders.details')) ? 'active' : '' }}">
                                     <i class="fa-solid fa-cart-shopping"></i>
                                     <span>Orders</span>
                                 </a>

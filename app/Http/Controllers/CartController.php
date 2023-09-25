@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
@@ -209,6 +210,7 @@ class CartController extends Controller
                 // New Order
                 $order = new Order();
                 $order->ip_address = $user_ip;
+                $order->user_id = Auth::user()->id;
                 $order->currency = $currency;
                 $order->checkout_type = $checkout_type;
                 $order->payment_method = $payment_method;
