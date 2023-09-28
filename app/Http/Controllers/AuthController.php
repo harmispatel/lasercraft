@@ -112,12 +112,7 @@ class AuthController extends Controller
             $user_status = (isset(Auth::user()->status) && Auth::user()->status == 1) ? Auth::user()->status : 0;
             $user_id = (isset(Auth::user()->id)) ? Auth::user()->id : '';
 
-            if (Auth::user()->user_type == 1)
-            {
-                $username = Auth::user()->firstname." ".Auth::user()->lastname;
-                return redirect()->route('admin.dashboard')->with('success', 'Welcome '.$username);
-            }
-            elseif(Auth::user()->user_type == 2)
+            if(Auth::user()->user_type == 1)
             {
                 $user_status = (isset(Auth::user()->status) && Auth::user()->status == 1) ? Auth::user()->status : 0;
 
@@ -130,7 +125,7 @@ class AuthController extends Controller
                 $username = Auth::user()->firstname." ".Auth::user()->lastname;
                 return redirect()->route('client.dashboard')->with('success', 'Welcome '.$username);
             }
-            else{
+            elseif(Auth::user()->user_type == 3){
 
                 if($user_verify == 0)
                 {
@@ -147,9 +142,7 @@ class AuthController extends Controller
                 $username = Auth::user()->firstname." ".Auth::user()->lastname;
                 return redirect()->route('home')->with('success','Hello, '. $username);
             }
-            // return back()->with('error', 'Kindly Login with Active Admin User.');
         }
-
         return back()->with('error', 'Please Enter Valid Email & Password');
     }
 

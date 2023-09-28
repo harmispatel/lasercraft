@@ -7,7 +7,6 @@ use App\Models\CategoryProductTags;
 use App\Models\Languages;
 use App\Models\Tags;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class TagsController extends Controller
 {

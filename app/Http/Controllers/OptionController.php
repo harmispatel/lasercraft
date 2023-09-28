@@ -7,7 +7,6 @@ use App\Models\Languages;
 use App\Models\Option;
 use App\Models\OptionPrice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class OptionController extends Controller
 {

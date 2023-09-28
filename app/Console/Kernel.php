@@ -15,12 +15,12 @@ class Kernel extends ConsoleKernel
      */
 
     protected $commands = [
-        Commands\SendSubscriptionExpiry::class,
+        // Commands\SendSubscriptionExpiry::class,
     ];
 
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('sendmail:before-expire')->daily();
+        // $schedule->command('sendmail:before-expire')->daily();
     }
 
     /**

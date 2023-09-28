@@ -1,7 +1,6 @@
 @php
-    $admin_settings = getAdminSettings();
-    $light_img = isset($admin_settings['default_light_theme_image']) ? $admin_settings['default_light_theme_image'] : '';
-    $dark_img = isset($admin_settings['default_dark_theme_image']) ? $admin_settings['default_dark_theme_image'] : '';
+    $light_img = '';
+    $dark_img = '';
     $shop_settings = getClientSettings();
     $active_theme = isset($shop_settings['shop_active_theme']) ? $shop_settings['shop_active_theme'] : '';
 

@@ -7,13 +7,9 @@ use App\Models\Clicks;
 use App\Models\Items;
 use App\Models\ItemsVisit;
 use App\Models\Order;
-use App\Models\Shop;
 use App\Models\UserVisits;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class StatisticsController extends Controller
 {

@@ -1,12 +1,8 @@
 <?php
 
-use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CartController, CategoryController,DashboardController,ContactController, CustomerAuthController, CustomerController, CustomerQuoteController, DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
-use App\Models\Shop;
-use Illuminate\Http\Request;
+use App\Http\Controllers\{AuthController, CartController, CategoryController,DashboardController,ContactController, CustomerController, CustomerQuoteController, DesignController ,ItemsController, ItemsReviewsController, LanguageController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, ShopBannerController,ShopController, ShopScheduleController, StatisticsController,TagsController,UserController, FrontendController};
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,15 +15,19 @@ use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 |
 */
 
-Route::get('config-clear', function () {
+
+// Cache Routes
+Route::get('config-clear', function ()
+{
     Artisan::call('cache:clear');
     Artisan::call('route:clear');
     Artisan::call('config:clear');
-    dd("Cache is cleared");
+
+    return redirect()->route('home')->with('success', 'Cache has been Clear SuccessFully...');
 });
 
 
-
+// Frontend Routes
 Route::get('/',[FrontendController::class,'index'])->name('home');
 Route::get('/collections/{cat_id}',[FrontendController::class,'collectionByCategory'])->name('categories.collections');
 Route::get('/product-details/{item_id}',[FrontendController::class,'productDetails'])->name('product.deatails');
@@ -44,102 +44,12 @@ Route::post('/update-profile',[FrontendController::class,'updateProfile'])->name
 Route::get('/my-orders',[FrontendController::class,'orders'])->name('customer.orders');
 Route::get('/order-details/{id}',[FrontendController::class,'ordersDetails'])->name('customer.orders.details');
 
-// Auth Routes for ADMIN
+// Auth Routes for All Users
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
 Route::post('/login', [AuthController::class,'login'])->name('doLogin');
 Route::get('/logout', [AuthController::class,'logout'])->name('logout');
 Route::get('/resgister', [AuthController::class,'showRegister'])->name('register');
 Route::post('/resgister', [AuthController::class,'register'])->name('doRegister');
-
-
-// Route::group(['prefix' => 'admin'], function ()
-// {
-//     // If Auth Login
-//     Route::group(['middleware' => ['auth','is_admin']], function ()
-//     {
-//         // Admin Dashboard
-//         Route::get('dashboard', [DashboardController::class,'index'])->name('admin.dashboard');
-
-//         // Admins
-//         Route::get('/admins',[UserController::class,'AdminUsers'])->name('admins');
-//         Route::get('/new-admins',[UserController::class,'NewAdminUser'])->name('admins.add');
-//         Route::post('/store-admins',[UserController::class,'storeNewAdmin'])->name('admins.store');
-//         Route::get('/delete-admins/{id}',[UserController::class,'destroyAdminUser'])->name('admins.destroy');
-//         Route::get('/edit-admins/{id}',[UserController::class,'editAdmin'])->name('admins.edit');
-//         Route::post('/update-admins',[UserController::class,'updateAdmin'])->name('admins.update');
-
-//         // Clients
-//         Route::get('/clients',[UserController::class,'index'])->name('clients');
-//         Route::get('/list-clients/{id?}',[UserController::class,'clientsList'])->name('clients.list');
-//         Route::get('/new-clients',[UserController::class,'insert'])->name('clients.add');
-//         Route::post('/store-clients',[UserController::class,'store'])->name('clients.store');
-//         Route::post('/status-clients',[UserController::class,'changeStatus'])->name('clients.status');
-//         Route::post('/status-fav-clients',[UserController::class,'addToFavClients'])->name('clients.addtofav');
-//         Route::post('/delete-clients',[UserController::class,'destroy'])->name('clients.destroy');
-//         Route::get('/edit-clients/{id}',[UserController::class,'edit'])->name('clients.edit');
-//         Route::get('/access-clients/{id}',[UserController::class,'clientAccess'])->name('clients.access');
-//         Route::post('/update-clients',[UserController::class,'update'])->name('clients.update');
-//         Route::post('/delete-clients-data',[UserController::class,'deleteClientsData'])->name('client.delete.data');
-//         Route::post('/delete-clients-orders',[UserController::class,'deleteClientsOrders'])->name('client.delete.orders');
-//         Route::post('/clients-verify',[UserController::class,'clientsVerify'])->name('clients.verify');
-
-//         // Subscription
-//         Route::get('/subscriptions',[SubscriptionsController::class,'index'])->name('subscriptions');
-//         Route::get('/new-subscription',[SubscriptionsController::class,'insert'])->name('subscriptions.add');
-//         Route::post('/store-subscription',[SubscriptionsController::class,'store'])->name('subscriptions.store');
-//         Route::post('/delete-subscription',[SubscriptionsController::class,'destroy'])->name('subscriptions.destroy');
-//         Route::get('/edit-subscription/{id}',[SubscriptionsController::class,'edit'])->name('subscriptions.edit');
-//         Route::post('/update-subscription',[SubscriptionsController::class,'update'])->name('subscriptions.update');
-
-//         // Tutorial
-//         Route::get('/tutorial',[TutorialController::class,'index'])->name('tutorial');
-//         Route::get('/new-tutorial',[TutorialController::class,'insert'])->name('tutorial.add');
-//         Route::post('/store-tutorial',[TutorialController::class,'store'])->name('tutorial.store');
-//         Route::get('/delete-tutorial/{id}',[TutorialController::class,'destroy'])->name('tutorial.destroy');
-//         Route::get('/edit-tutorial/{id}',[TutorialController::class,'edit'])->name('tutorial.edit');
-//         Route::post('/update-tutorial',[TutorialController::class,'update'])->name('tutorial.update');
-
-//         // Ingredients
-//         Route::get('/ingredients',[IngredientController::class,'index'])->name('ingredients');
-//         Route::get('/new-ingredients',[IngredientController::class,'insert'])->name('ingredients.add');
-//         Route::post('/store-ingredients',[IngredientController::class,'store'])->name('ingredients.store');
-//         Route::get('/delete-ingredients/{id}',[IngredientController::class,'destroy'])->name('ingredients.destroy');
-//         Route::get('/edit-ingredients/{id}',[IngredientController::class,'edit'])->name('ingredients.edit');
-//         Route::post('/update-ingredients',[IngredientController::class,'update'])->name('ingredients.update');
-//         Route::post('/status-ingredients',[IngredientController::class,'changeStatus'])->name('ingredients.status');
-
-//         // AdminProfile
-//         Route::get('/my-profile/{id}',[UserController::class,'myProfile'])->name('admin.profile.view');
-//         Route::get('/edit-profile/{id}',[UserController::class,'editProfile'])->name('admin.profile.edit');
-//         Route::post('/update-profile',[UserController::class,'updateProfile'])->name('admin.profile.update');
-
-
-//         // Admin Settings
-//         Route::get('/settings',[AdminSettingsController::class,'index'])->name('admin.settings');
-//         Route::post('/settings-update',[AdminSettingsController::class,'update'])->name('update.admin.settings');
-
-
-//         // Languages
-//         Route::post('/save-language',[LanguagesController::class,'saveAjax'])->name('languages.save.ajax');
-
-//         // Import & Export
-//         Route::get('/import-export', [ImportExportController::class,'index'])->name('admin.import.export');
-//         Route::post('/import-data', [ImportExportController::class,'importData'])->name('admin.import.data');
-//         Route::post('/export-data', [ImportExportController::class,'exportData'])->name('admin.export.data');
-
-//         // Food Junctions
-//         Route::get('/food-junctions',[FoodJunctionController::class,'index'])->name('food.junctions');
-//         Route::get('/food-junctions-create',[FoodJunctionController::class,'create'])->name('food.junctions.create');
-//         Route::post('/food-junctions-store',[FoodJunctionController::class,'store'])->name('food.junctions.store');
-//         Route::post('/food-junctions-status',[FoodJunctionController::class,'changeStatus'])->name('food.junctions.status');
-//         Route::get('/food-junctions-edit/{id}',[FoodJunctionController::class,'edit'])->name('food.junctions.edit');
-//         Route::post('/food-junctions-update',[FoodJunctionController::class,'update'])->name('food.junctions.update');
-//         Route::get('/food-junctions-destroy/{id}',[FoodJunctionController::class,'destroy'])->name('food.junctions.destroy');
-
-//     });
-
-// });
-
 
 // Customer Routes
 Route::group(['prefix' => 'user'], function(){
@@ -165,10 +75,10 @@ Route::group(['prefix' => 'user'], function(){
 
 
 // Client Routes
-Route::group(['prefix' => 'client'], function()
+Route::group(['prefix' => 'admin'], function()
 {
     // If Auth Login
-    Route::group(['middleware' => ['auth','is_client']], function ()
+    Route::group(['middleware' => ['auth','is_admin']], function ()
     {
         // Client Dashboard
         Route::get('dashboard', [DashboardController::class,'clientDashboard'])->name('client.dashboard');
@@ -326,53 +236,6 @@ Route::group(['prefix' => 'client'], function()
     });
 });
 
-
-// Get Total with currency
-Route::post('total-with-currency',function(Request $request)
-{
-    try
-    {
-        $total = Currency::currency($request->currency)->format($request->total);
-        return response()->json([
-            'success' => 1,
-            'total' => $total,
-        ]);
-    }
-    catch (\Throwable $th)
-    {
-        return response()->json([
-            'success' => 0,
-            'message' => "Internal Server Error!",
-        ]);
-    }
-
-})->name('total.with.currency');
-
-// Shops
-Route::get('junction/{junction_slug}',[ShopController::class,'foodJunction'])->name('junction');
-Route::get('/{shop_slug}/table/{table_no}',[ShopController::class,'shopTable'])->name('shop-table');
-Route::get('/{shop_slug}/room/{room_no}',[ShopController::class,'shopRoom'])->name('shop-room');
-Route::get('/{shop_slug}/{catID?}',[ShopController::class,'index'])->name('restaurant')->where('shop_slug','[a-zA-Z-]+');
-Route::get('{shop_slug}/items/{catID}',[ShopController::class,'itemPreview'])->name('items.preview')->where('shop_slug','[a-zA-Z-]+');
-Route::post('shop-locale-change',[ShopController::class,'changeShopLocale'])->name('shop.locale.change');
-Route::post('search-shop-categories',[ShopController::class,'searchCategories'])->name('shop.categories.search');
-Route::post('search-shop-items',[ShopController::class,'searchItems'])->name('shop.items.search');
-Route::post('details-items',[ShopController::class,'getDetails'])->name('items.get.details');
-Route::post('do-check-in',[ShopController::class,'checkIn'])->name('do.check.in');
-Route::post('shop-add-to-cart',[ShopController::class,'addToCart'])->name('shop.add.to.cart');
-Route::post('shop-update-cart',[ShopController::class,'updateCart'])->name('shop.update.cart');
-Route::post('shop-remove-cart-item',[ShopController::class,'removeCartItem'])->name('shop.remove.cart.item');
-Route::get('{my_shop_slug}/my/cart/',[ShopController::class,'viewCart'])->name('shop.cart');
-Route::get('{my_shop_slug}/my/cart/checkout/',[ShopController::class,'cartCheckout'])->name('shop.cart.checkout');
-Route::post('{my_shop_slug}/my/cart/checkout/processing/',[ShopController::class,'checkoutProcessing'])->name('shop.cart.processing');
-Route::get('{my_shop_slug}/checkout/success/{id}',[ShopController::class,'checkoutSuccess'])->name('shop.checkout.success');
-Route::post('set-checkout-type',[ShopController::class,'setCheckoutType'])->name('set.checkout.type');
-Route::post('check-order-status',[ShopController::class,'checkOrderStatus'])->name('check.order.status');
-Route::post('/set-delivery-address',[OrderController::class,'setDeliveryAddress'])->name('set.delivery.address');
-
-// EveryPay Payment
-Route::post('{my_shop_slug}/everypay/payment/',[EveryPayController::class,'payWithEveryPay'])->name('everypay.payment');
-Route::get('{my_shop_slug}/my/cart/checkout/processing/everypay',[EveryPayController::class,'gotoEveryPayCheckout'])->name('everypay.checkout.view');
 
 // Change Backend Language
 Route::post('/change-backend-language', [DashboardController::class, 'changeBackendLanguage'])->name('change.backend.language');

@@ -7,7 +7,6 @@ use App\Models\CustomerQuoteReply;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Magarrent\LaravelCurrencyFormatter\Facades\Currency;
 
 class CustomerQuoteController extends Controller
 {

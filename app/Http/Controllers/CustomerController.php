@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\User;
-use Everypay\Customer;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller

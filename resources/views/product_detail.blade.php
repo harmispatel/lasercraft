@@ -85,32 +85,6 @@
                             <h3>{{ $item_details[$name_key] }}</h3>
                             <label>{{ Currency::currency($default_currency)->format($item_price); }}</label>
                         </div>
-                        {{-- <p>Tax included.</p>
-                        <div class="color_opation">
-                            <div class="d-flex align-items">
-                                <h4>Color : </h4>
-                                <ul>
-                                    <li>
-                                        <label class="bg-dark"></label>
-                                    </li>
-                                    <li>
-                                        <label class="bg-info"></label>
-                                    </li>
-                                    <li>
-                                        <label class="bg-danger"></label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div> --}}
-                        {{-- <div class="design_opation">
-                            <h4>Design</h4>
-                            <div class="design_opation_inr">
-                                <label>Greatest Day By Par</label>
-                                <label>Blink if you think i am the best dad</label>
-                                <label>Man Myth Legend</label>
-                                <label>Own personalisation</label>
-                            </div>
-                        </div> --}}
                         <div class="add_design_text mb-3">
                             <div class="from-group">
                                 <label class="mb-2">Personalised Message</label>

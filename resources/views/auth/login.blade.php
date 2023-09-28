@@ -1,8 +1,3 @@
-@php
-    $settings = getAdminSettings();
-    $form_background = isset($settings['login_form_background']) ? $settings['login_form_background'] : '';
-@endphp
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,18 +26,6 @@
 
     <!-- Template Main CSS File -->
     <link href="{{ asset('public/admin/assets/vendor/css/style.css') }}" rel="stylesheet">
-
-    @if(!empty($form_background))
-        <style>
-            .bg_login {
-                background: url({{ $form_background }});
-                background-position: center;
-                background-repeat: no-repeat;
-                background-size: cover;
-            }
-        </style>
-    @endif
-
 
 </head>
 

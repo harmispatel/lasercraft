@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClientSettings;
-use App\Models\Shop;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class DesignController extends Controller
 {

@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
                 'firstname' =>      'Admin',
                 'lastname' =>      'User',
                 'email'     =>      'admin@gmail.com',
-                'user_type' =>      2,
+                'user_type' =>      1,
                 'password'  =>      Hash::make(123456),
                 'status'    =>      1,
             ],

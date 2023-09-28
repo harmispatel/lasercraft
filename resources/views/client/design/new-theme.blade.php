@@ -1,7 +1,6 @@
 @php
-    $admin_settings = getAdminSettings();
-    $main_screen = isset($admin_settings['theme_main_screen_demo']) ? $admin_settings['theme_main_screen_demo'] : '';
-    $category_screen = isset($admin_settings['theme_category_screen_demo']) ? $admin_settings['theme_category_screen_demo'] : '';
+    $main_screen = '';
+    $category_screen = '';
 @endphp
 
 @extends('client.layouts.client-layout')

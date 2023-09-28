@@ -9,7 +9,6 @@ use App\Models\Items;
 use App\Models\Languages;
 use App\Models\LanguageSettings;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class LanguageController extends Controller
 {

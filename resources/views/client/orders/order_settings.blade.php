@@ -1,8 +1,3 @@
-@php
-    $admin_settings = getAdminSettings();
-    $google_map_api = (isset($admin_settings['google_map_api'])) ? $admin_settings['google_map_api'] : '';
-@endphp
-
 @extends('client.layouts.client-layout')
 
 @section('title', __('Order Settings'))

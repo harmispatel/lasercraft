@@ -6,7 +6,6 @@ use App\Models\AdditionalLanguage;
 use App\Models\Languages;
 use App\Models\ShopBanner;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ShopBannerController extends Controller
 {

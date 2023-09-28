@@ -15,13 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            SubscriptionsSeeder::class,
             LanguagesSeeder::class,
-            // CategorySeeder::class,
-            AdminSettingSeeder::class,
             CountrySeeder::class,
-            LanguageSettingSeeder::class,
-            ClientSettingSeeder::class,
         ]);
     }
 }

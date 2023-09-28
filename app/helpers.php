@@ -1,43 +1,7 @@
 <?php
 
-    use App\Models\{AdminSettings, Category, CategoryProductTags,ClientSettings, DeliveryAreas, Ingredient,ItemPrice, Items, Languages,LanguageSettings, OrderSetting, PaymentSettings, ShopBanner,Subscriptions,ThemeSettings,User,UserShop,UsersSubscriptions,Shop, ShopSchedule};
+    use App\Models\{Category, ClientSettings, DeliveryAreas, Items, Languages,LanguageSettings, OrderSetting, PaymentSettings, ThemeSettings, ShopSchedule};
     use Carbon\Carbon;
-    use Illuminate\Support\Facades\Auth;
-
-    // Get Admin's Settings
-    function getAdminSettings()
-    {
-        // Keys
-        $keys = ([
-            'favourite_client_limit',
-            'copyright_text',
-            'logo',
-            'login_form_background',
-            'default_light_theme_image',
-            'default_dark_theme_image',
-            'theme_main_screen_demo',
-            'theme_category_screen_demo',
-            'default_special_item_image',
-            'contact_us_email',
-            'google_map_api',
-            'contact_us_mail_template',
-            'subscription_expire_mail',
-            'days_for_send_first_expiry_mail',
-            'days_for_send_second_expiry_mail',
-            'subscription_expiry_mails',
-        ]);
-
-        $settings = [];
-
-        foreach($keys as $key)
-        {
-            $query = AdminSettings::select('value')->where('key',$key)->first();
-            $settings[$key] = isset($query->value) ? $query->value : '';
-        }
-
-        return $settings;
-    }
-
 
     // Get Client's Settings
     function getClientSettings()
@@ -155,26 +119,6 @@
     }
 
 
-    // Get Package Permissions
-    function getPackagePermission($subID)
-    {
-        $details = Subscriptions::where('id',$subID)->first();
-        $permission = (isset($details['permissions']) && !empty($details['permissions'])) ? unserialize($details['permissions']) : '';
-        return $permission;
-    }
-
-
-    // Get Subscription ID
-    function getClientSubscriptionID($shop_id)
-    {
-        $user_shop = UserShop::where('shop_id',$shop_id)->first();
-        $user_id = (isset($user_shop['user_id'])) ? $user_shop['user_id'] : '';
-        $user_subscription = UsersSubscriptions::where('user_id',$user_id)->first();
-        $subscription_id = (isset($user_subscription['subscription_id'])) ? $user_subscription['subscription_id'] : '';
-        return $subscription_id;
-    }
-
-
     // Get Theme Settings
     function themeSettings($themeID)
     {
@@ -238,75 +182,6 @@
     {
         $language = Languages::where('id',$langID)->first();
         return $language;
-    }
-
-
-    // Get Language Details by Code
-    function getLangDetailsbyCode($langCode)
-    {
-        $language = Languages::where('code',$langCode)->first();
-        return $language;
-    }
-
-
-    // Get Tags Product
-    function getTagsProducts($tagID,$catID)
-    {
-        if(!empty($tagID) && !empty($catID))
-        {
-            // $items = CategoryProductTags::with(['product'])->where('tag_id',$tagID)->where('category_id',$catID)->get();
-            $items = CategoryProductTags::join('items','items.id','category_product_tags.item_id')->where('tag_id',$tagID)->where('category_product_tags.category_id',$catID)->where('items.published',1)->orderBy('items.order_key')->get();
-        }
-        else
-        {
-            $items = [];
-        }
-        return $items;
-    }
-
-
-    // Get Ingredients Details
-    function getIngredientDetail($id)
-    {
-        $ingredient = Ingredient::where('id',$id)->first();
-        return $ingredient;
-    }
-
-
-    // Get Banner Settings
-    function getBanners($shopID)
-    {
-        $banners = ShopBanner::where('shop_id',$shopID)->where('key','shop_banner')->get();
-        return $banners;
-    }
-
-
-    // Get Favourite Clients List
-    function FavClients($limit)
-    {
-        $clients = User::with(['hasOneShop','hasOneSubscription'])->where('user_type',2)->where('is_fav',1)->limit($limit)->get();
-        return $clients;
-    }
-
-
-    // Function for Hex to RGB
-    function hexToRgb($hex)
-    {
-        $hex      = str_replace('#', '', $hex);
-        $length   = strlen($hex);
-        $rgb['r'] = hexdec($length == 6 ? substr($hex, 0, 2) : ($length == 3 ? str_repeat(substr($hex, 0, 1), 2) : 0));
-        $rgb['g'] = hexdec($length == 6 ? substr($hex, 2, 2) : ($length == 3 ? str_repeat(substr($hex, 1, 1), 2) : 0));
-        $rgb['b'] = hexdec($length == 6 ? substr($hex, 4, 2) : ($length == 3 ? str_repeat(substr($hex, 2, 1), 2) : 0));
-
-        return $rgb;
-    }
-
-
-    // Function for Get Item Price
-    function getItemPrice($itemID)
-    {
-        $prices = ItemPrice::where('item_id',$itemID)->get();
-        return $prices;
     }
 
 
@@ -595,69 +470,6 @@
     }
 
 
-    // Get total Quantity of Cart
-    function getCartQuantity()
-    {
-        $cart = session()->get('cart', []);
-        $total_quantity = 0;
-        if(count($cart) > 0)
-        {
-            foreach($cart as $cart_data)
-            {
-                if(count($cart_data) > 0)
-                {
-                    foreach ($cart_data as $cart_val)
-                    {
-                        if(count($cart_val) > 0)
-                        {
-                            foreach($cart_val as $item)
-                            {
-                                $total_quantity += (isset($item['quantity'])) ? $item['quantity'] : 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if($total_quantity == 0)
-        {
-            session()->forget('cart');
-            session()->save();
-        }
-
-        return $total_quantity;
-    }
-
-
-    // Get Total of Cart
-    function getCartTotal()
-    {
-        $cart = session()->get('cart', []);
-        $total = 0;
-        if(count($cart) > 0)
-        {
-            foreach($cart as $cart_data)
-            {
-                if(count($cart_data) > 0)
-                {
-                    foreach($cart_data as $cart_val)
-                    {
-                        if(count($cart_val) > 0)
-                        {
-                            foreach($cart_val as $cart_item)
-                            {
-                                $total += (isset($cart_item['total_amount'])) ? $cart_item['total_amount'] : 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $total;
-    }
-
-
     // Get Item Details
     function itemDetails($itemID)
     {
@@ -684,81 +496,6 @@
             ]
         ];
         return $paypal_config;
-    }
-
-
-    // Function for get client EveryPay Config
-    function getEveryPayConfig($shop_slug)
-    {
-        $shop = Shop::where('shop_slug',$shop_slug)->first();
-        $shop_id = isset($shop['id']) ? $shop['id'] : '';
-
-        // Get Payment Settings
-        $payment_settings = getPaymentSettings($shop_id);
-
-        $every_pay_config = [
-            'public_key' => (isset($payment_settings['every_pay_public_key'])) ? $payment_settings['every_pay_public_key'] : '',
-            'secret_key' => (isset($payment_settings['every_pay_private_key'])) ? $payment_settings['every_pay_private_key'] : '',
-            'mode' => (isset($payment_settings['everypay_mode'])) ? $payment_settings['everypay_mode'] : 1,
-        ];
-        return $every_pay_config;
-    }
-
-
-    // Function for Check Category Type Permission
-    function checkCatTypePermission($catType,$shop_id)
-    {
-        $permission = 0;
-        // Get Subscription ID
-        $subscription_id = getClientSubscriptionID($shop_id);
-
-        // Get Package Permissions
-        $package_permissions = getPackagePermission($subscription_id);
-
-        if($catType == 'parent_category' || $catType == 'product_category')
-        {
-            $permission = 1;
-        }
-        else
-        {
-            if($catType == 'page')
-            {
-                if(isset($package_permissions['page']) && !empty($package_permissions['page']) && $package_permissions['page'] == 1)
-                {
-                    $permission = 1;
-                }
-            }
-            elseif($catType == 'link')
-            {
-                if(isset($package_permissions['link']) && !empty($package_permissions['link']) && $package_permissions['link'] == 1)
-                {
-                    $permission = 1;
-                }
-            }
-            elseif($catType == 'pdf_page')
-            {
-                if(isset($package_permissions['pdf_file']) && !empty($package_permissions['pdf_file']) && $package_permissions['pdf_file'] == 1)
-                {
-                    $permission = 1;
-                }
-            }
-            elseif($catType == 'gallery')
-            {
-                if(isset($package_permissions['gallery']) && !empty($package_permissions['gallery']) && $package_permissions['gallery'] == 1)
-                {
-                    $permission = 1;
-                }
-            }
-            elseif($catType == 'check_in')
-            {
-                if(isset($package_permissions['check_in']) && !empty($package_permissions['check_in']) && $package_permissions['check_in'] == 1)
-                {
-                    $permission = 1;
-                }
-            }
-        }
-
-        return $permission;
     }
 
 ?>

@@ -37,10 +37,6 @@ class CreateOrdersTable extends Migration
             $table->string('street_number')->nullable();
             $table->text('instructions')->nullable();
             $table->string('delivery_time')->nullable();
-            $table->string('table',50)->nullable();
-            $table->string('room',50)->nullable();
-            $table->string('building')->nullable();
-            $table->string('office_no',50)->nullable();
             $table->string('order_status');
             $table->text('reject_reason')->nullable();
             $table->string('estimated_time')->nullable();
