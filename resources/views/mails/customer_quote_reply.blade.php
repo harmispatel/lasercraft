@@ -10,7 +10,7 @@
         <div style="max-width: 500px; margin: 0 auto; background: #fff;">
             <p>{{ $details['message'] }}</p>
         </div>
-        <div style="max-width: 500px; margin: 0 auto; background: #fff;">
+        {{-- <div style="max-width: 500px; margin: 0 auto; background: #fff;">
             <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
                 <tr>
                     <td valign="top" class="bg_white" style="background-color: #f5f5f5;">
@@ -140,7 +140,7 @@
                     </td>
                 </tr>
             </table>
-        </div>
+        </div> --}}
     </center>
 </body>
 

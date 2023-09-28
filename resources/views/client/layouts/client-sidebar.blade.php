@@ -186,6 +186,14 @@
             </a>
         </li>
 
+         {{-- Customers --}}
+         <li class="nav-item">
+            <a class="nav-link {{ ($routeName == 'customers') ? 'active-tab' : '' }}" href="{{ route('customers') }}">
+                <i class="fa-solid fa-user {{ ($routeName == 'customers') ? 'icon-tab' : '' }}"></i>
+            <span>{{ __('Customers') }}</span>
+            </a>
+        </li>
+
         {{-- Reviews Nav --}}
         <li class="nav-item">
             <a class="nav-link {{ ($routeName == 'items.reviews') ? 'active-tab' : '' }}" href="{{ route('items.reviews') }}">
@@ -197,19 +205,18 @@
         {{-- Customer Quotes --}}
         <li class="nav-item">
             <a class="nav-link {{ ($routeName == 'customer.quotes') ? 'active-tab' : '' }}" href="{{ route('customer.quotes') }}">
-                <i class="fa-solid fa-comments {{ ($routeName == 'customer.quotes') ? 'icon-tab' : '' }}"></i>
+                <i class="fa-solid fa-quote-left {{ ($routeName == 'customer.quotes') ? 'icon-tab' : '' }}"></i>
             <span>{{ __('Customer Quotes') }}</span>
             </a>
         </li>
 
-
         {{-- Schedule Nav --}}
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link {{ ($routeName == 'shop.schedule') ? 'active-tab' : '' }}" href="{{ route('shop.schedule')}}">
                 <i class="bi bi-clock {{ ($routeName == 'shop.schedule') ? 'icon-tab' : '' }}"></i>
             <span>{{ __('Schedule') }}</span>
             </a>
-        </li>
+        </li> --}}
 
         {{-- Contact Nav --}}
         {{-- <li class="nav-item">

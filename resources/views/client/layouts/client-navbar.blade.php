@@ -13,7 +13,9 @@
         $userImage = '';
     }
 
-    $logo = (isset(Auth::user()->hasOneShop->shop['logo']) && !empty(Auth::user()->hasOneShop->shop['logo'])) ? Auth::user()->hasOneShop->shop['logo'] : '';
+    $shop_settings = getClientSettings();
+
+    $logo = (isset($shop_settings['shop_view_header_logo']) && !empty($shop_settings['shop_view_header_logo'])) ? $shop_settings['shop_view_header_logo'] : '';
 
     $shop_slug = isset(Auth::user()->hasOneShop->shop['shop_slug']) ? Auth::user()->hasOneShop->shop['shop_slug'] : '';
 
@@ -22,12 +24,13 @@
 <header id="header" class="header fixed-top d-flex align-items-center">
 
     <div class="d-flex align-items-center justify-content-between text-center">
-        <a href="{{ route('restaurant',$shop_slug) }}" target="_blank" class="logo d-flex align-items-center justify-content-center">
-            @if(!empty($logo))
-                <img class="w-100" src="{{ $logo }}" alt="Logo">
+        <a href="{{ route('home') }}" target="_blank" class="logo d-flex align-items-center justify-content-center" style="color: #203047; font-size: 23px;">
+            {{-- @if(!empty($logo) && file_exists('public/client_uploads/top_logos/'.$logo))
+                <img class="w-100" src="{{ asset('public/client_uploads/top_logos/'.$logo) }}" alt="Logo">
             @else
                 <span class="d-none d-lg-block">My Logo</span>
-            @endif
+            @endif --}}
+            <strong>ADMIN PANEL</strong>
         </a>
 
         <i class="bi bi-list toggle-sidebar-btn"></i>

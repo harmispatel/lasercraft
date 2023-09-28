@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{ShopBanner, Category, CustomerQuote, ItemReview, Items, Order, User};
+use App\Models\{ShopBanner, Category, CategoryVisit, Clicks, CustomerQuote, ItemReview, Items, ItemsVisit, Order, User, UserVisits};
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -20,19 +21,71 @@ class FrontendController extends Controller
     }
 
 
-    function collectionByCategory($catID)
+    function collectionByCategory($catID, Request $request)
     {
+        $user_ip = $request->ip();
+        $current_date = Carbon::now()->format('Y-m-d');
+
         $cat_details = Category::where('id',$catID)->first();
         $items = Items::with(['itemImages','itemPrices'])->where('category_id',$catID)->where('published',1)->get();
         $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
         $sub_categories = Category::where('parent_id',$catID)->orderBy('order_key')->where('published',1)->get();
 
+        // Count Category Visit
+        $category_visit = CategoryVisit::where('category_id',$catID)->first();
+        $cat_visit_id = isset($category_visit->id) ? $category_visit->id : '';
+
+        if(!empty($cat_visit_id))
+        {
+            $cat_visit = CategoryVisit::find($cat_visit_id);
+            $total_clicks = $cat_visit->total_clicks + 1;
+            $cat_visit->total_clicks = $total_clicks;
+            $cat_visit->update();
+        }
+        else
+        {
+            $new_cat_visit = new CategoryVisit();
+            $new_cat_visit->category_id = $catID;
+            $new_cat_visit->total_clicks = 1;
+            $new_cat_visit->save();
+        }
+
+        // Enter Visitor Count
+        $user_visit = UserVisits::where('ip_address',$user_ip)->whereDate('created_at','=',$current_date)->first();
+
+        if(!isset($user_visit) || empty($user_visit))
+        {
+            $new_visit = new UserVisits();
+            $new_visit->ip_address = $user_ip;
+            $new_visit->save();
+        }
+
+        // Count Clicks
+        $clicks = Clicks::whereDate('created_at',$current_date)->first();
+        $click_id = isset($clicks->id) ? $clicks->id : '';
+        if(!empty($click_id))
+        {
+            $edit_click = Clicks::find($click_id);
+            $total_clicks = $edit_click->total_clicks + 1;
+            $edit_click->total_clicks = $total_clicks;
+            $edit_click->update();
+        }
+        else
+        {
+            $new_click = new Clicks();
+            $new_click->total_clicks = 1;
+            $new_click->save();
+        }
+
         return view('frontend.categories_collections',compact(['cat_details','items','child_categories','sub_categories']));
     }
 
 
-    function productDetails($itemID)
+    function productDetails($itemID, Request $request)
     {
+        $user_ip = $request->ip();
+        $current_date = Carbon::now()->format('Y-m-d');
+
         // Item Details
         $item_details = Items::with(['itemImages','itemPrices'])->where('id',$itemID)->first();
 
@@ -46,6 +99,52 @@ class FrontendController extends Controller
         $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
 
         $averageRating = ItemReview::avg('rating');
+
+        // Count Items Visit
+        $item_visit = ItemsVisit::where('item_id',$itemID)->first();
+        $item_visit_id = isset($item_visit->id) ? $item_visit->id : '';
+
+        if(!empty($item_visit_id))
+        {
+            $edit_item_visit = ItemsVisit::find($item_visit_id);
+            $total_clicks = $edit_item_visit->total_clicks + 1;
+            $edit_item_visit->total_clicks = $total_clicks;
+            $edit_item_visit->update();
+        }
+        else
+        {
+            $new_item_visit = new ItemsVisit();
+            $new_item_visit->item_id = $itemID;
+            $new_item_visit->total_clicks = 1;
+            $new_item_visit->save();
+        }
+
+        // Enter Visitor Count
+        $user_visit = UserVisits::where('ip_address',$user_ip)->whereDate('created_at','=',$current_date)->first();
+
+        if(!isset($user_visit) || empty($user_visit))
+        {
+            $new_visit = new UserVisits();
+            $new_visit->ip_address = $user_ip;
+            $new_visit->save();
+        }
+
+        // Count Clicks
+        $clicks = Clicks::whereDate('created_at',$current_date)->first();
+        $click_id = isset($clicks->id) ? $clicks->id : '';
+        if(!empty($click_id))
+        {
+            $edit_click = Clicks::find($click_id);
+            $total_clicks = $edit_click->total_clicks + 1;
+            $edit_click->total_clicks = $total_clicks;
+            $edit_click->update();
+        }
+        else
+        {
+            $new_click = new Clicks();
+            $new_click->total_clicks = 1;
+            $new_click->save();
+        }
 
         return view('frontend.product_detail',compact(['child_categories','item_details','related_items','averageRating']));
     }

@@ -39,8 +39,9 @@
                 @endif
             @endforeach
         </div>
-        <!-- <div class="swiper-button-next"><i class="fas fa-angle-right csb"></i></div>
-        <div class="swiper-button-prev"><i class="fas fa-angle-left csb"></i></div> -->
+        <div class="swiper-button-next"><i class="fas fa-angle-right csb"></i></div>
+        <div class="swiper-button-prev"><i class="fas fa-angle-left csb"></i></div>
+        <div class="swiper-pagination"></div>
     </div>
 </section>
 

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CartController, CategoryController,DashboardController,ContactController, CustomerAuthController, CustomerQuoteController, DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
+use App\Http\Controllers\{AdminSettingsController,AuthController,BillingInfoController, BuildingController, CartController, CategoryController,DashboardController,ContactController, CustomerAuthController, CustomerController, CustomerQuoteController, DesignController,EveryPayController, FoodJunctionController, ImportExportController,IngredientController,ItemsController, ItemsReviewsController, LanguageController,LanguagesController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, RoomsController, ShopBannerController,ShopController,ShopQrController, ShopScheduleController, ShopTablesController, StatisticsController,SubscriptionsController,TagsController,ThemeController,TutorialController,UserController, FrontendController};
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -25,7 +25,6 @@ Route::get('config-clear', function () {
     Artisan::call('config:clear');
     dd("Cache is cleared");
 });
-
 
 
 
@@ -320,6 +319,10 @@ Route::group(['prefix' => 'client'], function()
         Route::post('/customer-quote-details',[CustomerQuoteController::class,'quoteDetails'])->name('customer.quote.details');
         Route::post('/customer-quote-reply',[CustomerQuoteController::class,'quoteReply'])->name('customer.quote.reply');
 
+        // Customers
+        Route::get('/customers',[CustomerController::class,'index'])->name('customers');
+        Route::post('/customers-clients',[CustomerController::class,'changeStatus'])->name('customers.status');
+        Route::post('/customers-delete',[CustomerController::class,'destroy'])->name('customers.destroy');
     });
 });
 

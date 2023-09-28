@@ -48,7 +48,7 @@ class StatisticsController extends Controller
         }
         elseif($key == 'lifetime')
         {
-            $month = Carbon::now()->startOfWeek();
+            $month = Carbon::create('2023', '09', '15');
         }
         else
         {

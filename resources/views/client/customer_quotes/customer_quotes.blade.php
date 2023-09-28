@@ -157,11 +157,16 @@
                         $('#btn-quote-reply').show();
                         $('#load-btn-quote-reply').hide();
                         $('#quoteDetailsModal #quoteReplyForm').trigger("reset");
+                        $('#quoteDetailsModal #quoteReplyForm .item_child').remove();
+                        $('#quoteDetailsModal .invoices_div').html('');
+                        $('#quoteDetailsModal .invoices_div').append(response.data);
                         toastr.success(response.message);
                     }else{
                         toastr.error(response.message);
                         $('#quoteDetailsModal .modal-body').html('');
                         $('#quoteDetailsModal').modal('hide');
+                        $('#quoteDetailsModal #quoteReplyForm').trigger("reset");
+                        $('#quoteDetailsModal #quoteReplyForm .item_child').remove();
                     }
                 },
                 error: function(response){
@@ -177,6 +182,27 @@
             });
         };
 
+
+        // Function for Add New Item & Price
+        function AddItemPrice(){
+            var count = $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').children('.item_price_div').length;
+            var html = "";
+            count ++;
+
+            html += '<div class="row item_child item_price_div item_price_div_'+count+' mb-3">';
+                html += '<div class="col-md-7">';
+                    html += '<input type="text" name="price[item][]" class="form-control" placeholder="Enter Item Name">';
+                html += '</div>';
+                html += '<div class="col-md-4">';
+                    html += '<input type="number" name="price[price][]" class="form-control" value="0">';
+                html += '</div>';
+                html += '<div class="col-md-1">';
+                    html += '<a onclick="$(\'.item_price_div_'+count+'\').remove()" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>';
+                html += '</div>';
+            html += '</div>';
+
+            $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(html);
+        }
 
     </script>
 @endsection

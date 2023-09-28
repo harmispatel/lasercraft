@@ -50,6 +50,7 @@ class AuthController extends Controller
         $input['password'] = Hash::make($request->password);
         $input['user_type'] = 3;
         $input['user_verify'] = 0;
+        $input['status'] = 1;
         $input['verify_token'] = $user_verify_token;
 
         try {
@@ -108,6 +109,7 @@ class AuthController extends Controller
         if (Auth::attempt($input))
         {
             $user_verify = (isset(Auth::user()->user_verify) && Auth::user()->user_verify == 1) ? Auth::user()->user_verify : 0;
+            $user_status = (isset(Auth::user()->status) && Auth::user()->status == 1) ? Auth::user()->status : 0;
             $user_id = (isset(Auth::user()->id)) ? Auth::user()->id : '';
 
             if (Auth::user()->user_type == 1)
@@ -135,6 +137,13 @@ class AuthController extends Controller
                     Auth::logout();
                     return redirect()->route('customer.verify',encrypt($user_id))->with('error','Please Verify Your Account to Access Login');
                 }
+
+                if($user_status == 0)
+                {
+                    Auth::logout();
+                    return redirect()->route('login')->with('error','Your account has been Blocked. Contact Admin to Unblock It.');
+                }
+
                 $username = Auth::user()->firstname." ".Auth::user()->lastname;
                 return redirect()->route('home')->with('success','Hello, '. $username);
             }
