@@ -48,7 +48,7 @@
                                             <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
                                         </span>
                                     </label>
-                                    <label for="delivery" class="form-label">{{ __('Delivery') }}</label>
+                                    <label for="delivery" class="form-label">{{ __('Ship') }}</label>
                                 </div>
                                 <div class="col-md-4 mt-3">
                                     <label class="switch me-2">
@@ -58,7 +58,7 @@
                                             <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
                                         </span>
                                     </label>
-                                    <label for="takeaway" class="form-label">{{ __('Takeaway') }}</label>
+                                    <label for="takeaway" class="form-label">{{ __('PickUp') }}</label>
                                 </div>
                             </div>
                             <hr>

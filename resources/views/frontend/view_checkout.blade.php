@@ -172,7 +172,7 @@
                                     @endif
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="phone_number" class="form-label">Phone No. <span class="text-danger">*</span></label>
+                                    <label for="phone_number" class="form-label">Mobile No. <span class="text-danger">*</span></label>
                                     <input type="text" name="phone_number" id="phone_number" class="form-control {{ ($errors->has('phone_number')) ? 'is-invalid' : '' }}" maxlength="10" value="{{ (Auth::user()->mobile) ? Auth::user()->mobile : old('phone_number') }}">
                                     @if($errors->has('phone_number'))
                                         <div class="invalid-feedback">
@@ -181,17 +181,6 @@
                                     @endif
                                 </div>
                                 @if($current_check_type == 'delivery')
-                                    <div class="col-md-6 mb-3">
-                                        <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
-                                        <input type="hidden" name="latitude" id="latitude" value="{{ $cust_lat }}">
-                                        <input type="hidden" name="longitude" id="longitude" value="{{ $cust_lng }}">
-                                        <input type="text" name="address" id="address" class="form-control {{ ($errors->has('address')) ? 'is-invalid' : '' }}" value="{{ $cust_address }}">
-                                        @if($errors->has('address'))
-                                            <div class="invalid-feedback">
-                                                {{ $errors->first('address') }}
-                                            </div>
-                                        @endif
-                                    </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="street_number" class="form-label">Street No. <span class="text-danger">*</span></label>
                                         <input type="text" name="street_number" id="street_number" class="form-control {{ ($errors->has('street_number')) ? 'is-invalid' : '' }}" value="{{ old('street_number') }}">
@@ -202,20 +191,40 @@
                                         @endif
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="floor" class="form-label">Floor <span class="text-danger">*</span></label>
-                                        <input type="text" name="floor" id="floor" class="form-control {{ ($errors->has('floor')) ? 'is-invalid' : '' }}" value="{{ old('floor') }}">
-                                        @if($errors->has('floor'))
+                                        <label for="address" class="form-label">Street Address <span class="text-danger">*</span></label>
+                                        <input type="hidden" name="latitude" id="latitude" value="{{ $cust_lat }}">
+                                        <input type="hidden" name="longitude" id="longitude" value="{{ $cust_lng }}">
+                                        <input type="text" name="address" id="address" class="form-control {{ ($errors->has('address')) ? 'is-invalid' : '' }}" value="{{ $cust_address }}">
+                                        @if($errors->has('address'))
                                             <div class="invalid-feedback">
-                                                {{ $errors->first('floor') }}
+                                                {{ $errors->first('address') }}
                                             </div>
                                         @endif
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="door_bell" class="form-label">Door Bell <span class="text-danger">*</span></label>
-                                        <input type="text" name="door_bell" id="door_bell" class="form-control {{ ($errors->has('door_bell')) ? 'is-invalid' : '' }}" value="{{ old('door_bell') }}">
-                                        @if($errors->has('door_bell'))
+                                        <label for="city" class="form-label">City <span class="text-danger">*</span></label>
+                                        <input type="text" name="city" id="city" class="form-control {{ ($errors->has('city')) ? 'is-invalid' : '' }}" value="{{ old('city') }}">
+                                        @if($errors->has('city'))
                                             <div class="invalid-feedback">
-                                                {{ $errors->first('door_bell') }}
+                                                {{ $errors->first('city') }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="state" class="form-label">State <span class="text-danger">*</span></label>
+                                        <input type="text" name="state" id="state" class="form-control {{ ($errors->has('state')) ? 'is-invalid' : '' }}" value="{{ old('state') }}">
+                                        @if($errors->has('state'))
+                                            <div class="invalid-feedback">
+                                                {{ $errors->first('state') }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="postcode" class="form-label">Postcode <span class="text-danger">*</span></label>
+                                        <input type="text" name="postcode" id="postcode" class="form-control {{ ($errors->has('postcode')) ? 'is-invalid' : '' }}" value="{{ old('postcode') }}">
+                                        @if($errors->has('postcode'))
+                                            <div class="invalid-feedback">
+                                                {{ $errors->first('postcode') }}
                                             </div>
                                         @endif
                                     </div>
@@ -276,18 +285,20 @@
     var lng = "{{ $cust_lng }}";
     var check_type = "{{ $current_check_type }}";
 
-    navigator.geolocation.getCurrentPosition(function (position){
-        if(lat == '' || lng == ''){
-            lat = position.coords.latitude;
-            lng = position.coords.longitude;
-        }
+    if(check_type == 'delivery'){
+        navigator.geolocation.getCurrentPosition(function (position){
+            if(lat == '' || lng == ''){
+                lat = position.coords.latitude;
+                lng = position.coords.longitude;
+            }
 
-        if(check_type == 'delivery'){
-            initMap(lat,lng);
-        }
-    },function errorCallback(error){
-        console.log(error)
-    });
+            if(check_type == 'delivery'){
+                initMap(lat,lng);
+            }
+        },function errorCallback(error){
+            console.log(error)
+        });
+    }
 
     function initMap(lat,long){
         const myLatLng = { lat: parseFloat(lat), lng: parseFloat(long) };

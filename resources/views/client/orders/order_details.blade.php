@@ -88,7 +88,7 @@
                                                                 <i class="bi bi-truck"></i>&nbsp;{{ __('Shipping Method') }}
                                                             </div>
                                                             <div class="fw-bold text-capitalize">
-                                                                {{ $order->checkout_type }}
+                                                                {{ ($order->checkout_type == 'takeaway') ? 'PickUp' : 'Ship' }}
                                                             </div>
                                                         </div>
                                                     </td>
@@ -190,7 +190,7 @@
                                                         <td class="text-muted">
                                                             <div class="client-order-info">
                                                                 <div class="">
-                                                                    <i class="bi bi-building"></i>&nbsp;{{ __('Street') }}
+                                                                    <i class="bi bi-map"></i>&nbsp;{{ __('Street') }}
                                                                 </div>
                                                                 <div class="fw-bold">
                                                                     {{ $order->street_number }}
@@ -202,10 +202,10 @@
                                                         <td class="text-muted">
                                                             <div class="client-order-info">
                                                                 <div class="">
-                                                                    <i class="bi bi-building"></i>&nbsp;{{ __('Floor') }}
+                                                                    <i class="bi bi-map"></i>&nbsp;{{ __('City') }}
                                                                 </div>
                                                                 <div class="fw-bold">
-                                                                    {{ $order->floor }}
+                                                                    {{ $order->city }}
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -214,10 +214,22 @@
                                                         <td class="text-muted">
                                                             <div class="client-order-info">
                                                                 <div class="">
-                                                                    <i class="bi bi-building"></i>&nbsp;{{ __('Door Bell') }}
+                                                                    <i class="bi bi-map"></i>&nbsp;{{ __('State') }}
                                                                 </div>
                                                                 <div class="fw-bold">
-                                                                    {{ $order->door_bell }}
+                                                                    {{ $order->state }}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted">
+                                                            <div class="client-order-info">
+                                                                <div class="">
+                                                                    <i class="bi bi-map"></i>&nbsp;{{ __('Postcode') }}
+                                                                </div>
+                                                                <div class="fw-bold">
+                                                                    {{ $order->postcode }}
                                                                 </div>
                                                             </div>
                                                         </td>

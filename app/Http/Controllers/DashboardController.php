@@ -51,7 +51,7 @@ class DashboardController extends Controller
         $data['categories'] = Category::with(['categoryImages'])->limit(8)->latest('created_at')->get();
 
         // Get All Items
-        $data['items'] = Items::with('category')->limit(8)->latest('created_at')->get();
+        $data['items'] = Items::with(['category','itemImages'])->limit(8)->latest('created_at')->get();
 
         // Total Food Count
         $item['total'] = Items::count();

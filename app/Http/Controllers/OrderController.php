@@ -92,11 +92,12 @@ class OrderController extends Controller
 
                     $html .= '</div>';
 
+                    $chekout_type = ($order->checkout_type == 'takeaway') ? 'PickUp' : 'Ship';
                     $html .= '<div class="order-info">';
                         $html .= '<ul>';
                             $html .= '<li><strong>#'.$order->id.'</strong></li>';
                             $html .= '<li><strong>'.__('Order Date').' : </strong>'.date('d-m-Y h:i:s',strtotime($order->created_at)).'</li>';
-                            $html .= '<li><strong>'.__('Order Type').' : </strong>'.$order->checkout_type.'</li>';
+                            $html .= '<li><strong>'.__('Shipping Method').' : </strong>'.$chekout_type.'</li>';
                             $html .= '<li><strong>'.__('Payment Method').' : </strong>'.$order->payment_method.'</li>';
                             $html .= '<li><strong>'.__('Customer').' : </strong>'.$order->firstname.' '.$order->lastname.'</li>';
                             $html .= '<li><strong>'.__('Phone No.').' : </strong> '.$order->phone.'</li>';
@@ -107,8 +108,9 @@ class OrderController extends Controller
                             {
                                 $html .= '<li><strong>'.__('Address').' : </strong> '.$order->address.'</li>';
                                 $html .= '<li><strong>'.__('Street').' : </strong> '.$order->street_number.'</li>';
-                                $html .= '<li><strong>'.__('Floor').' : </strong> '.$order->floor.'</li>';
-                                $html .= '<li><strong>'.__('Door Bell').' : </strong> '.$order->door_bell.'</li>';
+                                $html .= '<li><strong>'.__('City').' : </strong> '.$order->city.'</li>';
+                                $html .= '<li><strong>'.__('State').' : </strong> '.$order->state.'</li>';
+                                $html .= '<li><strong>'.__('Postcode').' : </strong> '.$order->postcode.'</li>';
                                 $html .= '<li><strong>'.__('Google Map').' : </strong> <a href="https://maps.google.com?q='.$order->address.'" target="_blank">Address Link</a></li>';
                             }
 

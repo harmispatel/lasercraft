@@ -93,7 +93,7 @@
                                     <ul>
                                         <li><strong>#{{ $order->id }}</strong></li>
                                         <li><strong>{{ __('Order Date') }} : </strong>{{ date('d-m-Y h:i:s',strtotime($order->created_at)) }}</li>
-                                        <li><strong>{{ __('Order Type') }} : </strong>{{ $order->checkout_type }}</li>
+                                        <li><strong>{{ __('Shipping Method') }} : </strong> {{ ($order->checkout_type == 'takeaway') ? 'PickUp' : 'Ship' }}</li>
                                         <li><strong>{{ __('Payment Method') }} : </strong>{{ $order->payment_method }}</li>
                                         <li><strong>{{ __('Customer') }} : </strong> {{ $order->firstname }} {{ $order->lastname }}</li>
                                         <li><strong>{{ __('Phone No.') }} : </strong> {{ $order->phone }}</li>
@@ -102,8 +102,9 @@
                                         @if($order->checkout_type == 'delivery')
                                             <li><strong>{{ __('Address') }} : </strong> {{ $order->address }}</li>
                                             <li><strong>{{ __('Street') }} : </strong> {{ $order->street_number }}</li>
-                                            <li><strong>{{ __('Floor') }} : </strong> {{ $order->floor }}</li>
-                                            <li><strong>{{ __('Door Bell') }} : </strong> {{ $order->door_bell }}</li>
+                                            <li><strong>{{ __('City') }} : </strong> {{ $order->city }}</li>
+                                            <li><strong>{{ __('State') }} : </strong> {{ $order->state }}</li>
+                                            <li><strong>{{ __('Postcode') }} : </strong> {{ $order->postcode }}</li>
                                             <li><strong>{{ __('Google Map') }} : </strong> <a href="https://maps.google.com?q={{ $order->address }}" target="_blank">Address Link</a></li>
                                         @endif
                                     </ul>

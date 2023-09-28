@@ -109,7 +109,7 @@
                                                                     <i class="bi bi-truck"></i>&nbsp; Shipping Method
                                                                 </div>
                                                                 <div class="fw-bold text-capitalize">
-                                                                    {{ $order_details->checkout_type }}
+                                                                    {{ ($order_details->checkout_type == 'takeaway') ? 'PickUp' : 'Ship' }}
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -211,10 +211,10 @@
                                                             <td class="text-muted">
                                                                 <div class="client-order-info">
                                                                     <div class="">
-                                                                        <i class="bi bi-building"></i>&nbsp; Floor
+                                                                        <i class="bi bi-building"></i>&nbsp; City
                                                                     </div>
                                                                     <div class="fw-bold">
-                                                                        {{ $order_details->floor }}
+                                                                        {{ $order_details->city }}
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -223,10 +223,22 @@
                                                             <td class="text-muted">
                                                                 <div class="client-order-info">
                                                                     <div class="">
-                                                                        <i class="bi bi-building"></i>&nbsp; Door Bell
+                                                                        <i class="bi bi-building"></i>&nbsp; State
                                                                     </div>
                                                                     <div class="fw-bold">
-                                                                        {{ $order_details->door_bell }}
+                                                                        {{ $order_details->state }}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="text-muted">
+                                                                <div class="client-order-info">
+                                                                    <div class="">
+                                                                        <i class="bi bi-building"></i>&nbsp; Postcode
+                                                                    </div>
+                                                                    <div class="fw-bold">
+                                                                        {{ $order_details->postcode }}
                                                                     </div>
                                                                 </div>
                                                             </td>

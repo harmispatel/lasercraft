@@ -145,8 +145,9 @@ class CartController extends Controller
             $rules += [
                 'address' => 'required',
                 'street_number' => 'required',
-                'floor' => 'required',
-                'door_bell' => 'required',
+                'city' => 'required',
+                'state' => 'required',
+                'postcode' => 'required',
             ];
         }
 
@@ -181,8 +182,9 @@ class CartController extends Controller
             $longitude = (isset($request->longitude)) ? $request->longitude : '';
             $address = (isset($request->address)) ? $request->address : '';
             $street_number = (isset($request->street_number)) ? $request->street_number : '';
-            $floor = (isset($request->floor)) ? $request->floor : '';
-            $door_bell = (isset($request->door_bell)) ? $request->door_bell : '';
+            $city = (isset($request->city)) ? $request->city : '';
+            $state = (isset($request->state)) ? $request->state : '';
+            $postcode = (isset($request->postcode)) ? $request->postcode : '';
             $discount_per = session()->get('discount_per');
             $discount_type = session()->get('discount_type');
             $cart = \Cart::getContent();
@@ -229,8 +231,9 @@ class CartController extends Controller
                     $order->address = $address;
                     $order->latitude = $latitude;
                     $order->longitude = $longitude;
-                    $order->floor = $floor;
-                    $order->door_bell = $door_bell;
+                    $order->city = $city;
+                    $order->state = $state;
+                    $order->postcode = $postcode;
                     $order->street_number = $street_number;
                 }
 

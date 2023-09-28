@@ -196,6 +196,9 @@
                                                                 <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" width="35">
                                                             @endif
                                                         @else
+                                                            @php
+                                                                $cat_image = (isset($cat->categoryImages) && count($cat->categoryImages) > 0 && isset($cat->categoryImages[0]->image)) ? $cat->categoryImages[0]->image : '';
+                                                            @endphp
                                                             @if(!empty($cat_image) && file_exists('public/client_uploads/categories/'.$cat_image))
                                                                 <img src="{{ asset('public/client_uploads/categories/'.$cat_image) }}" width="35">
                                                             @else
@@ -233,7 +236,7 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">{{ __('Preview')}}</th>
-                                            <th scope="col">{{ __('Category')}}</th>
+                                            {{-- <th scope="col">{{ __('Category')}}</th> --}}
                                             <th scope="col">{{ __('Item')}}</th>
                                             <th scope="col">{{ __('Updated At')}}</th>
                                         </tr>
@@ -241,15 +244,18 @@
                                     <tbody>
                                         @if(count($items) > 0)
                                             @foreach ($items as $val)
+                                                @php
+                                                    $item_image = (isset($val->itemImages) && count($val->itemImages) > 0 && isset($val->itemImages[0]->image)) ? $val->itemImages[0]->image : '';
+                                                @endphp
                                                 <tr>
                                                     <th scope="row">
-                                                        @if(!empty($val['image']))
-                                                            <img src="{{ asset('public/client_uploads/items/'.$val['image']) }}" width="35" height="35">
+                                                        @if(!empty($item_image) && file_exists('public/client_uploads/items/'.$item_image))
+                                                            <img src="{{ asset('public/client_uploads/items/'.$item_image) }}" width="35" height="35">
                                                         @else
                                                             <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" width="35" height="35">
                                                         @endif
                                                     </th>
-                                                    <td>{{ isset($val->category[$name_key]) ? $val->category[$name_key] :  "" }}</td>
+                                                    {{-- <td>{{ isset($val->category[$name_key]) ? $val->category[$name_key] :  "" }}</td> --}}
                                                     <td>
                                                         <a href="{{ route('items',$val['category_id']) }}">{{ $val->$name_key }}</a>
                                                     </td>

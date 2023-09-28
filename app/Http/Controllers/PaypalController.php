@@ -199,8 +199,9 @@ class PaypalController extends Controller
         $longitude = (isset($order_details['longitude'])) ? $order_details['longitude'] : '';
         $address = (isset($order_details['address'])) ? $order_details['address'] : '';
         $street_number = (isset($order_details['street_number'])) ? $order_details['street_number'] : '';
-        $floor = (isset($order_details['floor'])) ? $order_details['floor'] : '';
-        $door_bell = (isset($order_details['door_bell'])) ? $order_details['door_bell'] : '';
+        $city = (isset($order_details['city'])) ? $order_details['city'] : '';
+        $state = (isset($order_details['state'])) ? $order_details['state'] : '';
+        $postcode = (isset($order_details['postcode'])) ? $order_details['postcode'] : '';
         $cart_qty = \Cart::getTotalQuantity();
 
         $paypal_config = getPayPalConfig();
@@ -261,8 +262,9 @@ class PaypalController extends Controller
                 $order->address = $address;
                 $order->latitude = $latitude;
                 $order->longitude = $longitude;
-                $order->floor = $floor;
-                $order->door_bell = $door_bell;
+                $order->city = $city;
+                $order->state = $state;
+                $order->postcode = $postcode;
                 $order->street_number = $street_number;
             }
 

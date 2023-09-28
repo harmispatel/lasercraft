@@ -170,13 +170,13 @@
                                 @if (isset($order_settings['takeaway']) && $order_settings['takeaway'] == 1)
                                     <div class="opt_radio_box">
                                         <input type="radio" id="takeaway" name="checkout_type" class="d-none" value="takeaway" {{ ($current_check_type == 'takeaway') ? 'checked' : '' }} value="takeaway" />
-                                        <label class="btn btn-default" for="takeaway">TakeAway</label>
+                                        <label class="btn btn-default" for="takeaway">PickUp</label>
                                     </div>
                                 @endif
                                 @if (isset($order_settings['delivery']) && $order_settings['delivery'] == 1)
                                     <div class="opt_radio_box">
                                         <input type="radio" id="delivery" name="checkout_type" class="d-none" value="delivery" {{ ($current_check_type == 'delivery') ? 'checked' : '' }} value="delivery" />
-                                        <label class="btn btn-default" for="delivery">Delivery</label>
+                                        <label class="btn btn-default" for="delivery">Ship</label>
                                     </div>
                                 @endif
                             </div>
