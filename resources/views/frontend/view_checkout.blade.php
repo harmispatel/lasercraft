@@ -321,6 +321,11 @@
         function initialize()
         {
             var input = document.getElementById('address');
+            var streetInput = document.getElementById('street_number');
+            var cityInput = document.getElementById('city');
+            var stateInput = document.getElementById('state');
+            var zipInput = document.getElementById('postcode');
+
             var autocomplete = new google.maps.places.Autocomplete(input);
 
             $('#address').keydown(function (e)
@@ -335,6 +340,32 @@
             autocomplete.addListener('place_changed', function ()
             {
                 var place = autocomplete.getPlace();
+                var addressComponents = place.address_components;
+                var formattedAddress = place.formatted_address;
+
+                // Reset inputs
+                streetInput.value = '';
+                cityInput.value = '';
+                stateInput.value = '';
+                zipInput.value = '';
+
+                 // Fill inputs with data from Google Maps API
+                for (var i = 0; i < addressComponents.length; i++) {
+                    var component = addressComponents[i];
+
+                    if (component.types.includes('street_number')) {
+                        streetInput.value = component.long_name;
+                    }else if (component.types.includes('route')) {
+                        streetInput.value = component.long_name;
+                    } else if (component.types.includes('locality')) {
+                        cityInput.value = component.long_name;
+                    } else if (component.types.includes('administrative_area_level_1')) {
+                        stateInput.value = component.long_name;
+                    } else if (component.types.includes('postal_code')) {
+                        zipInput.value = component.long_name;
+                    }
+                }
+
                 if(place != '')
                 {
                     initMap(place.geometry['location'].lat(),place.geometry['location'].lng());
