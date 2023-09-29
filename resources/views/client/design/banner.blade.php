@@ -111,7 +111,7 @@
                         </div>
                         <div class="row">
                             <div class="table-responsive">
-                                <table class="table table-bordered">
+                                <table class="table table-striped" id="bannersTable">
                                     <thead>
                                         <tr>
                                             <th style="width: 12%">{{ __('Banner') }}</th>
@@ -119,14 +119,14 @@
                                             <th>{{ __('Actions') }}</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @forelse ($banners as $banner)
+                                    <tbody class="connectedSortableBanner" id="bannerSorting">
+                                        @foreach ($banners as $banner)
                                             @php
                                                 $banner_image = isset($banner->$image_key) ? $banner->$image_key : '';
                                                 $banner_description = isset($banner->$description_key) ? $banner->$description_key : '';
                                             @endphp
 
-                                            <tr>
+                                            <tr banner-id="{{ $banner['id'] }}">
                                                 <td>
                                                     @if(!empty($banner_image) && file_exists('public/client_uploads/banners/'.$banner_image))
                                                         <img src="{{ asset('public/client_uploads/banners/'.$banner_image) }}" class="w-100">
@@ -147,13 +147,7 @@
                                                     <a class="btn btn-sm btn-danger mt-2" onclick="deleteBanner({{ $banner->id }})"><i class="bi bi-trash"></i></a>
                                                 </td>
                                             </tr>
-                                        @empty
-                                            <tr class="text-center">
-                                                <td colspan="3">
-                                                    <h4>{{ __('Records Not Found !') }}</h4>
-                                                </td>
-                                            </tr>
-                                        @endforelse
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -174,6 +168,10 @@
         var addBanEditor;
         var editBanEditor;
         var addKey=0;
+
+        $('#bannersTable').DataTable({
+            "ordering": false,
+        });
 
         // Reset New BannerForm when Click on add New Banner
         $('#addBannerBtn').on('click',function()
@@ -735,6 +733,44 @@
                 }
             });
         }
+
+        // Sort Banners
+        $( function()
+        {
+            // Sorting Banners
+            $( "#bannerSorting" ).sortable({
+                connectWith: ".connectedSortableBanner",
+                opacity: 0.5,
+            }).disableSelection();
+
+            $( ".connectedSortableBanner" ).on( "sortupdate", function( event, ui )
+            {
+                var bannersArr = [];
+
+                $("#bannerSorting tr").each(function( index )
+                {
+                    bannersArr[index] = $(this).attr('banner-id');
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: '{{ route("banners.sorting") }}',
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        'sortArr': bannersArr,
+                    },
+                    dataType: 'JSON',
+                    success: function(response)
+                    {
+                        if (response.success == 1)
+                        {
+                            toastr.success(response.message);
+                        }
+                    }
+                });
+            });
+
+        });
 
     </script>
 

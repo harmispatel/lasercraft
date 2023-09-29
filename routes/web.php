@@ -137,6 +137,7 @@ Route::group(['prefix' => 'admin'], function()
         Route::post('/banners-update', [ShopBannerController::class,'update'])->name('banners.update');
         Route::post('/banners-image-delete', [ShopBannerController::class,'deleteBanner'])->name('banners.delete.image');
         Route::post('update-banners-by-lang',[ShopBannerController::class,'updateByLangCode'])->name('banners.update-by-lang');
+        Route::post('banners-sorting',[ShopBannerController::class,'sorting'])->name('banners.sorting');
 
         Route::get('/design-general-info', [DesignController::class,'generalInfo'])->name('design.general-info');
         Route::get('/design-mail-forms', [DesignController::class,'MailForms'])->name('design.mail.forms');

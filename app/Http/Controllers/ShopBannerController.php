@@ -12,7 +12,7 @@ class ShopBannerController extends Controller
 
     public function index()
     {
-        $data['banners'] = ShopBanner::where('key','shop_banner')->get();
+        $data['banners'] = ShopBanner::where('key','shop_banner')->orderBy('order_key','ASC')->get();
 
         return view('client.design.banner',$data);
     }
@@ -35,6 +35,9 @@ class ShopBannerController extends Controller
         $language_detail = Languages::where('id',$primary_lang_id)->first();
         $lang_code = isset($language_detail->code) ? $language_detail->code : '';
 
+        $max_banner_order_key = ShopBanner::max('order_key');
+        $banner_order = (isset($max_banner_order_key) && !empty($max_banner_order_key)) ? ($max_banner_order_key + 1) : 1;
+
         $description = $request->description;
         $display = $request->display;
         $background_color = $request->background_color;
@@ -49,6 +52,7 @@ class ShopBannerController extends Controller
             $banner->background_color = $background_color;
             $banner->description = $description;
             $banner->$description_key = $description;
+            $banner->order_key = $banner_order;
 
             if($request->hasFile('image'))
             {
@@ -684,5 +688,24 @@ class ShopBannerController extends Controller
                 'message' => 'Internal Server Error!',
             ]);
         }
+    }
+
+
+    // Sorting Banners.
+    public function sorting(Request $request)
+    {
+        $sort_array = $request->sortArr;
+
+        foreach ($sort_array as $key => $value)
+        {
+            $key = $key+1;
+            ShopBanner::where('id',$value)->update(['order_key'=>$key]);
+        }
+
+        return response()->json([
+            'success' => 1,
+            'message' => "Banners has been Sorted SuccessFully....",
+        ]);
+
     }
 }
