@@ -121,7 +121,15 @@
                                                                     <i class="bi bi-truck"></i>&nbsp; Order Status
                                                                 </div>
                                                                 <div class="fw-bold text-capitalize">
-                                                                    {{ $order_details->order_status }}
+                                                                    @if($order_details->order_status == 'completed')
+                                                                        <span class="badge bg-success">Completed</span>
+                                                                    @elseif ($order_details->order_status == 'pending')
+                                                                        <span class="badge bg-warning">Pending</span>
+                                                                    @elseif ($order_details->order_status == 'accepted')
+                                                                        <span class="badge bg-primary">Accepted</span>
+                                                                    @elseif ($order_details->order_status == 'rejected')
+                                                                        <span class="badge bg-danger">Rejected</span>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </td>

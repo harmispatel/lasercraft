@@ -546,7 +546,7 @@ class FrontendController extends Controller
     function orders()
     {
         if(Auth::user() && Auth::user()->user_type == 3){
-            $data['orders'] = Order::where('user_id',Auth::user()->id)->get();
+            $data['orders'] = Order::where('user_id',Auth::user()->id)->orderBy('id','DESC')->get();
             return view('frontend.customer_orders',$data);
         }else{
             return redirect()->route('home');

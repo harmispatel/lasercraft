@@ -79,8 +79,8 @@
                                             <thead>
                                                 <tr>
                                                     <th>Sr.</th>
-                                                    <th>FirstName</th>
-                                                    <th>LastName</th>
+                                                    <th>Customer</th>
+                                                    <th>Order Status</th>
                                                     <th>Email</th>
                                                     <th>Total Amount</th>
                                                     <th>Actions</th>
@@ -91,8 +91,18 @@
                                                     @foreach ($orders as $order)
                                                         <tr>
                                                             <td>{{ $loop->iteration }}</td>
-                                                            <td>{{ $order->firstname }}</td>
-                                                            <td>{{ $order->lastname }}</td>
+                                                            <td>{{ $order->firstname }} {{ $order->lastname }}</td>
+                                                            <td>
+                                                                @if($order->order_status == 'completed')
+                                                                    <span class="badge bg-success">Completed</span>
+                                                                @elseif ($order->order_status == 'pending')
+                                                                    <span class="badge bg-warning">Pending</span>
+                                                                @elseif ($order->order_status == 'accepted')
+                                                                    <span class="badge bg-primary">Accepted</span>
+                                                                @elseif ($order->order_status == 'rejected')
+                                                                    <span class="badge bg-danger">Rejected</span>
+                                                                @endif
+                                                            </td>
                                                             <td>{{ $order->email }}</td>
                                                             <td>{{ $order->order_total_text }}</td>
                                                             <td>
@@ -130,7 +140,9 @@
         toastr.success('{{ Session::get('success') }}')
     @endif
 
-    $('#ordersTable').DataTable();
+    $('#ordersTable').DataTable({
+        // 'sorting' : false,
+    });
 
 </script>
 
