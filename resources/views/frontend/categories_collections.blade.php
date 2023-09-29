@@ -43,7 +43,7 @@
         </div>
         <div class="product_main">
             <div class="row">
-                <div class="col-md-3">
+                {{-- <div class="col-md-3">
                     <div class="product_list_sidebar">
                         <div class="accordion" id="accordionExample">
                             <div class="accordion-item">
@@ -69,8 +69,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-9">
+                </div> --}}
+                <div class="col-md-12">
                     <div class="product_list">
                         {{-- <div class="row justify-content-end mb-4">
                             <div class="col-md-3">
