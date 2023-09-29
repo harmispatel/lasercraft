@@ -346,7 +346,8 @@ class PaypalController extends Controller
             session()->forget('cust_address');
             session()->save();
 
-            return redirect()->route('cart.checkout.success',encrypt($order->id));
+            // return redirect()->route('cart.checkout.success',encrypt($order->id));
+            return redirect()->route('customer.orders.details',[encrypt($order->id)])->with('success','Your Order has been Placed SuccessFully....');
         }
 
         return redirect()->route('paypal.payment.cancel');

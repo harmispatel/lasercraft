@@ -319,7 +319,8 @@ class CartController extends Controller
             session()->forget('cust_long');
             session()->forget('cust_address');
 
-            return redirect()->route('cart.checkout.success',[encrypt($order->id)]);
+            // return redirect()->route('cart.checkout.success',[encrypt($order->id)]);
+            return redirect()->route('customer.orders.details',[encrypt($order->id)])->with('success','Your Order has been Placed SuccessFully....');
 
         }
         catch (\Throwable $th)
