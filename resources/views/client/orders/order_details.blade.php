@@ -240,6 +240,12 @@
                                     </div>
                                 </div>
                             @endif
+                            @if($order->checkout_type == 'takeaway')
+                                <div class="col-md-12 mt-2 mb-2">
+                                    <strong>PickUp Location : </strong> {{ $order->pickup_location }}
+                                </div>
+                            @endif
+
                             @if($order->order_status == 'rejected')
                                 <div class="col-md-12 mt-2 mb-2">
                                     <strong>Order Rejection Reason : </strong> {{ $order->reject_reason }}

@@ -11,7 +11,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title')</title>
     <!-- Favicons -->
-    <link href="{{ asset('public/admin_images/favicons/glob.png') }}" rel="icon">
+    <link href="{{ asset('public/admin_images/favicons/mahantam.ico') }}" rel="icon">
     {{-- css --}}
     @include('frontend.layouts.frontend-css')
 </head>

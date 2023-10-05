@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, CartController, CategoryController,DashboardController,ContactController, CustomerController, CustomerQuoteController, DesignController ,ItemsController, ItemsReviewsController, LanguageController,OptionController,OrderController,PaymentController,PaypalController,PreviewController, ShopBannerController,ShopController, ShopScheduleController, StatisticsController,TagsController,UserController, FrontendController};
+use App\Http\Controllers\{AuthController, CartController, CategoryController,DashboardController, CustomerController, CustomerQuoteController, DesignController ,ItemsController, ItemsReviewsController, LanguageController,OptionController,OrderController,PaymentController,PaypalController, ShopBannerController, ShopScheduleController, StatisticsController,TagsController,UserController, FrontendController};
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -162,9 +162,6 @@ Route::group(['prefix' => 'admin'], function()
         Route::post('/update-profile',[UserController::class,'updateProfile'])->name('client.profile.update');
         Route::get('/delete-profile-picture',[UserController::class,'deleteProfilePicture'])->name('client.delete.profile.picture');
 
-        // Delete Shop Logo
-        Route::get('delete-shop-logo',[ShopController::class, 'deleteShopLogo'])->name('shop.delete.logo');
-
         // Tags
         Route::get('tags',[TagsController::class,'index'])->name('tags');
         Route::post('store-tags',[TagsController::class,'store'])->name('tags.store');
@@ -174,16 +171,9 @@ Route::group(['prefix' => 'admin'], function()
         Route::post('sorting-tags',[TagsController::class,'sorting'])->name('tags.sorting');
         Route::post('update-tags-by-lang',[TagsController::class,'updateByLangCode'])->name('tags.update-by-lang');
 
-        // Preview
-        Route::get('/preview',[PreviewController::class,'index'])->name('preview');
-
 
         // Statistic
         Route::get('/statistics/{key?}',[StatisticsController::class,'index'])->name('statistics');
-
-        // contact us
-        Route::get('/contact',[ContactController::class,'index'])->name('contact');
-        Route::post('/contact-send',[ContactController::class,'send'])->name('contact.send');
 
         // Themes
         // Route::get('/design-theme', [ThemeController::class,'index'])->name('design.theme');

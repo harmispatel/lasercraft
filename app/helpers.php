@@ -27,6 +27,7 @@
             'orders_mail_form_client',
             'orders_mail_form_customer',
             'check_in_mail_form',
+            'pickup_address',
         ]);
 
         $settings = [];

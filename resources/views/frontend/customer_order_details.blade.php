@@ -252,6 +252,22 @@
                                                             </td>
                                                         </tr>
                                                     @endif
+
+                                                    @if($order_details->checkout_type == 'takeaway')
+                                                        <tr>
+                                                            <td class="text-muted">
+                                                                <div class="client-order-info">
+                                                                    <div class="w-50">
+                                                                        <i class="bi bi-map"></i>&nbsp; PickUp Location
+                                                                    </div>
+                                                                    <div class="fw-bold ps-5">
+                                                                        {{ $order_details->pickup_location }}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+
                                                     <tr>
                                                         <td class="text-muted">
                                                             <div class="client-order-info">

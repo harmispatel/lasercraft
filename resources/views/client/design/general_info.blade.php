@@ -103,13 +103,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-3">
                             <div class="form-group">
                                 <label class="form-label" for="map_url">{{ __('Map')}}</label>
                                 <div class="position-relative">
                                     <input type="text" class="form-control icon-input" name="map_url" id="map_url" value="{{ (isset($client_settings['map_url']) && !empty($client_settings['map_url'])) ? $client_settings['map_url'] : '' }}">
                                     <i class="fa-solid fa-map input-icon"></i>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label for="pickup_address" class="form-label">PickUp Location</label>
+                                <textarea name="pickup_address" id="pickup_address" rows="3" class="form-control">{{ (isset($client_settings['pickup_address']) && !empty($client_settings['pickup_address'])) ? $client_settings['pickup_address'] : '' }}</textarea>
                             </div>
                         </div>
                     </div>

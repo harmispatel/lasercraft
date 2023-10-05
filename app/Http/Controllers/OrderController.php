@@ -100,6 +100,12 @@ class OrderController extends Controller
                             $html .= '<li><strong>'.__('Customer').' : </strong>'.$order->firstname.' '.$order->lastname.'</li>';
                             $html .= '<li><strong>'.__('Phone No.').' : </strong> '.$order->phone.'</li>';
                             $html .= '<li><strong>'.__('Email').' : </strong> '.$order->email.'</li>';
+
+                            if($order->checkout_type == 'takeaway')
+                            {
+                                $html .= '<li><strong>'.__('PickUp Location').' : </strong> '.$order->pickup_location.'</li>';
+                            }
+
                             $html .= '<li><strong>'.__('Comments').' : </strong> '.$order->instructions.'</li>';
 
                             if($order->checkout_type == 'delivery')

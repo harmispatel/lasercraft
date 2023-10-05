@@ -256,6 +256,10 @@ class PaypalController extends Controller
             $order->phone = $phone_number;
             $order->instructions = $instructions;
 
+            if($checkout_type == 'takeaway'){
+                $order->pickup_location = $order_details['pickup_location'];
+            }
+
             // If Checkout Type is Delivery Then Insert More Details
             if($checkout_type == 'delivery')
             {

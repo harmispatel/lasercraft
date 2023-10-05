@@ -24,6 +24,7 @@
     $default_currency = (isset($client_settings['default_currency'])) ? $client_settings['default_currency'] : 'USD';
 
     $delivery_message = (isset($client_settings['delivery_message']) && !empty($client_settings['delivery_message'])) ? $client_settings['delivery_message'] : 'Sorry your address is out of our delivery range.';
+    $pickup_address = (isset($client_settings['pickup_address']) && !empty($client_settings['pickup_address'])) ? $client_settings['pickup_address'] : '';
 
     $discount_per = session()->get('discount_per');
     $discount_type = session()->get('discount_type');
@@ -180,6 +181,17 @@
                                         </div>
                                     @endif
                                 </div>
+                                @if($current_check_type == 'takeaway')
+                                    <div class="col-md-6 mb-3">
+                                        <label for="pickup_address" class="form-label">PickUp Location</label>
+                                        <textarea name="pickup_location" id="pickup_location" rows="4" class="form-control {{ ($errors->has('pickup_location')) ? 'is-invalid' : '' }}" readonly>{{ $pickup_address }}</textarea>
+                                        @if($errors->has('pickup_location'))
+                                            <div class="invalid-feedback">
+                                                {{ $errors->first('pickup_location') }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
                                 @if($current_check_type == 'delivery')
                                     <div class="col-md-6 mb-3">
                                         <label for="street_number" class="form-label">Street No. <span class="text-danger">*</span></label>

@@ -140,6 +140,13 @@ class CartController extends Controller
             'payment_method' => 'required',
         ];
 
+        if($checkout_type == 'takeaway')
+        {
+            $rules += [
+                'pickup_location' => 'required',
+            ];
+        }
+
         if($checkout_type == 'delivery')
         {
             $rules += [
@@ -224,6 +231,10 @@ class CartController extends Controller
                 $order->email = $email;
                 $order->phone = $phone_number;
                 $order->instructions = $instructions;
+
+                if($checkout_type == 'takeaway'){
+                    $order->pickup_location = $request->pickup_location;
+                }
 
                 // If Checkout Type is Delivery Then Insert More Details
                 if($checkout_type == 'delivery')

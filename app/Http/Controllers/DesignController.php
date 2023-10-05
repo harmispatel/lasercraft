@@ -314,6 +314,7 @@ class DesignController extends Controller
         $all_data['map_url'] = $request->map_url;
         $all_data['homepage_intro'] = $request->homepage_intro;
         $all_data['delivery_message'] = $request->delivery_message;
+        $all_data['pickup_address'] = $request->pickup_address;
 
         // Insert or Update Settings
         foreach($all_data as $key => $value)

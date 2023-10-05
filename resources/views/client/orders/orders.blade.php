@@ -98,6 +98,9 @@
                                         <li><strong>{{ __('Customer') }} : </strong> {{ $order->firstname }} {{ $order->lastname }}</li>
                                         <li><strong>{{ __('Phone No.') }} : </strong> {{ $order->phone }}</li>
                                         <li><strong>{{ __('Email') }} : </strong> {{ $order->email }}</li>
+                                        @if($order->checkout_type == 'takeaway')
+                                            <li><strong>{{ __('PickUp Location') }} : </strong> {{ $order->pickup_location }}</li>
+                                        @endif
                                         <li><strong>{{ __('Comments') }} : </strong> {{ $order->instructions }}</li>
                                         @if($order->checkout_type == 'delivery')
                                             <li><strong>{{ __('Address') }} : </strong> {{ $order->address }}</li>

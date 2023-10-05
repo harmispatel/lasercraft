@@ -25,6 +25,7 @@ class CreateOrdersTable extends Migration
             $table->string('checkout_type',20);
             $table->string('payment_method',30);
             $table->longText('address')->nullable();
+            $table->longText('pickup_location')->nullable();
             $table->string('cgst')->nullable();
             $table->string('sgst')->nullable();
             $table->string('gst_amount')->nullable();
