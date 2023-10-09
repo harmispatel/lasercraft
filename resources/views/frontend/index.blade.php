@@ -14,6 +14,8 @@
     $description_key = $lang_code."_description";
     $image_key = $lang_code."_image";
     $name_key = $lang_code."_name";
+
+    $intro_second = (isset($client_settings['intro_icon_duration']) && !empty($client_settings['intro_icon_duration'])) ? $client_settings['intro_icon_duration'] : '';
 @endphp
 
 @extends('frontend.layouts.frontend-layout')
@@ -21,6 +23,8 @@
 @section('title', __('Laser Craft'))
 
 @section('content')
+
+<input type="hidden" name="intro_second" id="intro_second" value="{{ $intro_second }}">
 
 <section class="banner_slider">
     <div class="swiper">
@@ -78,13 +82,6 @@
         @endif
     </div>
 </section>
-
-{{-- <section class="offer_sec">
-    <div class="offer_banner position-relative">
-        <img src="{{asset('public/frontend//image/offer.png')}}" class="w-100" />
-        <button class="btn btn_explore">Explore More</button>
-    </div>
-</section> --}}
 
 @php
     $main_loop_key = 1;
@@ -144,201 +141,38 @@
     @endforeach
 @endif
 
-{{-- <section class="sec_main product_sec">
-    <div class="sec_title">
-        <h2><span>Night lights</span></h2>
-    </div>
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="novelty-tab" data-bs-toggle="tab" data-bs-target="#novelty"
-                type="button" role="tab" aria-controls="novelty" aria-selected="true">NOVELTY</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="printed-tab" data-bs-toggle="tab" data-bs-target="#printed" type="button"
-                role="tab" aria-controls="printed" aria-selected="false">PRINTED</button>
-        </li>
-    </ul>
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="novelty" role="tabpanel" aria-labelledby="novelty-tab">
-            <div class="product_items">
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{asset('public/frontend/image/night_light.png')}}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Personalised Unicorn Wings Led Night Light</h3>
-                        <p>$45.95</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{asset('public/frontend/image/night_light.png')}}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Personalised Unicorn Wings Led Night Light</h3>
-                        <p>$45.95</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{asset('public/frontend/image/night_light.png')}}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Personalised Unicorn Wings Led Night Light</h3>
-                        <p>$45.95</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{asset('public/frontend/image/night_light.png')}}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Personalised Unicorn Wings Led Night Light</h3>
-                        <p>$45.95</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{asset('public/frontend/image/night_light.png')}}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Personalised Unicorn Wings Led Night Light</h3>
-                        <p>$45.95</p>
-                    </div>
-                </div>
-            </div>
-            <div class="view_bt text-center py-3">
-                <button class="btn btn_explore">- View all</button>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="printed" role="tabpanel" aria-labelledby="printed-tab">
-            <div class="product_items">
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{ asset('public/frontend/image/printed.png') }}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Elephant Night Light</h3>
-                        <p>$68.12</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{ asset('public/frontend/image/printed.png') }}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Elephant Night Light</h3>
-                        <p>$68.12</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{ asset('public/frontend/image/printed.png') }}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Elephant Night Light</h3>
-                        <p>$68.12</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{ asset('public/frontend/image/printed.png') }}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Elephant Night Light</h3>
-                        <p>$68.12</p>
-                    </div>
-                </div>
-                <div class="product_box">
-                    <div class="product_image">
-                        <img src="{{ asset('public/frontend/image/printed.png') }}" class="w-100">
-                        <button class="btn cart_bt"><i class="fa-solid fa-bag-shopping"></i></button>
-                    </div>
-                    <div class="product_info">
-                        <h3>Elephant Night Light</h3>
-                        <p>$68.12</p>
-                    </div>
-                </div>
-            </div>
-            <div class="view_bt text-center py-3">
-                <button class="btn btn_explore">- View all</button>
-            </div>
-        </div>
-    </div>
 
-</section> --}}
+@if(isset($client_settings['intro_icon_status']) && !empty($client_settings['intro_icon_status']) && $client_settings['intro_icon_status'] == 1)
+    @if(isset($client_settings['shop_intro_icon']) && !empty($client_settings['shop_intro_icon']) && file_exists('public/client_uploads/intro_icons/'.$client_settings['shop_intro_icon']))
+        @php
+            $intro_file_ext = pathinfo($client_settings['shop_intro_icon'], PATHINFO_EXTENSION);
+        @endphp
 
-{{-- <section class="sec_main img_gallery">
-    <div class="container">
-        <div class="gallery_inr">
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
-            <div class="gallery_img">
-                <a href="#">
-                    <img src="{{asset('public/frontend/image/gallery.jpg')}}" class="w-100">
-                </a>
-            </div>
+        <div class="cover-img">
+            @if($intro_file_ext == 'mp4' || $intro_file_ext == 'mov')
+                <video src="{{ asset('public/client_uploads/intro_icons/'.$client_settings['shop_intro_icon']) }}" width="100%" autoplay muted loop>
+            </video>
+            @else
+                <img src="{{ asset('public/client_uploads/intro_icons/'.$client_settings['shop_intro_icon']) }}" width="100%">
+            @endif
         </div>
-    </div>
-</section> --}}
+    @endif
+@endif
+
 
 @endsection
 
 @section('page-js')
 
 <script type="text/javascript">
+
+    $(document).ready(function () {
+        // Timeout for Cover
+        var introSec = $('#intro_second').val() * 1000;
+        setTimeout(() => {
+            $('.cover-img').hide();
+        }, introSec);
+    });
 
     // Error Messages
     @if (Session::has('error'))
