@@ -20,14 +20,14 @@
                         <div class="form-group">
                             <label class="form-label" for="orders_mail_form_client">{{ __('Orders Mail Form Owner') }}</label>
                             <textarea name="orders_mail_form_client" id="orders_mail_form_client" class="form-control editor">{{ (isset($client_settings['orders_mail_form_client']) && !empty($client_settings['orders_mail_form_client'])) ? $client_settings['orders_mail_form_client'] : '' }}</textarea>
-                            <code>Tags : ({shop_logo}, {shop_name}, {firstname}, {lastname}, {order_id}, {order_type}, {payment_method}, {items}, {total})</code>
+                            <code>Tags : ({shop_logo}, {firstname}, {lastname}, {order_id}, {shipping_method}, {payment_method}, {phone_number}, {comments}, {items}, {total})</code>
                         </div>
                     </div>
                     <div class="col-md-12 mt-3">
                         <div class="form-group">
                             <label class="form-label" for="orders_mail_form_customer">{{ __('Orders Mail Form Customer') }}</label>
                             <textarea name="orders_mail_form_customer" id="orders_mail_form_customer" class="form-control editor">{{ (isset($client_settings['orders_mail_form_customer']) && !empty($client_settings['orders_mail_form_customer'])) ? $client_settings['orders_mail_form_customer'] : '' }}</textarea>
-                            <code>Tags : ({shop_logo}, {shop_name}, {firstname}, {lastname}, {order_id}, {order_type}, {order_status}, {payment_method}, {items}, {total}, {estimated_time})</code>
+                            <code>Tags : ({shop_logo}, {firstname}, {lastname}, {order_status}, {order_id}, {shipping_method}, {payment_method}, {phone_number}, {comments}, {items}, {total})</code>
                         </div>
                     </div>
                 </div>

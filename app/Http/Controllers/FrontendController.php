@@ -331,7 +331,7 @@ class FrontendController extends Controller
         $from_mail = $customer_mail;
         $subject = "New Customer Quote";
 
-        $user_details = User::where('id',1)->where('user_type',2)->first();
+        $user_details = User::where('id',1)->where('user_type',1)->first();
         $contact_emails = (isset($user_details['contact_emails']) && !empty($user_details['contact_emails'])) ? unserialize($user_details['contact_emails']) : [];
 
         try

@@ -189,6 +189,7 @@ class OrderController extends Controller
                                             $html .= '<tr>';
                                                 $html .= '<td>';
                                                     $html .= '<b>'.$ord_item['item_qty'].' x '.$ord_item['item_name'].'</b>';
+                                                    $html .= '<p class="m-0 text-muted">Personalised Message : '.$ord_item['personalised_message'].'</p>';
                                                     if(count($options) > 0)
                                                     {
                                                         foreach ($options as $option)
@@ -524,7 +525,7 @@ class OrderController extends Controller
     // Function for Clear Delivery Range Settings
     public function clearDeliveryRangeSettings()
     {
-        DeliveryAreas::deleteAll();
+        DeliveryAreas::truncate();
 
         return redirect()->route('order.settings')->with('success',"Setting has been Updated SuccessFully..");
 
@@ -569,11 +570,36 @@ class OrderController extends Controller
         $order_id = $request->order_id;
         try
         {
+            // Admin Settings
+            $shop_settings = getClientSettings();
+            $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'AUD';
+
+            // Order Mail Template
+            $orders_mail_form_customer = (isset($shop_settings['orders_mail_form_customer'])) ? $shop_settings['orders_mail_form_customer'] : '';
+
             // Update Order Status
             $order = Order::find($order_id);
             $order->order_status = 'accepted';
             $order->is_new = 0;
             $order->update();
+
+            $email = (isset($order->email)) ? $order->email : '';
+            $firstname = (isset($order->firstname)) ? $order->firstname : '';
+            $lastname = (isset($order->lastname)) ? $order->lastname : '';
+
+            // Sent Mail to Customer
+            if(!empty($orders_mail_form_customer) && isset($order_id) && !empty($email))
+            {
+                $details['currency'] = $currency;
+                $details['order_status'] = 'Accepted';
+                $details['user_name'] = "$firstname $lastname";
+                $details['form_mail'] = env('MAIL_USERNAME');
+                $details['mail_format'] = $orders_mail_form_customer;
+                $details['to_mail'] = $email;
+                $details['order_details'] = Order::with(['order_items'])->where('id',$order_id)->first();
+
+                \Mail::to($details['to_mail'])->send(new \App\Mail\OrderNotifyCustomer($details));
+            }
 
             return response()->json([
                 'success' => 1,
@@ -597,12 +623,37 @@ class OrderController extends Controller
         $reject_reason = $request->reject_reason;
         try
         {
+            // Admin Settings
+            $shop_settings = getClientSettings();
+            $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'AUD';
+
+            // Order Mail Template
+            $orders_mail_form_customer = (isset($shop_settings['orders_mail_form_customer'])) ? $shop_settings['orders_mail_form_customer'] : '';
+
             // Update Order Status
             $order = Order::find($order_id);
             $order->order_status = 'rejected';
             $order->reject_reason = $reject_reason;
             $order->is_new = 0;
             $order->update();
+
+            $email = (isset($order->email)) ? $order->email : '';
+            $firstname = (isset($order->firstname)) ? $order->firstname : '';
+            $lastname = (isset($order->lastname)) ? $order->lastname : '';
+
+            // Sent Mail to Customer
+            if(!empty($orders_mail_form_customer) && isset($order_id) && !empty($email))
+            {
+                $details['currency'] = $currency;
+                $details['order_status'] = 'Rejected';
+                $details['user_name'] = "$firstname $lastname";
+                $details['form_mail'] = env('MAIL_USERNAME');
+                $details['mail_format'] = $orders_mail_form_customer;
+                $details['to_mail'] = $email;
+                $details['order_details'] = Order::with(['order_items'])->where('id',$order_id)->first();
+
+                \Mail::to($details['to_mail'])->send(new \App\Mail\OrderNotifyCustomer($details));
+            }
 
             return response()->json([
                 'success' => 1,
@@ -622,12 +673,38 @@ class OrderController extends Controller
     // Function for Finalized Order
     public function finalizedOrder(Request $request)
     {
+
         $order_id = $request->order_id;
         try
         {
+            // Admin Settings
+            $shop_settings = getClientSettings();
+            $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'AUD';
+
+            // Order Mail Template
+            $orders_mail_form_customer = (isset($shop_settings['orders_mail_form_customer'])) ? $shop_settings['orders_mail_form_customer'] : '';
+
             $order = Order::find($order_id);
             $order->order_status = 'completed';
             $order->update();
+
+            $email = (isset($order->email)) ? $order->email : '';
+            $firstname = (isset($order->firstname)) ? $order->firstname : '';
+            $lastname = (isset($order->lastname)) ? $order->lastname : '';
+
+            // Sent Mail to Customer
+            if(!empty($orders_mail_form_customer) && isset($order_id) && !empty($email))
+            {
+                $details['currency'] = $currency;
+                $details['order_status'] = 'Completed';
+                $details['user_name'] = "$firstname $lastname";
+                $details['form_mail'] = env('MAIL_USERNAME');
+                $details['mail_format'] = $orders_mail_form_customer;
+                $details['to_mail'] = $email;
+                $details['order_details'] = Order::with(['order_items'])->where('id',$order_id)->first();
+
+                \Mail::to($details['to_mail'])->send(new \App\Mail\OrderNotifyCustomer($details));
+            }
 
             return response()->json([
                 'success' => 1,

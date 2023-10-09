@@ -30,6 +30,7 @@
                             <label class="form-label" for="default_currency">{{ __('Currency')}}</label>
                             <select  class="form-select {{ ($errors->has('default_currency')) ? 'is-invalid' : '' }}" name="default_currency" id="default_currency">
                                 <option value="">Choose Currency</option>
+                                <option value="AUD" {{ (isset($client_settings['default_currency']) && ($client_settings['default_currency'] == 'AUD')) ? 'selected' : '' }}>AUD</option>
                                 <option value="INR" {{ (isset($client_settings['default_currency']) && ($client_settings['default_currency'] == 'INR')) ? 'selected' : '' }}>INR</option>
                                 <option value="EUR" {{ (isset($client_settings['default_currency']) && ($client_settings['default_currency'] == 'EUR')) ? 'selected' : '' }}>EUR</option>
                                 <option value="USD" {{ (isset($client_settings['default_currency']) && ($client_settings['default_currency'] == 'USD')) ? 'selected' : '' }}>USD</option>

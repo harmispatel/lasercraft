@@ -279,6 +279,7 @@
                                                                     <a class="fw-bold" style="color: #7e8299">
                                                                         {{ ($ord_item->item_name) }}
                                                                     </a>
+                                                                    <p class="m-0 text-muted">Personalised Message : {{ $ord_item['personalised_message'] }}</p>
                                                                     @if(count($options) > 0)
                                                                         @foreach ($options as $option)
                                                                             @php

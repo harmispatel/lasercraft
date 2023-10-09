@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class QuoteReplyMail extends Mailable
+class OrderNotifyAdmin extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -30,9 +30,6 @@ class QuoteReplyMail extends Mailable
      */
     public function build()
     {
-        return $this->from(env('MAIL_USERNAME'), 'Mahantam Laser Crafts')->attach(public_path('admin_uploads/quote_replies_docs/'.$this->details['file_name']), [
-            'as' => $this->details['file_name'], // Attachment file name
-            'mime' => 'application/pdf', // MIME type
-        ])->subject('Customer Quotation')->view('mails.customer_quote_reply');
+        return $this->from($this->details['form_mail'], $this->details['user_name'])->subject('New Order')->view('mails.new_order_notify_to_admin');
     }
 }

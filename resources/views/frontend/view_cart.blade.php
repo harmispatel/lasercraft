@@ -24,7 +24,7 @@
 
     $total_amount = 0;
 
-    $user_details = App\Models\User::where('id',1)->where('user_type',2)->first();
+    $user_details = App\Models\User::where('id',1)->where('user_type',1)->first();
     $sgst = (isset($user_details['sgst'])) ? $user_details['sgst'] : 0;
     $cgst = (isset($user_details['cgst'])) ? $user_details['cgst'] : 0;
 
@@ -71,6 +71,9 @@
                                                     @endphp
                                                     <p><strong>{{ $option_name }} :</strong> {{ $price_name }}</p>
                                                 @endforeach
+                                            @endif
+                                            @if(!empty($cart_item['per_message']))
+                                                <p class="text-muted"><strong>Personalised Message : </strong> {{ $cart_item['per_message'] }}</p>
                                             @endif
                                         </div>
                                     </div>

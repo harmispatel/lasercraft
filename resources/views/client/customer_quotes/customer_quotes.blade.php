@@ -190,10 +190,13 @@
             count ++;
 
             html += '<div class="row item_child item_price_div item_price_div_'+count+' mb-3">';
-                html += '<div class="col-md-7">';
+                html += '<div class="col-md-6">';
                     html += '<input type="text" name="price[item][]" class="form-control" placeholder="Enter Item Name">';
                 html += '</div>';
-                html += '<div class="col-md-4">';
+                html += '<div class="col-md-2">';
+                    html += '<input type="number" name="price[qty][]" class="form-control" value="1">';
+                html += '</div>';
+                html += '<div class="col-md-3">';
                     html += '<input type="number" name="price[price][]" class="form-control" value="0">';
                 html += '</div>';
                 html += '<div class="col-md-1">';

@@ -30,6 +30,6 @@ class VerifyUser extends Mailable
      */
     public function build()
     {
-        return $this->from(env('mail_username'), 'Mahantam Laser Crafts')->subject('User Verification')->view('mails.customer_verify');
+        return $this->from(env('MAIL_USERNAME'), 'Mahantam Laser Crafts')->subject('User Verification')->view('mails.customer_verify');
     }
 }

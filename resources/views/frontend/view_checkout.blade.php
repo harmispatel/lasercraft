@@ -31,7 +31,7 @@
 
     $total_amount = 0;
 
-    $user_details = App\Models\User::where('id',1)->where('user_type',2)->first();
+    $user_details = App\Models\User::where('id',1)->where('user_type',1)->first();
     $sgst = (isset($user_details['sgst'])) ? $user_details['sgst'] : 0;
     $cgst = (isset($user_details['cgst'])) ? $user_details['cgst'] : 0;
 
@@ -147,7 +147,7 @@
                             <div class="row mt-4">
                                 <div class="col-md-6 mb-3">
                                     <label for="firstname" class="form-label">Firstname <span class="text-danger">*</span></label>
-                                    <input type="text" name="firstname" id="firstname" class="form-control {{ ($errors->has('firstname')) ? 'is-invalid' : '' }}" value="{{ Auth::user()->firstname }}">
+                                    <input type="text" name="firstname" id="firstname" class="form-control {{ ($errors->has('firstname')) ? 'is-invalid' : '' }}" value="{{ (Auth::user() && Auth::user()->user_type == 3) ? Auth::user()->firstname : '' }}">
                                     @if($errors->has('firstname'))
                                         <div class="invalid-feedback">
                                             {{ $errors->first('firstname') }}
@@ -156,7 +156,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="lastname" class="form-label">Lastname <span class="text-danger">*</span></label>
-                                    <input type="text" name="lastname" id="lastname" class="form-control {{ ($errors->has('lastname')) ? 'is-invalid' : '' }}" value="{{ Auth::user()->lastname }}">
+                                    <input type="text" name="lastname" id="lastname" class="form-control {{ ($errors->has('lastname')) ? 'is-invalid' : '' }}" value="{{ (Auth::user() && Auth::user()->user_type == 3) ? Auth::user()->lastname : '' }}">
                                     @if($errors->has('lastname'))
                                         <div class="invalid-feedback">
                                             {{ $errors->first('lastname') }}
@@ -165,7 +165,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="text" name="email" id="email" class="form-control {{ ($errors->has('email')) ? 'is-invalid' : '' }}" value="{{ Auth::user()->email }}">
+                                    <input type="text" name="email" id="email" class="form-control {{ ($errors->has('email')) ? 'is-invalid' : '' }}" value="{{ (Auth::user() && Auth::user()->user_type == 3) ? Auth::user()->email : '' }}">
                                     @if($errors->has('email'))
                                         <div class="invalid-feedback">
                                             {{ $errors->first('email') }}
@@ -174,7 +174,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="phone_number" class="form-label">Mobile No. <span class="text-danger">*</span></label>
-                                    <input type="text" name="phone_number" id="phone_number" class="form-control {{ ($errors->has('phone_number')) ? 'is-invalid' : '' }}" maxlength="10" value="{{ (Auth::user()->mobile) ? Auth::user()->mobile : old('phone_number') }}">
+                                    <input type="text" name="phone_number" id="phone_number" class="form-control {{ ($errors->has('phone_number')) ? 'is-invalid' : '' }}" maxlength="10" value="{{ (Auth::user() && Auth::user()->user_type == 3) ? Auth::user()->mobile : old('phone_number') }}">
                                     @if($errors->has('phone_number'))
                                         <div class="invalid-feedback">
                                             {{ $errors->first('phone_number') }}
@@ -338,7 +338,11 @@
             var stateInput = document.getElementById('state');
             var zipInput = document.getElementById('postcode');
 
-            var autocomplete = new google.maps.places.Autocomplete(input);
+            var autocompleteOptions = {
+                componentRestrictions: { country: 'AU' } // Restrict the search to Australia (AU country code)
+            };
+
+            var autocomplete = new google.maps.places.Autocomplete(input, autocompleteOptions);
 
             $('#address').keydown(function (e)
             {
@@ -356,7 +360,7 @@
                 var formattedAddress = place.formatted_address;
 
                 // Reset inputs
-                streetInput.value = '';
+                // streetInput.value = '';
                 cityInput.value = '';
                 stateInput.value = '';
                 zipInput.value = '';
@@ -366,9 +370,9 @@
                     var component = addressComponents[i];
 
                     if (component.types.includes('street_number')) {
-                        streetInput.value = component.long_name;
+                        // streetInput.value = component.long_name;
                     }else if (component.types.includes('route')) {
-                        streetInput.value = component.long_name;
+                        // streetInput.value = component.long_name;
                     } else if (component.types.includes('locality')) {
                         cityInput.value = component.long_name;
                     } else if (component.types.includes('administrative_area_level_1')) {
@@ -377,6 +381,8 @@
                         zipInput.value = component.long_name;
                     }
                 }
+
+                input.value = formattedAddress.split(',')[0];
 
                 if(place != '')
                 {

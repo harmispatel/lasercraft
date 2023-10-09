@@ -18,6 +18,7 @@ class CreateOrderItemsTable extends Migration
             $table->integer('order_id');
             $table->integer('item_id');
             $table->string('item_name');
+            $table->string('personalised_message')->nullable();
             $table->string('item_price');
             $table->string('item_price_label')->nullable();
             $table->string('item_qty');

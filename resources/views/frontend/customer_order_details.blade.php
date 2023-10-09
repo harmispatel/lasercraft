@@ -33,41 +33,45 @@
 <section class="profile_main sec_main">
     <div class="container">
         <div class="row">
-            <div class="col-md-4 col-lg-3">
-                <div class="profile_sidebar">
-                    <div class="profile_info_box">
-                        @if(!empty(Auth::user()->image) && file_exists('public/admin_uploads/users/'.Auth::user()->image))
-                            <img src="{{ asset('public/admin_uploads/users/'.Auth::user()->image) }}" width="65px" height="65px" style="border-radius: 50%">
-                        @else
-                            <img src="{{ asset('public/admin_images/demo_images/profiles/profile1.jpg') }}" width="65px" height="65px" style="border-radius: 50%">
-                        @endif
-                        <h3>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</h3>
-                    </div>
-                    <div class="sidebar_menu">
-                        <ul>
-                            <li>
-                                <a href="{{ route('customer.profile') }}" class="{{ (($routeName == 'customer.profile') || ($routeName == 'customer.profile.edit')) ? 'active' : '' }}">
-                                    <i class="fa-solid fa-user"></i>
-                                    <span>Profile</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('customer.orders') }}" class="{{ (($routeName == 'customer.orders') || ($routeName == 'customer.orders.details')) ? 'active' : '' }}">
-                                    <i class="fa-solid fa-cart-shopping"></i>
-                                    <span>Orders</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('logout') }}" class="">
-                                    <i class="fa-solid fa-right-from-bracket"></i>
-                                    <span>Logout</span>
-                                </a>
-                            </li>
-                        </ul>
+
+            @if(Auth::user() && Auth::user()->user_type == 3)
+                <div class="col-md-4 col-lg-3">
+                    <div class="profile_sidebar">
+                        <div class="profile_info_box">
+                            @if(!empty(Auth::user()->image) && file_exists('public/admin_uploads/users/'.Auth::user()->image))
+                                <img src="{{ asset('public/admin_uploads/users/'.Auth::user()->image) }}" width="65px" height="65px" style="border-radius: 50%">
+                            @else
+                                <img src="{{ asset('public/admin_images/demo_images/profiles/profile1.jpg') }}" width="65px" height="65px" style="border-radius: 50%">
+                            @endif
+                            <h3>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</h3>
+                        </div>
+                        <div class="sidebar_menu">
+                            <ul>
+                                <li>
+                                    <a href="{{ route('customer.profile') }}" class="{{ (($routeName == 'customer.profile') || ($routeName == 'customer.profile.edit')) ? 'active' : '' }}">
+                                        <i class="fa-solid fa-user"></i>
+                                        <span>Profile</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('customer.orders') }}" class="{{ (($routeName == 'customer.orders') || ($routeName == 'customer.orders.details')) ? 'active' : '' }}">
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                        <span>Orders</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('logout') }}" class="">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                        <span>Logout</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-8 col-lg-9">
+            @endif
+
+            <div class="col-md-{{ (Auth::user() && Auth::user()->user_type == 3) ? '8' : '12' }} col-lg-{{ (Auth::user() && Auth::user()->user_type == 3) ? '9' : '12' }}">
                 <div class="profile_info_main">
                     <div class="card">
                         <div class="card-body order-details">
@@ -316,6 +320,7 @@
                                                                                 <a href="{{ route('product.deatails',$ord_item->item_id) }}" class="fw-bold" style="color: #7e8299">
                                                                                     {{ ($ord_item->item_name) }}
                                                                                 </a>
+                                                                                <p class="m-0 text-muted">Personalised Message : {{ $ord_item->personalised_message }}</p>
                                                                                 @if(count($options) > 0)
                                                                                     @foreach ($options as $option)
                                                                                         @php

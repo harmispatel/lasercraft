@@ -169,6 +169,7 @@
                                                             @endphp
                                                             <td>
                                                                 <b>{{ $ord_item['item_qty'] }} x {{ $ord_item['item_name'] }}</b>
+                                                                <p class="m-0 text-muted">Personalised Message : {{ $ord_item['personalised_message'] }}</p>
                                                                 @if(count($options) > 0)
                                                                     @foreach ($options as $option)
                                                                         @php

@@ -133,12 +133,25 @@ class CustomerQuoteController extends Controller
                                     $html .= csrf_field();
                                     $html .= '<input type="hidden" name="quote_id" id="quote_id" value="'.$quote_id.'">';
                                     $html .= '<div class="main_item_price_div">';
-                                        $html .= '<label for="price" class="form-label">Items & Price</label>';
+                                        $html .= '<div class="row mb-3">';
+                                            $html .= '<div class="col-md-6">';
+                                                $html .= '<strong>Item Name</strong>';
+                                            $html .= '</div>';
+                                            $html .= '<div class="col-md-2">';
+                                                $html .= '<strong>Qty.</strong>';
+                                            $html .= '</div>';
+                                            $html .= '<div class="col-md-3">';
+                                                $html .= '<strong>Price</strong>';
+                                            $html .= '</div>';
+                                        $html .= '</div>';
                                         $html .= '<div class="row item_price_div item_price_div_1 mb-3">';
-                                            $html .= '<div class="col-md-7">';
+                                            $html .= '<div class="col-md-6">';
                                                 $html .= '<input type="text" name="price[item][]" class="form-control" placeholder="Enter Item Name">';
                                             $html .= '</div>';
-                                            $html .= '<div class="col-md-4">';
+                                            $html .= '<div class="col-md-2">';
+                                                $html .= '<input type="number" name="price[qty][]" class="form-control" value="1">';
+                                            $html .= '</div>';
+                                            $html .= '<div class="col-md-3">';
                                                 $html .= '<input type="number" name="price[price][]" class="form-control" value="0">';
                                             $html .= '</div>';
                                             $html .= '<div class="col-md-1">';
@@ -205,7 +218,7 @@ class CustomerQuoteController extends Controller
             $details['latestReplyId'] = CustomerQuoteReply::max('id') + 1;
             $to_email = (isset($quote_details['email'])) ? $quote_details['email'] : '';
 
-            $user_details = User::where('id',1)->where('user_type',2)->first();
+            $user_details = User::where('id',1)->where('user_type',1)->first();
             $contact_emails = (isset($user_details['contact_emails']) && !empty($user_details['contact_emails'])) ? unserialize($user_details['contact_emails']) : [];
             $from_email = (count($contact_emails) > 0 && isset($contact_emails[0])) ? $contact_emails[0] : '';
 
@@ -215,7 +228,7 @@ class CustomerQuoteController extends Controller
             $details['message'] = $message;
             $details['currency'] = $currency;
 
-            $path = public_path('admin_uploads\quote_replies_docs');
+            $path = public_path('admin_uploads/quote_replies_docs');
             $details['file_name'] = 'INVOICE_'.time().'_'.$details['latestReplyId'].'.pdf';
 
             $pdfFilePath = $path . '/' . $details['file_name'];

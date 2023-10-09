@@ -24,7 +24,7 @@
 
     $total_amount = 0;
 
-    $user_details = App\Models\User::where('id',1)->where('user_type',2)->first();
+    $user_details = App\Models\User::where('id',1)->where('user_type',1)->first();
     $sgst = (isset($user_details['sgst'])) ? $user_details['sgst'] : 0;
     $cgst = (isset($user_details['cgst'])) ? $user_details['cgst'] : 0;
 

@@ -163,16 +163,19 @@ class CartController extends Controller
         try
         {
             // Admin Details
-            $user_details = User::where('id',1)->where('user_type',2)->first();
+            $user_details = User::where('id',1)->where('user_type',1)->first();
             $sgst = (isset($user_details['sgst'])) ? $user_details['sgst'] : 0;
             $cgst = (isset($user_details['cgst'])) ? $user_details['cgst'] : 0;
 
             // Admin Settings
             $shop_settings = getClientSettings();
-            $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'USD';
+            $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'AUD';
 
             // Order Settings
             $order_settings = getOrderSettings();
+
+            // Order Mail Template
+            $orders_mail_form_client = (isset($shop_settings['orders_mail_form_client'])) ? $shop_settings['orders_mail_form_client'] : '';
 
             $total_amount = $request->total_amount;
             $total_amount_text = Currency::currency($currency)->format($total_amount);
@@ -219,7 +222,9 @@ class CartController extends Controller
                 // New Order
                 $order = new Order();
                 $order->ip_address = $user_ip;
-                $order->user_id = Auth::user()->id;
+                if(Auth::user() && Auth::user()->user_type == 3){
+                    $order->user_id = Auth::user()->id;
+                }
                 $order->currency = $currency;
                 $order->checkout_type = $checkout_type;
                 $order->payment_method = $payment_method;
@@ -259,6 +264,7 @@ class CartController extends Controller
                         $item_name = $cart_data['name'];
                         $item_quantity = $cart_data['quantity'];
                         $item_price = $cart_data['price'];
+                        $per_message = $cart_data['per_message'];
                         $item_price_text = Currency::currency($currency)->format($item_price);
                         $item_subtotal = $item_price * $item_quantity;
                         $item_subtotal_text = Currency::currency($currency)->format($item_subtotal);
@@ -269,6 +275,7 @@ class CartController extends Controller
                         $order_items->order_id = $order->id;
                         $order_items->item_id = $item_id;
                         $order_items->item_name = $item_name;
+                        $order_items->personalised_message = $per_message;
                         $order_items->item_price = $item_price;
                         $order_items->item_qty = $item_quantity;
                         $order_items->sub_total = $item_subtotal;
@@ -315,6 +322,20 @@ class CartController extends Controller
                     $update_order->update();
 
                 }
+
+                // Sent Mail to Admin
+                if(!empty($orders_mail_form_client) && isset($order->id) && !empty($email))
+                {
+                    $details['currency'] = $currency;
+                    $details['user_name'] = "$firstname $lastname";
+                    $details['form_mail'] = $email;
+                    $details['mail_format'] = $orders_mail_form_client;
+                    $details['to_mail'] = env('MAIL_USERNAME');
+                    $details['order_details'] = Order::with(['order_items'])->where('id',$order->id)->first();
+
+                    \Mail::to($details['to_mail'])->send(new \App\Mail\OrderNotifyAdmin($details));
+                }
+
             }
             elseif($payment_method == 'paypal'){
                 session()->put('order_details',$request->all());
