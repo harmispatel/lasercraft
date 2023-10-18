@@ -378,4 +378,193 @@ class PaypalController extends Controller
 
         return redirect()->route('paypal.payment.cancel');
     }
+
+    function getPaymentProcess(Request $request)
+    {
+        $cart = \Cart::getContent();
+        $discount_per = session()->get('discount_per');
+        $discount_type = session()->get('discount_type');
+        $checkout_type = session('checkout_type','');
+
+        // Admin Details
+        $user_details = User::where('id',1)->where('user_type',1)->first();
+        $sgst = (isset($user_details['sgst'])) ? $user_details['sgst'] : 0;
+        $cgst = (isset($user_details['cgst'])) ? $user_details['cgst'] : 0;
+
+        // Admin Settings
+        $shop_settings = getClientSettings();
+        $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'USD';
+
+        // Order Mail Template
+        $orders_mail_form_client = (isset($shop_settings['orders_mail_form_client'])) ? $shop_settings['orders_mail_form_client'] : '';
+
+        // Order Settings
+        $order_settings = getOrderSettings();
+
+        $total_amount = $request->total_amount;
+        $total_amount_text = Currency::currency($currency)->format($total_amount);
+        $cart_subtotal = \Cart::getTotal();
+        $cart_subtotal_text = Currency::currency($currency)->format($cart_subtotal);
+        $user_ip = $request->ip();
+        $payment_method = (isset($request->payment_method) && !empty($request->payment_method)) ? $request->payment_method : 'paypal';
+        $email = $request->email;
+        $phone_number = $request->phone_number;
+        $instructions = $request->instructions;
+        $firstname = $request->firstname;
+        $lastname = $request->lastname;
+        $latitude = (isset($request->latitude)) ? $request->latitude : '';
+        $longitude = (isset($request->longitude)) ? $request->longitude : '';
+        $address = (isset($request->address)) ? $request->address : '';
+        $street_number = (isset($request->street_number)) ? $request->street_number : '';
+        $city = (isset($request->city)) ? $request->city : '';
+        $state = (isset($request->state)) ? $request->state : '';
+        $postcode = (isset($request->postcode)) ? $request->postcode : '';
+        $cart_qty = \Cart::getTotalQuantity();
+
+        try {
+
+            // New Order
+            $order = new Order();
+            if(Auth::user() && Auth::user()->user_type == 3){
+                $order->user_id = Auth::user()->id;
+            }
+            $order->ip_address = $user_ip;
+            $order->currency = $currency;
+            $order->checkout_type = $checkout_type;
+            $order->payment_method = $payment_method;
+            $order->order_status = 'pending';
+            $order->is_new = 1;
+            $order->estimated_time = (isset($order_settings['order_arrival_minutes']) && !empty($order_settings['order_arrival_minutes'])) ? $order_settings['order_arrival_minutes'] : '30';
+            $order->firstname = $firstname;
+            $order->lastname = $lastname;
+            $order->email = $email;
+            $order->phone = $phone_number;
+            $order->instructions = $instructions;
+
+            if($checkout_type == 'takeaway'){
+                $order->pickup_location = $request->pickup_location;
+            }
+
+            // If Checkout Type is Delivery Then Insert More Details
+            if($checkout_type == 'delivery')
+            {
+                $order->address = $address;
+                $order->latitude = $latitude;
+                $order->longitude = $longitude;
+                $order->city = $city;
+                $order->state = $state;
+                $order->postcode = $postcode;
+                $order->street_number = $street_number;
+            }
+
+            $order->save();
+
+            // Insert Order Items
+            if($order->id)
+            {
+                foreach($cart as $cart_data)
+                {
+                    $item_id = $cart_data['id'];
+                    $item_name = $cart_data['name'];
+                    $item_quantity = $cart_data['quantity'];
+                    $item_price = $cart_data['price'];
+                    $per_message = $cart_data['per_message'];
+                    $item_price_text = Currency::currency($currency)->format($item_price);
+                    $item_subtotal = $item_price * $item_quantity;
+                    $item_subtotal_text = Currency::currency($currency)->format($item_subtotal);
+                    $options = (isset($cart_data['attributes']) && count($cart_data['attributes']) > 0) ? serialize($cart_data['attributes']->toArray()) : '';
+
+                    // Order Items
+                    $order_items = new OrderItems();
+                    $order_items->order_id = $order->id;
+                    $order_items->item_id = $item_id;
+                    $order_items->item_name = $item_name;
+                    $order_items->personalised_message = $per_message;
+                    $order_items->item_price = $item_price;
+                    $order_items->item_qty = $item_quantity;
+                    $order_items->sub_total = $item_subtotal;
+                    $order_items->sub_total_text = $item_subtotal_text;
+                    $order_items->options = $options;
+                    $order_items->save();
+                }
+
+                $update_order = Order::find($order->id);
+                $update_order->order_subtotal = $cart_subtotal;
+
+                if($discount_per > 0)
+                {
+                    if($discount_type == 'fixed')
+                    {
+                        $discount_amount = $discount_per;
+                    }
+                    else
+                    {
+                        $discount_amount = ($cart_subtotal * $discount_per) / 100;
+                    }
+
+                    $update_order->discount_per = $discount_per;
+                    $update_order->discount_type = $discount_type;
+                    $update_order->discount_value = $discount_amount;
+
+                    $cart_subtotal = $cart_subtotal - $discount_amount;
+                }
+
+                // CGST & SGST
+                if($cgst > 0 && $sgst > 0)
+                {
+                    $gst_per =  $cgst + $sgst;
+                    $gst_amount = ( $cart_subtotal * $gst_per) / 100;
+                    $update_order->cgst = $cgst;
+                    $update_order->sgst = $sgst;
+                    $update_order->gst_amount = $gst_amount;
+                    $cart_subtotal += $gst_amount;
+                }
+
+                $update_order->order_total = $total_amount;
+                $update_order->order_total_text = $total_amount_text;
+                $update_order->total_qty = $cart_qty;
+                $update_order->update();
+            }
+
+            // Sent Mail to Admin
+            if(!empty($orders_mail_form_client) && isset($order->id) && !empty($email))
+            {
+                $details['currency'] = $currency;
+                $details['user_name'] = "$firstname $lastname";
+                $details['form_mail'] = $email;
+                $details['mail_format'] = $orders_mail_form_client;
+                $details['to_mail'] = env('MAIL_USERNAME');
+                $details['order_details'] = Order::with(['order_items'])->where('id',$order->id)->first();
+
+                \Mail::to($details['to_mail'])->send(new \App\Mail\OrderNotifyAdmin($details));
+            }
+
+            \Cart::clear();
+            session()->forget('order_details');
+            session()->forget('paypal_payment_id');
+            session()->forget('discount_per');
+            session()->forget('discount_type');
+            session()->forget('checkout_type');
+            session()->forget('cust_lat');
+            session()->forget('cust_long');
+            session()->forget('cust_address');
+            session()->save();
+
+            $success_url = route('customer.orders.details',[encrypt($order->id)]);
+            session()->flash('success', "Your Order has been Placed SuccessFully....");
+
+            return response()->json([
+                'success' => 1,
+                'success_url' => $success_url,
+                'message' => 'Your Order has been Placed SuccessFully....',
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => 0,
+                'message' => 'Internal Server Error',
+            ]);
+        }
+
+    }
 }

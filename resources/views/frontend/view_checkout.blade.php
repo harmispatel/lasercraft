@@ -41,6 +41,11 @@
     $cust_lng = session()->get('cust_long','');
     $cust_address = session()->get('cust_address','');
 
+    $paypal_config = getPayPalConfig();
+    $paypal_mode = (isset($paypal_config['settings']['mode'])) ? $paypal_config['settings']['mode'] : '';
+    $client_id = (isset($paypal_config['client_id'])) ? $paypal_config['client_id'] : '';
+    $secret_id = (isset($paypal_config['secret'])) ? $paypal_config['secret'] : '';
+
 @endphp
 
 @extends('frontend.layouts.frontend-layout')
@@ -48,6 +53,10 @@
 @section('title', __('Checkout Page'))
 
 @section('content')
+
+    <div class="payment-loader" style="display: none;">
+        <img src="{{ asset('public/client_images/loader/loader1.gif') }}" alt="">
+    </div>
 
     {{-- Delivery Out of Range Message Model --}}
     <div class="modal fade" id="deliveyModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deliveyModalLabel" aria-hidden="true">
@@ -141,7 +150,7 @@
                     <div class="checkout-form">
                         <h3 class="text-center">Please Fill Your Information to Checkout</h3>
                         <hr>
-                        <form method="POST" enctype="multipart/form-data" action="{{ route('cart.checkout.post') }}">
+                        <form method="POST" id="checkoutForm" enctype="multipart/form-data" action="javascript:void(0)">
                             @csrf
                             <input type="hidden" name="total_amount" id="total_amount" value="{{ $total_amount }}">
                             <div class="row mt-4">
@@ -206,6 +215,7 @@
                                         <label for="address" class="form-label">Street Address <span class="text-danger">*</span></label>
                                         <input type="hidden" name="latitude" id="latitude" value="{{ $cust_lat }}">
                                         <input type="hidden" name="longitude" id="longitude" value="{{ $cust_lng }}">
+                                        <input type="hidden" name="address_verified" id="address_verified" value="">
                                         <input type="text" name="address" id="address" class="form-control {{ ($errors->has('address')) ? 'is-invalid' : '' }}" value="{{ $cust_address }}">
                                         @if($errors->has('address'))
                                             <div class="invalid-feedback">
@@ -245,7 +255,7 @@
                                     <label for="instructions" class="form-label">Instructions</label>
                                     <textarea name="instructions" id="instructions" rows="4" class="form-control">{{ old('instructions') }}</textarea>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                {{-- <div class="col-md-6 mb-3">
                                     <label for="payment_method" class="form-label">Payment Method <span class="text-danger">*</span></label>
                                     <select name="payment_method" id="payment_method" class="form-select {{ ($errors->has('payment_method')) ? 'is-invalid' : '' }}">
                                         <option value="">Select Payment Method</option>
@@ -261,11 +271,14 @@
                                             {{ $errors->first('payment_method') }}
                                         </div>
                                     @endif
+                                </div> --}}
+                                <div class="col-md-6 mb-3">
+                                    <div id="paypal-button-container" style="max-width:1000px;"></div>
                                 </div>
                             </div>
                             <div class="row mt-2">
                                 <div class="col-md-12">
-                                    <button class="btn checkout_bt">Checkout</button>
+                                    <a class="btn checkout_bt">Checkout</a>
                                 </div>
                             </div>
                         </form>
@@ -280,6 +293,7 @@
 @section('page-js')
 
 <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBsf7LHMQFIeuA_7-bR7u7EXz5CUaD6I2A&libraries=places"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ $client_id }}&currency={{ $default_currency }}"></script>
 <script type="text/javascript">
 
     // Error Messages
@@ -296,6 +310,15 @@
     var lat = "{{ $cust_lat }}";
     var lng = "{{ $cust_lng }}";
     var check_type = "{{ $current_check_type }}";
+    var cart = @json(\Cart::getContent());
+    var total_amt = @json(\Cart::getTotal());
+    var items_arr = [];
+    var discount_amount = 0;
+    var currency = @json($default_currency);
+    var discount_per = @json(session()->get('discount_per'));
+    var discount_type = @json(session()->get('discount_type'));
+    var cgst = parseInt(@json($cgst));
+    var sgst = parseInt(@json($sgst));
 
     if(check_type == 'delivery'){
         navigator.geolocation.getCurrentPosition(function (position){
@@ -408,6 +431,7 @@
                                 {
                                     $('#deliveyModal').modal('show');
                                 }
+                                $('#address_verified').val(response.available);
                             }
                             else
                             {
@@ -420,6 +444,262 @@
             });
         }
     }
+
+    $('.checkout_bt').on('click',function(){
+        var fname = $('#firstname');
+        var lname = $('#lastname');
+        var email = $('#email');
+        var mobile_no = $('#phone_number');
+        var pickup_location = $('#pickup_location');
+        var street_number = $('#street_number');
+        var address = $('#address');
+        var city = $('#city');
+        var state = $('#state');
+        var postcode = $('#postcode');
+        var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        var validate = 1;
+
+        $('#paypal-button-container').hide();
+        toastr.clear();
+
+        if(!fname.val()){
+            fname.addClass('is-invalid');
+            toastr.error("Firstname Field is Required!");
+            validate = 0;
+        }else{
+            fname.removeClass('is-invalid');
+        }
+
+        if(!lname.val()){
+            lname.addClass('is-invalid');
+            toastr.error("Lastname Field is Required!");
+            validate = 0;
+        }else{
+            lname.removeClass('is-invalid');
+        }
+
+        if(!email.val()){
+            email.addClass('is-invalid');
+            toastr.error("Email Field is Required!");
+            validate = 0;
+        }
+        else{
+            if (regex.test(email.val()) == false) {
+                email.addClass('is-invalid');
+                toastr.error("Please Enter Valid Email ID!");
+                validate = 0;
+            }else {
+                email.removeClass('is-invalid');
+            }
+        }
+
+        if(!mobile_no.val()){
+            mobile_no.addClass('is-invalid');
+            toastr.error("Mobile Number Field is Required!");
+            validate = 0;
+        }else{
+            if($.isNumeric(mobile_no.val()) == false){
+                mobile_no.addClass('is-invalid');
+                toastr.error("Mobile Number Must be Numeric Value!");
+                validate = 0;
+            }else if(mobile_no.val().length < 10){
+                mobile_no.addClass('is-invalid');
+                toastr.error("Mobile Number Must have 10 Digits!");
+                validate = 0;
+            } else{
+                mobile_no.removeClass('is-invalid');
+            }
+        }
+
+        if(check_type == 'delivery'){
+
+            if(!street_number.val()){
+                street_number.addClass('is-invalid');
+                toastr.error("Street Number Field is Required!");
+                validate = 0;
+            }else{
+                street_number.removeClass('is-invalid');
+            }
+
+            if(!address.val()){
+                address.addClass('is-invalid');
+                toastr.error("Street Address Field is Required!");
+                validate = 0;
+            }else{
+                if($('#address_verified').val() == '' || $('#address_verified').val() == 0){
+                    address.addClass('is-invalid');
+                    toastr.error("Your Adress is Out of Our Delivery Range!");
+                    validate = 0;
+                }else{
+                    address.removeClass('is-invalid');
+                }
+            }
+
+            if(!city.val()){
+                city.addClass('is-invalid');
+                toastr.error("City Field is Required!");
+                validate = 0;
+            }else{
+                city.removeClass('is-invalid');
+            }
+
+            if(!state.val()){
+                state.addClass('is-invalid');
+                toastr.error("State Field is Required!");
+                validate = 0;
+            }else{
+                state.removeClass('is-invalid');
+            }
+
+            if(!postcode.val()){
+                postcode.addClass('is-invalid');
+                toastr.error("Postcode Field is Required!");
+                validate = 0;
+            }else{
+                postcode.removeClass('is-invalid');
+            }
+        }else{
+            if(!pickup_location.val()){
+                pickup_location.addClass('is-invalid');
+                toastr.error("PickUp Location Field is Required!");
+                validate = 0;
+            }else{
+                pickup_location.removeClass('is-invalid');
+            }
+        }
+
+        if(validate == 1){
+            $('#paypal-button-container').show();
+        }
+    });
+
+
+    // Make Cart Response Array
+    $.each(cart, function (indexInArray, cart_item) {
+        let inner_item = {};
+        let ut_amount = {};
+
+        // Item Name
+        inner_item.name = cart_item.name;
+
+        // Item Description
+        inner_item.description =  cart_item.name;
+
+        // Unit Amount
+        ut_amount.currency_code = currency;
+        ut_amount.value = cart_item.price;
+        inner_item.unit_amount = ut_amount;
+
+        // Item Quantity
+        inner_item.quantity = cart_item.quantity;
+
+        items_arr.push(inner_item);
+    });
+
+    // Add GST
+    if(cgst > 0 && sgst > 0)
+    {
+        var gst_per = cgst + sgst;
+
+        if(items_arr.length > 0){
+            $.each(items_arr, function (key, item) {
+                var new_price = item.unit_amount.value + (item.unit_amount.value * gst_per) / 100;
+                items_arr[key].unit_amount.value = new_price.toFixed(2);
+            });
+        }
+
+        total_amt += (total_amt * gst_per) / 100;
+    }
+
+    total_amt = total_amt.toFixed(2);
+
+    // Add Discount
+    if(discount_per > 0)
+    {
+        if(discount_type == 'fixed')
+        {
+            discount_amount = discount_per;
+        }
+        else
+        {
+            discount_amount = total_amt * discount_per / 100;
+            discount_amount = discount_amount.toFixed(2);
+        }
+    }
+    var discountedTotal = total_amt - discount_amount;
+
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        currency_code : currency,
+                        value: discountedTotal.toFixed(2), // Set the payment amount dynamically
+                        breakdown: {
+                            "item_total":{
+                                currency_code : currency,
+                                value: total_amt,
+                            },
+                            "discount": {
+                                currency_code: currency,
+                                value: discount_amount // Include the discount amount in the breakdown
+                            }
+                        }
+                    },
+                    items: items_arr,
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+
+            // return actions.order.capture().then(function(details) {
+            // });
+
+            if(actions.order.capture()){
+
+                var myFormData = new FormData(document.getElementById('checkoutForm'));
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('paypal.payment.process') }}",
+                    data: myFormData,
+                    dataType: "JSON",
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    beforeSend: function(){
+                        $('.payment-loader').show();
+                    },
+                    success: function (response) {
+                        if(response.success == 1){
+                            window.location.href = response.success_url;
+                        }else{
+                            toastr.error(response.message);
+                        }
+                    }
+                });
+
+                // Call your backend to save the transaction
+                // return fetch('/paypal/execute-payment', {
+                //     method: 'POST',
+                //     headers: {
+                //         'content-type': 'application/json'
+                //     },
+                //     body: JSON.stringify({
+                //         orderID: data.orderID,
+                //         payerID: data.payerID
+                //     })
+                // });
+            }
+        },
+        onError: function(err) {
+            toastr.error("Payment Faild!");
+            console.log('PayPal Error : ', err);
+        }
+    }).render('#paypal-button-container');
+
+    $('#paypal-button-container').hide();
 
 </script>
 

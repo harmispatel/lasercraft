@@ -68,6 +68,7 @@ Route::group(['prefix' => 'user'], function(){
     // Paypal Payment
     Route::get('/paypal/payment/',[PaypalController::class,'payWithpaypal'])->name('paypal.payment');
     Route::get('/paypal/payment/status',[PaypalController::class,'getPaymentStatus'])->name('paypal.payment.status');
+    Route::post('/paypal/payment/process',[PaypalController::class,'getPaymentProcess'])->name('paypal.payment.process');
     Route::get('/paypal/payment/cancel',[PaypalController::class,'paymentCancel'])->name('paypal.payment.cancel');
 
     // Route::group(['middleware' => ['auth','is_customer']], function (){
