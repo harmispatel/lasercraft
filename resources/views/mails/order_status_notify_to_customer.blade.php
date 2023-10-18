@@ -27,6 +27,7 @@
     $last_name = (isset($details['order_details']['lastname'])) ? $details['order_details']['lastname'] : '';
     $order_id = (isset($details['order_details']['id'])) ? $details['order_details']['id'] : '';
     $shipping_method = (isset($details['order_details']['checkout_type'])) ? $details['order_details']['checkout_type'] : '';
+    $shipping_charge = (isset($details['order_details']['shipping_amount'])) ? $details['order_details']['shipping_amount'] : '';
     $payment_method = (isset($details['order_details']['payment_method'])) ? $details['order_details']['payment_method'] : '';
     $phone_number = (isset($details['order_details']['phone'])) ? $details['order_details']['phone'] : '';
     $comments = (isset($details['order_details']['instructions'])) ? $details['order_details']['instructions'] : '';
@@ -117,13 +118,14 @@
     // Order Total
     $order_total_html = "";
     $order_total_html .= '<div>';
-        $order_total_html .= '<table style="width:65%; border:1px solid gray;border-collapse: collapse;">';
+        $order_total_html .= '<table style="width:75%; border:1px solid gray;border-collapse: collapse;">';
             $order_total_html .= '<tbody style="font-weight: 700!important;">';
                 $order_total_html .= '<tr>';
                     $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">Sub Total : </td>';
                     $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">'.Currency::currency($currency)->format($order_details->order_subtotal).'</td>';
                 $order_total_html .= '</tr>';
 
+                // Apply Discount
                 if($order_details->discount_per > 0)
                 {
                     $order_total_html .= '<tr>';
@@ -139,6 +141,7 @@
                     $order_total_html .= '</tr>';
                 }
 
+                // Apply GST
                 if($order_details->cgst > 0 && $order_details->sgst > 0)
                 {
                     $gst_amt = $order_details->cgst + $order_details->sgst;
@@ -151,6 +154,14 @@
                     $order_total_html .= '<tr>';
                         $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">'.__('SGST.').' ('.$order_details->sgst.'%)</td>';
                         $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">+ '.Currency::currency($currency)->format($order_details->sgst * $gst_amt).'</td>';
+                    $order_total_html .= '</tr>';
+                }
+
+                // Apply Shipping Charge
+                if($shipping_method == 'delivery' && $shipping_charge > 0){
+                    $order_total_html .= '<tr>';
+                        $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">'.__('Shipping Charge').'</td>';
+                        $order_total_html .= '<td style="padding:10px; border-bottom:1px solid gray">+ '.Currency::currency($currency)->format($shipping_charge).'</td>';
                     $order_total_html .= '</tr>';
                 }
 

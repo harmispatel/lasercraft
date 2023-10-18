@@ -29,6 +29,7 @@ class CreateOrdersTable extends Migration
             $table->string('cgst')->nullable();
             $table->string('sgst')->nullable();
             $table->string('gst_amount')->nullable();
+            $table->string('shipping_amount')->nullable();
             $table->string('currency')->nullable();
             $table->string('latitude')->nullable();
             $table->string('longitude')->nullable();

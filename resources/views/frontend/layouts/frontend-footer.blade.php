@@ -61,7 +61,7 @@
                 <ul>
                     <li><a href="{{ route('home') }}">Home</a></li>
                     <li><a href="">About Us</a></li>
-                    <li><a href="">Contact Us</a></li>
+                    <li><a href="{{ route('contact.us') }}">Contact Us</a></li>
                 </ul>
             </div>
             <div class="footer_menu_inr">

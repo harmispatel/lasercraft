@@ -64,8 +64,8 @@
                             </div>
                             <div class="row mt-2">
                                 <div class="col-md-6 mt-3">
-                                    <label for="min_amount_for_delivery" class="form-label">{{ __('Minimum amount needed for delivery, if left null any amount is acceptable.') }}</label>
-                                    <input type="number" name="min_amount_for_delivery" id="min_amount_for_delivery" class="form-control ord-setting" value="{{ (isset($order_settings['min_amount_for_delivery'])) ? $order_settings['min_amount_for_delivery'] : '' }}">
+                                    <label for="shipping_charge" class="form-label">{{ __('Shipping Charge.') }}</label>
+                                    <input type="number" name="shipping_charge" id="shipping_charge" class="form-control ord-setting" value="{{ (isset($order_settings['shipping_charge'])) ? $order_settings['shipping_charge'] : '' }}">
                                 </div>
                             </div>
                             <div class="row">

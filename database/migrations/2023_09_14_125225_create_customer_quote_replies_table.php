@@ -16,7 +16,7 @@ class CreateCustomerQuoteRepliesTable extends Migration
         Schema::create('customer_quote_replies', function (Blueprint $table) {
             $table->id();
             $table->integer('quote_id');
-            $table->string('price')->nullable();
+            $table->longText('price')->nullable();
             $table->string('file')->nullable();
             $table->text('message')->nullable();
             $table->timestamps();

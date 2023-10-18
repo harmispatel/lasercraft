@@ -349,6 +349,8 @@
                                                             </td>
                                                             <td class="text-dark fs-5 text-end">{{ Currency::currency($default_currency)->format($order_details->order_subtotal) }}</td>
                                                         </tr>
+
+                                                        {{-- Apply Discount --}}
                                                         @if($order_details->discount_per > 0)
                                                             <tr>
                                                                 <td colspan="2" class="text-dark fs-5 text-end">
@@ -361,6 +363,8 @@
                                                                 @endif
                                                             </tr>
                                                         @endif
+
+                                                        {{-- Apply GST --}}
                                                         @if($order_details->cgst > 0 && $order_details->sgst > 0)
                                                             <tr>
                                                                 @php
@@ -378,6 +382,17 @@
                                                                 <td class="text-dark fs-5 text-end">+ {{ Currency::currency($default_currency)->format($order_details->sgst * $gst_amt) }}</td>
                                                             </tr>
                                                         @endif
+
+                                                        {{-- Apply Shipping Charge --}}
+                                                        @if($order_details->checkout_type == 'delivery' && !empty($order_details->shipping_amount) && $order_details->shipping_amount > 0)
+                                                            <tr>
+                                                                <td colspan="2" class="text-dark fs-5 text-end">
+                                                                    {{ __('Shipping Charge') }}
+                                                                </td>
+                                                                <td class="text-dark fs-5 text-end">+ {{ Currency::currency($default_currency)->format($order_details->shipping_amount) }}</td>
+                                                            </tr>
+                                                        @endif
+
                                                         <tr>
                                                             <td colspan="3" class="text-dark fs-5 fw-bold text-end">
                                                                 {{ Currency::currency($default_currency)->format($order_details->order_total) }}

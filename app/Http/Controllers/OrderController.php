@@ -133,6 +133,7 @@ class OrderController extends Controller
                                         $html .= '<td class="text-end">'. Currency::currency($currency)->format($order->order_subtotal).'</td>';
                                     $html .= '</tr>';
 
+                                    // Apply Discount
                                     if($order->discount_per > 0)
                                     {
                                         $html .= '<tr>';
@@ -148,6 +149,7 @@ class OrderController extends Controller
                                         $html .= '</tr>';
                                     }
 
+                                    // Apply GST
                                     if($order->cgst > 0 && $order->sgst > 0)
                                     {
                                         $gst_amt = $order->cgst + $order->sgst;
@@ -161,6 +163,15 @@ class OrderController extends Controller
                                         $html .= '<tr>';
                                             $html .= '<td><b>'.__('SGST.').' ('.$order->sgst.'%)</b></td>';
                                             $html .= '<td class="text-end">+ '.Currency::currency($currency)->format($order->sgst * $gst_amt).'</td>';
+                                        $html .= '</tr>';
+                                    }
+
+                                    // Apply Shipping Charge
+                                    if($order->checkout_type == 'delivery' && !empty($order->shipping_amount) && $order->shipping_amount > 0)
+                                    {
+                                        $html .= '<tr>';
+                                            $html .= '<td><b>'. __('Shipping Charge') .'</b></td>';
+                                            $html .= '<td class="text-end">+ '. Currency::currency($currency)->format($order->shipping_amount).'</td>';
                                         $html .= '</tr>';
                                     }
 
@@ -461,7 +472,7 @@ class OrderController extends Controller
         $all_data['delivery'] = (isset($request->delivery)) ? $request->delivery : 0;
         $all_data['takeaway'] = (isset($request->takeaway)) ? $request->takeaway : 0;
         $all_data['scheduler_active'] = (isset($request->scheduler_active)) ? $request->scheduler_active : 0;
-        $all_data['min_amount_for_delivery'] = (isset($request->min_amount_for_delivery)) ? $request->min_amount_for_delivery : '';
+        $all_data['shipping_charge'] = (isset($request->shipping_charge)) ? $request->shipping_charge : '';
         $all_data['discount_percentage'] = (isset($request->discount_percentage)) ? $request->discount_percentage : '';
         $all_data['order_arrival_minutes'] = (isset($request->order_arrival_minutes)) ? $request->order_arrival_minutes : 30;
         $all_data['schedule_array'] = $request->schedule_array;

@@ -401,6 +401,8 @@ class PaypalController extends Controller
         // Order Settings
         $order_settings = getOrderSettings();
 
+        $shipping_charge = (isset($order_settings['shipping_charge']) && !empty($order_settings['shipping_charge'])) ? $order_settings['shipping_charge'] : 0;
+
         $total_amount = $request->total_amount;
         $total_amount_text = Currency::currency($currency)->format($total_amount);
         $cart_subtotal = \Cart::getTotal();
@@ -455,6 +457,10 @@ class PaypalController extends Controller
                 $order->state = $state;
                 $order->postcode = $postcode;
                 $order->street_number = $street_number;
+
+                if($shipping_charge > 0){
+                    $order->shipping_amount = $shipping_charge;
+                }
             }
 
             $order->save();

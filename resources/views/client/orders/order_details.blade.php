@@ -309,6 +309,7 @@
                                                 <td class="text-dark fs-5 text-end">{{ Currency::currency($currency)->format($order->order_subtotal) }}</td>
                                             </tr>
 
+                                            {{-- Apply Discount --}}
                                             @if($order->discount_per > 0)
                                                 <tr>
                                                     <td colspan="2" class="text-dark fs-5 text-end">
@@ -327,6 +328,7 @@
                                                 </tr> --}}
                                             @endif
 
+                                            {{-- Apply GST --}}
                                             @if($order->cgst > 0 && $order->sgst > 0)
                                                 <tr>
                                                     @php
@@ -342,6 +344,14 @@
                                                         {{ __('SGST.') }} ({{ $order->sgst }}%)
                                                     </td>
                                                     <td class="text-dark fs-5 text-end">+ {{ Currency::currency($currency)->format($order->sgst * $gst_amt) }}</td>
+                                                </tr>
+                                            @endif
+
+                                            {{-- Apply Shipping Charge --}}
+                                            @if($order->checkout_type == 'delivery' && !empty($order->shipping_amount) && $order->shipping_amount > 0)
+                                                <tr>
+                                                    <td colspan="2" class="text-dark fs-5 text-end">{{ __('Shipping Charge') }}</td>
+                                                    <td class="text-dark fs-5 text-end">+ {{ Currency::currency($currency)->format($order->shipping_amount) }}</td>
                                                 </tr>
                                             @endif
 

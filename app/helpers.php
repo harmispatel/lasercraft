@@ -50,7 +50,7 @@
             'delivery',
             'takeaway',
             'scheduler_active',
-            'min_amount_for_delivery',
+            'shipping_charge',
             'discount_percentage',
             'order_arrival_minutes',
             'schedule_array',
