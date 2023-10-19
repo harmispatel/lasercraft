@@ -72,9 +72,10 @@
                             <table role="presentation" class="table" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;border-bottom:1px solid #000;">
                                 <thead>
                                     <tr>
-                                        <th align="left" style="width: 50%;padding: 10px 5px;border-bottom: 1px solid #000;">Name</th>
-                                        <th align="left" style="width: 15%;padding: 10px 5px;border-bottom: 1px solid #000;">Qty.</th>
-                                        <th align="left" style="width: 15%;padding: 10px 5px;border-bottom: 1px solid #000;">Price.</th>
+                                        <th align="left" style="width: 40%;padding: 10px 5px;border-bottom: 1px solid #000;">Name</th>
+                                        <th align="left" style="width: 10%;padding: 10px 5px;border-bottom: 1px solid #000;">Qty.</th>
+                                        <th align="left" style="width: 15%;padding: 10px 5px;border-bottom: 1px solid #000;">Price</th>
+                                        <th align="left" style="width: 15%;padding: 10px 5px;border-bottom: 1px solid #000;">Discount</th>
                                         <th align="right" style="width: 20%;padding: 10px 5px;border-bottom: 1px solid #000;">Total Price</th>
                                     </tr>
                                 </thead>
@@ -84,6 +85,7 @@
                                             $items = (isset($products['item'])) ? $products['item'] : '';
                                             $prices = (isset($products['price'])) ? $products['price'] : '';
                                             $quantities = (isset($products['qty'])) ? $products['qty'] : '';
+                                            $discounts = (isset($products['discount'])) ? $products['discount'] : '';
                                             $total = 0;
                                         @endphp
 
@@ -91,34 +93,37 @@
                                             @foreach ($items as $key => $item)
                                                 @php
                                                     $price = (isset($prices[$key])) ? $prices[$key] : 0;
+                                                    $discount = (isset($discounts[$key])) ? $discounts[$key] : 0;
                                                     $quantity = (isset($quantities[$key])) ? $quantities[$key] : 0;
-                                                    $total += $price * $quantity;
+                                                    $item_total = ($price * $quantity) - $discount;
+                                                    $total += $item_total;
                                                 @endphp
                                                 <tr>
                                                     <td align="left" style="padding: 2px 5px 2px">{{ $item }}</td>
                                                     <td align="left" style="padding: 2px 5px 2px">{{ $quantity }}</td>
-                                                    <td align="left" style="padding: 2px 5px 2px">{{ $price }}</td>
-                                                    <td align="right" style="padding: 2px 5px 2px">{{ Currency::currency($currency)->format($price * $quantity) }}</td>
+                                                    <td align="left" style="padding: 2px 5px 2px">{{ Currency::currency($currency)->format($price) }}</td>
+                                                    <td align="left" style="padding: 2px 5px 2px">- {{ Currency::currency($currency)->format($discount) }}</td>
+                                                    <td align="right" style="padding: 2px 5px 2px">{{ Currency::currency($currency)->format($item_total) }}</td>
                                                 </tr>
                                             @endforeach
                                         @endif
                                     @endif
                                     <tr>
-                                        <td colspan="2" align="left" style="border-top: 1px solid #000;padding: 10px 5px 0"><strong>SUBTOTAL</strong></td>
-                                        <td colspan="2" align="right" style="border-top: 1px solid #000;padding: 10px 5px 0">{{ Currency::currency($currency)->format($total) }}</td>
+                                        <td colspan="3" align="left" style="border-top: 1px solid #000;padding: 10px 5px 0"><strong>SUBTOTAL</strong></td>
+                                        <td colspan="3" align="right" style="border-top: 1px solid #000;padding: 10px 5px 0">{{ Currency::currency($currency)->format($total) }}</td>
                                     </tr>
 
                                     @if($cgst > 0 && $sgst > 0)
                                         <tr>
-                                            <td colspan="2" align="left" style="padding: 5px 5px 0"><strong>CGST ({{ $cgst }}%)</strong> </td>
-                                            <td colspan="2" align="right" style="padding: 5px 5px 0">+ {{ Currency::currency($currency)->format(($total * $cgst) / 100) }}</td>
+                                            <td colspan="3" align="left" style="padding: 5px 5px 0"><strong>CGST ({{ $cgst }}%)</strong> </td>
+                                            <td colspan="3" align="right" style="padding: 5px 5px 0">+ {{ Currency::currency($currency)->format(($total * $cgst) / 100) }}</td>
                                             @php
                                             $cgst_amount = ($total * $cgst) / 100;
                                             @endphp
                                         </tr>
                                         <tr>
-                                            <td colspan="2" align="left" style="padding: 5px 5px 0"><strong>SGST ({{ $sgst }}%)</strong></td>
-                                            <td colspan="2" align="right" style="padding: 5px 5px 0">+ {{ Currency::currency($currency)->format(($total * $sgst) / 100) }}</td>
+                                            <td colspan="3" align="left" style="padding: 5px 5px 0"><strong>SGST ({{ $sgst }}%)</strong></td>
+                                            <td colspan="3" align="right" style="padding: 5px 5px 0">+ {{ Currency::currency($currency)->format(($total * $sgst) / 100) }}</td>
                                             @php
                                             $sgst_amount = ($total * $sgst) / 100;
                                             $total = $total + $sgst_amount + $cgst_amount;
@@ -126,8 +131,8 @@
                                         </tr>
                                     @endif
                                     <tr>
-                                        <td colspan="2" align="left" style="padding: 5px 5px 10px"><strong>TOTAL AMOUNT</strong></td>
-                                        <td colspan="2" align="right" style="padding: 5px 5px 0">{{ Currency::currency($currency)->format($total) }}</td>
+                                        <td colspan="3" align="left" style="padding: 5px 5px 10px"><strong>TOTAL AMOUNT</strong></td>
+                                        <td colspan="3" align="right" style="padding: 5px 5px 0">{{ Currency::currency($currency)->format($total) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
