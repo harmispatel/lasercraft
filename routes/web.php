@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, CartController, CategoryController,DashboardController, CustomerController, CustomerQuoteController, DesignController ,ItemsController, ItemsReviewsController, LanguageController,OptionController,OrderController,PaymentController,PaypalController, ShopBannerController, ShopScheduleController, StatisticsController,TagsController,UserController, FrontendController};
+use App\Http\Controllers\{AuthController, CartController, CategoryController,DashboardController, CustomerController, CustomerQuoteController, CustomPageController, DesignController ,ItemsController, ItemsReviewsController, LanguageController,OptionController,OrderController,PaymentController,PaypalController, ShopBannerController, ShopScheduleController, StatisticsController,TagsController,UserController, FrontendController};
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +29,7 @@ Route::get('config-clear', function ()
 
 // Frontend Routes
 Route::get('/',[FrontendController::class,'index'])->name('home');
+Route::get('page/{page_slug}',[FrontendController::class,'customPageView'])->name('custom.page.view');
 Route::get('/collections/{cat_id}',[FrontendController::class,'collectionByCategory'])->name('categories.collections');
 Route::get('/product-details/{item_id}',[FrontendController::class,'productDetails'])->name('product.deatails');
 Route::get('/contact-us',[FrontendController::class,'contactUS'])->name('contact.us');
@@ -147,6 +148,15 @@ Route::group(['prefix' => 'admin'], function()
         Route::get('/design-mail-forms', [DesignController::class,'MailForms'])->name('design.mail.forms');
         Route::post('/design-generalInfoUpdate', [DesignController::class,'generalInfoUpdate'])->name('design.generalInfoUpdate');
         Route::post('/design-mailFormUpdate', [DesignController::class,'mailFormUpdate'])->name('design.mailFormUpdate');
+
+        // Custom Pages
+        Route::get('/custom-pages', [CustomPageController::class, 'index'])->name('custom.pages');
+        Route::get('/custom-pages/create', [CustomPageController::class, 'create'])->name('custom.pages.create');
+        Route::post('/custom-pages/store', [CustomPageController::class, 'store'])->name('custom.pages.store');
+        Route::get('/custom-pages/edit/{id}', [CustomPageController::class, 'edit'])->name('custom.pages.edit');
+        Route::post('/custom-pages/update', [CustomPageController::class, 'update'])->name('custom.pages.update');
+        Route::post('/custom-pages/status', [CustomPageController::class, 'status'])->name('custom.pages.status');
+        Route::post('/custom-pages/destroy', [CustomPageController::class, 'destroy'])->name('custom.pages.destroy');
 
         // Languages
         Route::get('/languages', [LanguageController::class,'index'])->name('languages');

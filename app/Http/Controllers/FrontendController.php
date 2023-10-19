@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{ShopBanner, Category, CategoryVisit, Clicks, CustomerQuote, ItemReview, Items, ItemsVisit, Order, User, UserVisits};
+use App\Models\{ShopBanner, Category, CategoryVisit, Clicks, CustomerQuote, CustomPage, ItemReview, Items, ItemsVisit, Order, User, UserVisits};
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -567,4 +567,16 @@ class FrontendController extends Controller
         }
     }
 
+
+    // Function for Custom Page View
+    function customPageView($slug)
+    {
+        $custom_page = CustomPage::where('page_slug',$slug)->first();
+
+        if($custom_page){
+            return view('frontend.custom_page_view', compact(['custom_page']));
+        }else{
+            return redirect()->back();
+        }
+    }
 }

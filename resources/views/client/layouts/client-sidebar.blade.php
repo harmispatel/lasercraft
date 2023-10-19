@@ -34,10 +34,10 @@
 
         {{-- Design Nav --}}
         <li class="nav-item">
-            <a class="nav-link {{ (($routeName != 'design.general-info') && ($routeName != 'design.logo') && ($routeName != 'design.cover') && ($routeName != 'banners') && ($routeName != 'design.theme') && ($routeName != 'design.mail.forms') && $routeName != 'design.theme-preview' && $routeName != 'theme.clone') ? 'collapsed' : '' }} {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || $routeName == 'design.theme-preview' || $routeName == 'theme.clone') ? 'active-tab' : '' }}" data-bs-target="#design-nav" data-bs-toggle="collapse" href="#" aria-expanded="{{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || $routeName == 'design.theme-preview' || $routeName == 'theme.clone') ? 'true' : 'false' }}">
-                <i class="fa-solid fa-pen-nib {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms' || $routeName == 'design.theme-preview' || $routeName == 'theme.clone')) ? 'icon-tab' : '' }}"></i><span>{{ __('Design') }}</span><i class="bi bi-chevron-down ms-auto {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || $routeName == 'design.theme-preview' || $routeName == 'theme.clone') ? 'icon-tab' : '' }}"></i>
+            <a class="nav-link {{ (($routeName != 'design.general-info') && ($routeName != 'design.logo') && ($routeName != 'design.cover') && ($routeName != 'banners') && ($routeName != 'design.theme') && ($routeName != 'design.mail.forms') && ($routeName != 'design.theme-preview') && ($routeName != 'theme.clone') && ($routeName != 'custom.pages') && ($routeName != 'custom.pages.create') && ($routeName != 'custom.pages.edit')) ? 'collapsed' : '' }} {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || ($routeName == 'design.theme-preview') || ($routeName == 'theme.clone') || ($routeName == 'custom.pages') || ($routeName == 'custom.pages.create') || ($routeName == 'custom.pages.edit')) ? 'active-tab' : '' }}" data-bs-target="#design-nav" data-bs-toggle="collapse" href="#" aria-expanded="{{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || ($routeName == 'design.theme-preview') || ($routeName == 'theme.clone') || ($routeName == 'custom.pages') || ($routeName == 'custom.pages.create') || ($routeName == 'custom.pages.edit')) ? 'true' : 'false' }}">
+                <i class="fa-solid fa-pen-nib {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms' || ($routeName == 'design.theme-preview') || ($routeName == 'theme.clone') || ($routeName == 'custom.pages') || ($routeName == 'custom.pages.create') || ($routeName == 'custom.pages.edit'))) ? 'icon-tab' : '' }}"></i><span>{{ __('Design') }}</span><i class="bi bi-chevron-down ms-auto {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || ($routeName == 'design.theme-preview') || ($routeName == 'theme.clone') || ($routeName == 'custom.pages') || ($routeName == 'custom.pages.create') || ($routeName == 'custom.pages.edit')) ? 'icon-tab' : '' }}"></i>
             </a>
-            <ul id="design-nav" class="nav-content sidebar-ul collapse {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || $routeName == 'design.theme-preview' || $routeName == 'theme.clone') ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+            <ul id="design-nav" class="nav-content sidebar-ul collapse {{ (($routeName == 'design.general-info') || ($routeName == 'design.logo') || ($routeName == 'design.cover') || ($routeName == 'banners') || ($routeName == 'design.theme') || ($routeName == 'design.mail.forms') || ($routeName == 'design.theme-preview') || ($routeName == 'theme.clone') || ($routeName == 'custom.pages') || ($routeName == 'custom.pages.create') || ($routeName == 'custom.pages.edit')) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="{{ route('design.general-info') }}" class="{{ ($routeName == 'design.general-info') ? 'active-link' : '' }}">
                         <span>{{ __('General Info') }}</span>
@@ -53,23 +53,24 @@
                         <span>{{ __('Cover') }}</span>
                     </a>
                 </li>
-
-                {{-- Banner --}}
                 <li>
                     <a href="{{ route('banners') }}" class="{{ ($routeName == 'banners') ? 'active-link' : '' }}">
                         <span>{{ __('Banners') }}</span>
                     </a>
                 </li>
-
                 {{-- <li>
                     <a href="{{ route('design.theme') }}" class="{{ ($routeName == 'design.theme' || $routeName == 'design.theme-preview' || $routeName == 'theme.clone') ? 'active-link' : '' }}">
                         <span>{{ __('Themes') }}</span>
                     </a>
                 </li> --}}
-
                 <li>
                     <a href="{{ route('design.mail.forms') }}" class="{{ ($routeName == 'design.mail.forms') ? 'active-link' : '' }}">
                         <span>{{ __('Mail Forms') }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('custom.pages') }}" class="{{ (($routeName == 'custom.pages') || ($routeName == 'custom.pages.create') || ($routeName == 'custom.pages.edit')) ? 'active-link' : '' }}">
+                        <span>{{ __('Custom Pages') }}</span>
                     </a>
                 </li>
             </ul>

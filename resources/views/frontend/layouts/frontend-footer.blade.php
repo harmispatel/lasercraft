@@ -2,6 +2,8 @@
     $current_year = \Carbon\Carbon::now()->format('Y');
     $copyright_text = isset($client_settings['homepage_intro']) ? $client_settings['homepage_intro'] : '';
     $copyright_text = str_replace('[year]',$current_year,$copyright_text);
+
+    $custom_pages = App\Models\CustomPage::where('status', 1)->get();
 @endphp
 
 <footer class="footer">
@@ -60,18 +62,22 @@
                 <h3>Quick LInks</h3>
                 <ul>
                     <li><a href="{{ route('home') }}">Home</a></li>
-                    <li><a href="">About Us</a></li>
                     <li><a href="{{ route('contact.us') }}">Contact Us</a></li>
                 </ul>
             </div>
             <div class="footer_menu_inr">
                 <h3>Customer care</h3>
                 <ul>
-                    <li><a href="">Shipping and Turnaround Times</a></li>
+                    @if(count($custom_pages) > 0)
+                        @foreach ($custom_pages as $custom_page)
+                            <li><a href="{{ route('custom.page.view',$custom_page['page_slug']) }}">{{ $custom_page['name'] }}</a></li>
+                        @endforeach
+                    @endif
+                    {{-- <li><a href="">Shipping and Turnaround Times</a></li>
                     <li><a href="">FAQ</a></li>
                     <li><a href="">Privacy Policy</a></li>
                     <li><a href="">Refund Policy</a></li>
-                    <li><a href="">Terms of Service</a></li>
+                    <li><a href="">Terms of Service</a></li> --}}
                 </ul>
             </div>
             <div class="footer_menu_inr text-center">
