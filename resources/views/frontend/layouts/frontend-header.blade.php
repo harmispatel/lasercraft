@@ -25,6 +25,13 @@
     <div class="container">
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
             <div class="header_inner">
+                <a class="navbar-brand m-0 logo" href="{{ route('home') }}">
+                    @if(isset($client_settings['shop_view_header_logo']) && !empty($client_settings['shop_view_header_logo']) && file_exists('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']))
+                        <img src="{{ asset('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']) }}" height="100">
+                    @else
+                        <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" height="100">
+                    @endif
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +41,7 @@
                         <span class="bar-icon"></span>
                     </div>
                 </button>
+               
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
@@ -67,12 +75,9 @@
                         </li>
                     </ul>
                 </div>
-                <a class="navbar-brand m-0" href="{{ route('home') }}">
-                    @if(isset($client_settings['shop_view_header_logo']) && !empty($client_settings['shop_view_header_logo']) && file_exists('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']))
-                        <img src="{{ asset('public/client_uploads/top_logos/'.$client_settings['shop_view_header_logo']) }}" height="100">
-                    @else
-                        <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" height="100">
-                    @endif
+                <a class="navbar-brand m-0 new_logo" href="{{ route('home') }}">
+                    <img src="{{ asset('public/frontend/image/logo_new.jpeg') }}" width="400">
+                    <img src="{{ asset('public/frontend/image/mob_logo.png') }}">
                 </a>
                 <div class="header_right">
                     <ul>
