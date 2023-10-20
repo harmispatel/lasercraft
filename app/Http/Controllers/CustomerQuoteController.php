@@ -111,7 +111,12 @@ class CustomerQuoteController extends Controller
                                 foreach ($quote_details->quotes_replys as $qt_rep)
                                 {
                                     $file_path = asset('public/admin_uploads/quote_replies_docs/'.$qt_rep['file']);
-                                    $html .= '<div class="col-md-4 text-center mb-2"><a target="_blank" href="'.$file_path.'"  class="btn btn-sm" style="background: #ccc;color: red;"><i class="bi bi-file-pdf"></i> '.$qt_rep['file'].'</a></div>';
+                                    $html .= '<div class="col-md-4 text-center mb-2">';
+                                        $html .= '<div class="position-relative pdf-btn">';
+                                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')"><i class="bi bi-pencil"></i></a>';
+                                            $html .= '<a target="_blank" href="'.$file_path.'"  class="btn btn-sm" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['file'].'</a>';
+                                        $html .= '</div>';
+                                    $html .= '</div>';
                                 }
                             }
                             else
@@ -125,6 +130,7 @@ class CustomerQuoteController extends Controller
                 $html .= '<div class="row">';
                     $html .= '<div class="col-md-12 text-center">';
                         $html .= '<h3>Quotation Reply</h3>';
+                        $html .= '<a onclick="resetQuoteReplyForm()" class="btn btn-sm btn-danger mb-3"><i></i>Reset</a>';
                     $html .= '</div>';
                     $html .= '<div class="col-md-12">';
                         $html .= '<div class="card mb-4">';
@@ -210,11 +216,46 @@ class CustomerQuoteController extends Controller
             'message' => 'required',
         ]);
 
+        // Reset Form
+        $reset_form = '';
+        $reset_form .= '<div class="row mb-3">';
+            $reset_form .= '<div class="col-md-5">';
+                $reset_form .= '<strong>Item Name</strong>';
+            $reset_form .= '</div>';
+            $reset_form .= '<div class="col-md-2">';
+                $reset_form .= '<strong>Qty.</strong>';
+            $reset_form .= '</div>';
+            $reset_form .= '<div class="col-md-2">';
+                $reset_form .= '<strong>Price</strong>';
+            $reset_form .= '</div>';
+            $reset_form .= '<div class="col-md-2">';
+                $reset_form .= '<strong>Discount</strong>';
+            $reset_form .= '</div>';
+        $reset_form .= '</div>';
+        $reset_form .= '<div class="row item_price_div item_price_div_1 mb-3">';
+            $reset_form .= '<div class="col-md-5">';
+                $reset_form .= '<input type="text" name="price[item][]" class="form-control" placeholder="Enter Item Name">';
+            $reset_form .= '</div>';
+            $reset_form .= '<div class="col-md-2">';
+                $reset_form .= '<input type="number" name="price[qty][]" class="form-control" value="1">';
+            $reset_form .= '</div>';
+            $reset_form .= '<div class="col-md-2">';
+                $reset_form .= '<input type="number" name="price[price][]" class="form-control" value="0">';
+            $reset_form .= '</div>';
+            $reset_form .= '<div class="col-md-2">';
+                $reset_form .= '<input type="number" name="price[discount][]" class="form-control" value="0">';
+            $reset_form .= '</div>';
+            $reset_form .= '<div class="col-md-1">';
+                $reset_form .= '<button class="btn btn-sm btn-danger" disabled><i class="bi bi-trash"></i></button>';
+            $reset_form .= '</div>';
+        $reset_form .= '</div>';
+
         try {
 
             $quote_id = $request->quote_id;
             $products = $request->price;
             $message = $request->message;
+            $quote_reply_id = (isset($request->reply_id) && !empty($request->reply_id)) ? $request->reply_id : '';
 
             $shop_settings = getClientSettings();
             $currency = (isset($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'USD';
@@ -246,13 +287,30 @@ class CustomerQuoteController extends Controller
                 \Mail::to($to_email)->send(new \App\Mail\QuoteReplyMail($details));
             }
 
-            // Insert Customer Quote Reply
-            $customer_quote_reply = new CustomerQuoteReply();
-            $customer_quote_reply->quote_id = $quote_id;
-            $customer_quote_reply->price = serialize($products);
-            $customer_quote_reply->message = $message;
-            $customer_quote_reply->file =  $details['file_name'];
-            $customer_quote_reply->save();
+            if(!empty($quote_reply_id)){
+                $customer_quote_reply = CustomerQuoteReply::find($quote_reply_id);
+
+                $old_pdf = (isset($customer_quote_reply['file'])) ? $customer_quote_reply['file'] : '';
+
+                if(!empty($old_pdf) && file_exists('public/admin_uploads/quote_replies_docs/'.$old_pdf)){
+                    unlink('public/admin_uploads/quote_replies_docs/'.$old_pdf);
+                }
+
+                $customer_quote_reply->price = serialize($products);
+                $customer_quote_reply->message = $message;
+                $customer_quote_reply->file =  $details['file_name'];
+                $customer_quote_reply->update();
+
+            }else{
+                // Insert Customer Quote Reply
+                $customer_quote_reply = new CustomerQuoteReply();
+                $customer_quote_reply->quote_id = $quote_id;
+                $customer_quote_reply->price = serialize($products);
+                $customer_quote_reply->message = $message;
+                $customer_quote_reply->file =  $details['file_name'];
+                $customer_quote_reply->save();
+            }
+
 
             $quotes_replys = CustomerQuoteReply::where('quote_id',$quote_id)->get();
 
@@ -262,7 +320,12 @@ class CustomerQuoteController extends Controller
                 foreach ($quotes_replys as $qt_rep)
                 {
                     $file_path = asset('public/admin_uploads/quote_replies_docs/'.$qt_rep['file']);
-                    $html .= '<div class="col-md-4 text-center mb-2"><a target="_blank" href="'.$file_path.'"  class="btn btn-sm" style="background: #ccc;color: red;"><i class="bi bi-file-pdf"></i> '.$qt_rep['file'].'</a></div>';
+                    $html .= '<div class="col-md-4 text-center mb-2">';
+                        $html .= '<div class="position-relative pdf-btn">';
+                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')"><i class="bi bi-pencil"></i></a>';
+                            $html .= '<a target="_blank" href="'.$file_path.'"  class="btn btn-sm" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['file'].'</a>';
+                        $html .= '</div>';
+                    $html .= '</div>';
                 }
             }
             else
@@ -274,9 +337,98 @@ class CustomerQuoteController extends Controller
                 'success' => 1,
                 'message' => 'Message has been Sent SuccessFully..',
                 'data' => $html,
+                'reset_form' => $reset_form,
             ]);
 
         } catch (\Throwable $th) {
+            return response()->json([
+                'success' => 0,
+                'message' => 'Internal Server Error!',
+                'reset_form' => $reset_form,
+            ]);
+        }
+    }
+
+
+    // Function for Edit Quote Reply
+    function quoteReplyEdit(Request $request)
+    {
+        try
+        {
+            $quote_reply_id = $request->quote_reply_id;
+            $quote_rep_dt = CustomerQuoteReply::find($quote_reply_id);
+            $items_arr = (isset($quote_rep_dt['price']) && !empty($quote_rep_dt['price'])) ? unserialize($quote_rep_dt['price']) : [];
+            $html = '';
+
+            $html .= '<div class="row mb-3">';
+                $html .= '<div class="col-md-5">';
+                    $html .= '<strong>Item Name</strong>';
+                $html .= '</div>';
+                $html .= '<div class="col-md-2">';
+                    $html .= '<strong>Qty.</strong>';
+                $html .= '</div>';
+                $html .= '<div class="col-md-2">';
+                    $html .= '<strong>Price</strong>';
+                $html .= '</div>';
+                $html .= '<div class="col-md-2">';
+                    $html .= '<strong>Discount</strong>';
+                $html .= '</div>';
+            $html .= '</div>';
+
+            if(isset($items_arr) && count($items_arr) > 0){
+                $items = (isset($items_arr['item'])) ? $items_arr['item'] : '';
+                $prices = (isset($items_arr['price'])) ? $items_arr['price'] : '';
+                $quantities = (isset($items_arr['qty'])) ? $items_arr['qty'] : '';
+                $discounts = (isset($items_arr['discount'])) ? $items_arr['discount'] : '';
+
+                if(count($items) > 0)
+                {
+                    foreach ($items as $key => $item){
+
+                        $loop_itr = $key + 1;
+                        $price = (isset($prices[$key])) ? $prices[$key] : 0;
+                        $discount = (isset($discounts[$key])) ? $discounts[$key] : 0;
+                        $quantity = (isset($quantities[$key])) ? $quantities[$key] : 0;
+
+                        $html .= '<input type="hidden" name="reply_id" id="reply_id" value="'.$quote_reply_id.'">';
+
+                        if($loop_itr == 1){
+                            $html .= '<div class="row item_price_div item_price_div_'.$loop_itr.' mb-3">';
+                        }else{
+                            $html .= '<div class="row item_child item_price_div item_price_div_'.$loop_itr.' mb-3">';
+                        }
+                            $html .= '<div class="col-md-5">';
+                                $html .= '<input type="text" name="price[item][]" class="form-control" placeholder="Enter Item Name" value="'.$item.'">';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-2">';
+                                $html .= '<input type="number" name="price[qty][]" class="form-control" value="'.$quantity.'">';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-2">';
+                                $html .= '<input type="number" name="price[price][]" class="form-control" value="'.$price.'">';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-2">';
+                                $html .= '<input type="number" name="price[discount][]" class="form-control" value="'.$discount.'">';
+                            $html .= '</div>';
+                            $html .= '<div class="col-md-1">';
+                                if($loop_itr == 1){
+                                    $html .= '<button class="btn btn-sm btn-danger" disabled><i class="bi bi-trash"></i></button>';
+                                }else{
+                                    $html .= '<a onclick="$(\'.item_price_div_'.$loop_itr.'\').remove()" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>';
+                                }
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => 1,
+                'data' => $html,
+            ]);
+
+        }
+        catch (\Throwable $th)
+        {
             return response()->json([
                 'success' => 0,
                 'message' => 'Internal Server Error!',

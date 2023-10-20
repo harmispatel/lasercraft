@@ -160,6 +160,8 @@
                         $('#quoteDetailsModal #quoteReplyForm .item_child').remove();
                         $('#quoteDetailsModal .invoices_div').html('');
                         $('#quoteDetailsModal .invoices_div').append(response.data);
+                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').html('');
+                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(response.reset_form);
                         toastr.success(response.message);
                     }else{
                         toastr.error(response.message);
@@ -167,6 +169,8 @@
                         $('#quoteDetailsModal').modal('hide');
                         $('#quoteDetailsModal #quoteReplyForm').trigger("reset");
                         $('#quoteDetailsModal #quoteReplyForm .item_child').remove();
+                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').html('');
+                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(response.reset_form);
                     }
                 },
                 error: function(response){
@@ -181,7 +185,6 @@
                 }
             });
         };
-
 
         // Function for Add New Item & Price
         function AddItemPrice(){
@@ -208,6 +211,66 @@
             html += '</div>';
 
             $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(html);
+        }
+
+        // Function for Edit Quote Reply
+        function editQuoteReply(quoteReplyID){
+            $.ajax({
+                type: "POST",
+                url: "{{ route('customer.quote.reply.edit') }}",
+                data: {
+                    "_token" : "{{ csrf_token() }}",
+                    "quote_reply_id" : quoteReplyID,
+                },
+                dataType: "JSON",
+                success: function (response) {
+                    if(response.success == 1){
+                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').html('');
+                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(response.data);
+                    }else{
+                        toastr.error(response.message);
+                    }
+                }
+            });
+        }
+
+        // Reset Customer Quote Reply Form
+        function resetQuoteReplyForm(){
+            var reset_form = '';
+            reset_form += '<div class="row mb-3">';
+                reset_form += '<div class="col-md-5">';
+                    reset_form += '<strong>Item Name</strong>';
+                reset_form += '</div>';
+                reset_form += '<div class="col-md-2">';
+                    reset_form += '<strong>Qty.</strong>';
+                reset_form += '</div>';
+                reset_form += '<div class="col-md-2">';
+                    reset_form += '<strong>Price</strong>';
+                reset_form += '</div>';
+                reset_form += '<div class="col-md-2">';
+                    reset_form += '<strong>Discount</strong>';
+                reset_form += '</div>';
+            reset_form += '</div>';
+            reset_form += '<div class="row item_price_div item_price_div_1 mb-3">';
+                reset_form += '<div class="col-md-5">';
+                    reset_form += '<input type="text" name="price[item][]" class="form-control" placeholder="Enter Item Name">';
+                reset_form += '</div>';
+                reset_form += '<div class="col-md-2">';
+                    reset_form += '<input type="number" name="price[qty][]" class="form-control" value="1">';
+                reset_form += '</div>';
+                reset_form += '<div class="col-md-2">';
+                    reset_form += '<input type="number" name="price[price][]" class="form-control" value="0">';
+                reset_form += '</div>';
+                reset_form += '<div class="col-md-2">';
+                    reset_form += '<input type="number" name="price[discount][]" class="form-control" value="0">';
+                reset_form += '</div>';
+                reset_form += '<div class="col-md-1">';
+                    reset_form += '<button class="btn btn-sm btn-danger" disabled><i class="bi bi-trash"></i></button>';
+                reset_form += '</div>';
+            reset_form += '</div>';
+
+            $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').html('');
+            $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(reset_form);
         }
 
     </script>

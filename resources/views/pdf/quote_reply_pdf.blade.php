@@ -95,14 +95,17 @@
                                                     $price = (isset($prices[$key])) ? $prices[$key] : 0;
                                                     $discount = (isset($discounts[$key])) ? $discounts[$key] : 0;
                                                     $quantity = (isset($quantities[$key])) ? $quantities[$key] : 0;
-                                                    $item_total = ($price * $quantity) - $discount;
+                                                    $discount_val = $price * $quantity;
+                                                    $discount_val =($discount_val ) * $discount / 100;
+                                                    $item_total = ($price * $quantity);
+                                                    $item_total = $item_total - $discount_val;
                                                     $total += $item_total;
                                                 @endphp
                                                 <tr>
                                                     <td align="left" style="padding: 2px 5px 2px">{{ $item }}</td>
                                                     <td align="left" style="padding: 2px 5px 2px">{{ $quantity }}</td>
                                                     <td align="left" style="padding: 2px 5px 2px">{{ Currency::currency($currency)->format($price) }}</td>
-                                                    <td align="left" style="padding: 2px 5px 2px">- {{ Currency::currency($currency)->format($discount) }}</td>
+                                                    <td align="left" style="padding: 2px 5px 2px">- {{ $discount }}%</td>
                                                     <td align="right" style="padding: 2px 5px 2px">{{ Currency::currency($currency)->format($item_total) }}</td>
                                                 </tr>
                                             @endforeach
