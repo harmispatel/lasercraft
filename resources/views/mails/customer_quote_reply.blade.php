@@ -1,3 +1,9 @@
+@php
+    $cust_name =  $details['quote_details']['firstname']." ".$details['quote_details']['lastname'];
+    $message = $details['message'];
+    $message = str_replace('[customer_name]', $cust_name, $message);
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,9 +12,9 @@
 </head>
 
 <body width="100%" style="margin: 0; padding: 30px 0 !important; mso-line-height-rule: exactly; background-color: #fff; font-family: sans-serif; color: #676767; -webkit-print-color-adjust: exact;">
-    <center style="width: 100%; background-color: #fff;">
+    <div style="width: 100%; background-color: #fff;">
         <div style="max-width: 500px; margin: 0 auto; background: #fff;">
-            <p>{{ $details['message'] }}</p>
+            <p>{!! $message !!}</p>
         </div>
         {{-- <div style="max-width: 500px; margin: 0 auto; background: #fff;">
             <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
@@ -141,7 +147,7 @@
                 </tr>
             </table>
         </div> --}}
-    </center>
+    </div>
 </body>
 
 </html>

@@ -28,6 +28,8 @@ class CustomerQuoteController extends Controller
             $quote_details = CustomerQuote::with(['quotes_replys'])->where('id',$quote_id)->first();
             $full_name = $quote_details['firstname'] . " ". $quote_details['lastname'];
 
+            $default_message = '<p><strong>Dear [customer_name],</strong></p><p>We trust this message finds you well and that you\'re having a great day. Thank you for considering Mahantam Laser Crafts for your upcoming project. We are pleased to provide you with a customized quote based on your requirements.</p><p>Please review the attached quote for a detailed breakdown of the costs and specifications. If you have any questions or need further clarification on any aspect of the quote, our team is here to assist you.</p><p>If you have any additional requirements or would like to discuss any specific details, please do not hesitate to get in touch with us.</p><p>Thank you for considering Mahantam Laser Crafts for your project needs. We value your interest in our products and services.</p><p>Best regards,</p><p>Ronak Vaidh<br>Mahantam Laser Crafts<br>📧 admin@mahantamlasercrafts.com.au<br>🌐 www.mahantamlasercrafts.com.au&nbsp;</p>';
+
             $html .= '<div class="container">';
                 $html .= '<div class="row">';
                     $html .= '<div class="col-md-12">';
@@ -179,7 +181,7 @@ class CustomerQuoteController extends Controller
                                     $html .= '<div class="row mt-2">';
                                         $html .= '<div class="col-md-12 mb-3">';
                                             $html .= '<label for="message" class="form-label">Message</label>';
-                                            $html .= '<textarea rows="5" name="message" id="message" class="form-control" placeholder="Write Your Message here."></textarea>';
+                                            $html .= '<textarea rows="5" name="message" id="message" class="form-control" placeholder="Write Your Message here.">'.$default_message.'</textarea>';
                                         $html .= '</div>';
                                         $html .= '<div class="col-md-12 mb-3">';
                                             $html .= '<a id="btn-quote-reply" onclick="quoteReply()" class="btn btn-success"><i class="bi bi-send"></i> SEND</a>';
