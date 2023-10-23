@@ -33,8 +33,8 @@
                                         <label>From</label>
                                         <h3 style="font-size: 20px;margin:0;">{{ isset($client_settings['business_name']) ? $client_settings['business_name'] : 'Mahantam Laser Crafts' }}</h3>
                                         <address class="text-muted">{{ isset($user_details['address']) ? $user_details['address'] : '{shop_address}' }}</address>
-                                        <p style="font-size: 16px;margin:0;"><strong>Email :</strong> {{ isset($user_details['email']) ? $user_details['email'] : '' }}</p>
-                                        <p style="font-size: 16px;margin:0;"><strong>Phone :</strong> {{ isset($user_details['mobile']) ? $user_details['mobile'] : '' }}</p>
+                                        <p style="font-size: 16px;margin:0;"><strong>Email :</strong> {{ env('MAIL_USERNAME') }}</p>
+                                        {{-- <p style="font-size: 16px;margin:0;"><strong>Phone :</strong> {{ isset($user_details['mobile']) ? $user_details['mobile'] : '' }}</p> --}}
                                     </td>
                                     <td>
                                         <label>To</label>
@@ -69,7 +69,7 @@
                             $sgst = (isset($user_details['sgst'])) ? $user_details['sgst'] : 0;
                         @endphp
                         <td>
-                            <table role="presentation" class="table" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;border-bottom:1px solid #000;">
+                            <table role="presentation" class="table" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;border-bottom:1px solid #000;margin-bottom:10px">
                                 <thead>
                                     <tr>
                                         <th align="left" style="width: 40%;padding: 10px 5px;border-bottom: 1px solid #000;">Name</th>
@@ -138,6 +138,37 @@
                                         <td colspan="3" align="right" style="padding: 5px 5px 0">{{ Currency::currency($currency)->format($total) }}</td>
                                     </tr>
                                 </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #ccc; text-align: center; margin:20px 0;">
+                            How to Pay
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table role="presentation" class="table" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto; border-bottom:1px solid #000;">
+                                <tr>
+                                    <td style="width: 50%">
+                                        <h4 style="margin:7px 0;"><strong>Payment details:</strong></h4>
+                                        <table role="presentation" class="table" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+                                            <tr>
+                                                <td style="padding:5px 15px;width:50%">Bank : </td>
+                                                <td style="padding:5px 15px;width:50%">NAB</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:5px 15px;width:50%">BSB : </td>
+                                                <td style="padding:5px 15px;width:50%">086-006</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:5px 15px;width:50%">Acc : </td>
+                                                <td style="padding:5px 15px;width:50%">95-721-1170</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td style="width: 50%"></td>
+                                </tr>
                             </table>
                         </td>
                     </tr>
