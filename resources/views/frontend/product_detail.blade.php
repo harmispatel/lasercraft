@@ -10,6 +10,7 @@
     // Client Settings
     $client_settings = getClientSettings();
     $default_currency = (isset($client_settings['default_currency'])) ? $client_settings['default_currency'] : 'USD';
+    $business_name = (isset($client_settings['business_name'])) ? $client_settings['business_name'] : 'Mahantam Laser Crafts';
 
     $description_key = $lang_code."_description";
     $image_key = $lang_code."_image";
@@ -17,11 +18,13 @@
     $title_key = $lang_code."_title";
 
     $item_price = (isset($item_details->itemPrices) && count($item_details->itemPrices) > 0) ? $item_details->itemPrices[0]->price : 0.00;
+
+    $title = $item_details[$name_key]." - ".$business_name;
 @endphp
 
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('Product Details'))
+@section('title', $title)
 
 @section('content')
 

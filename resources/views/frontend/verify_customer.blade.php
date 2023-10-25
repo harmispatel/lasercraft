@@ -18,6 +18,7 @@
 
     $client_settings = getClientSettings();
     $default_currency = (isset($client_settings['default_currency'])) ? $client_settings['default_currency'] : 'USD';
+    $business_name = (isset($client_settings['business_name'])) ? $client_settings['business_name'] : 'Mahantam Laser Crafts';
 
     $discount_per = session()->get('discount_per');
     $discount_type = session()->get('discount_type');
@@ -30,11 +31,13 @@
 
     $current_check_type = session()->get('checkout_type');
 
+    $title = "Verify Account - ".$business_name;
+
 @endphp
 
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('Verify Account'))
+@section('title', $title)
 
 @section('content')
 

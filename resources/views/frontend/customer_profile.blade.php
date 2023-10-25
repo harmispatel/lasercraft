@@ -18,15 +18,18 @@
 
     $client_settings = getClientSettings();
     $default_currency = (isset($client_settings['default_currency'])) ? $client_settings['default_currency'] : 'USD';
+    $business_name = (isset($client_settings['business_name'])) ? $client_settings['business_name'] : 'Mahantam Laser Crafts';
 
     // Current Route Name
     $routeName = Route::currentRouteName();
+
+    $title = "My Profile - ".$business_name;
 
 @endphp
 
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('My Profile'))
+@section('title', $title)
 
 @section('content')
 

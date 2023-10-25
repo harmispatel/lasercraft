@@ -24,6 +24,7 @@
     // Client Settings
     $client_settings = getClientSettings();
     $default_currency = (isset($client_settings['default_currency'])) ? $client_settings['default_currency'] : 'USD';
+    $business_name = (isset($client_settings['business_name'])) ? $client_settings['business_name'] : 'Mahantam Laser Crafts';
 
     $delivery_message = (isset($client_settings['delivery_message']) && !empty($client_settings['delivery_message'])) ? $client_settings['delivery_message'] : 'Sorry your address is out of our delivery range.';
     $pickup_address = (isset($client_settings['pickup_address']) && !empty($client_settings['pickup_address'])) ? $client_settings['pickup_address'] : '';
@@ -48,11 +49,13 @@
     $client_id = (isset($paypal_config['client_id'])) ? $paypal_config['client_id'] : '';
     $secret_id = (isset($paypal_config['secret'])) ? $paypal_config['secret'] : '';
 
+    $title = "Checkout - ".$business_name;
+
 @endphp
 
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('Checkout Page'))
+@section('title', $title)
 
 @section('content')
 

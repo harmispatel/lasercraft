@@ -10,15 +10,18 @@
     // Client Settings
     $client_settings = getClientSettings();
     $default_currency = (isset($client_settings['default_currency'])) ? $client_settings['default_currency'] : 'USD';
+    $business_name = (isset($client_settings['business_name'])) ? $client_settings['business_name'] : 'Mahantam Laser Crafts';
 
     $description_key = $lang_code."_description";
     $image_key = $lang_code."_image";
     $name_key = $lang_code."_name";
+
+    $title = $page_details[$name_key]." - ".$business_name;
 @endphp
 
 @extends('frontend.layouts.frontend-layout')
 
-@section('title', __('Printing'))
+@section('title', $title)
 
 @section('content')
 
