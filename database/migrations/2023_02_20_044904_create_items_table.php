@@ -55,7 +55,7 @@ class CreateItemsTable extends Migration
 
             $table->string('image')->nullable();
             $table->tinyInteger('is_new')->default(0);
-            $table->tinyInteger('as_sign')->default(0);
+            $table->tinyInteger('pers_message')->default(0);
             $table->tinyInteger('day_special')->default(0);
             $table->tinyInteger('published')->default(0);
             $table->tinyInteger('review')->default(1);

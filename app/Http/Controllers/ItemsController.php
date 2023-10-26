@@ -64,7 +64,7 @@ class ItemsController extends Controller
         $discount_type = $request->discount_type;
         $discount = $request->discount;
         $is_new = isset($request->is_new) ? $request->is_new : 0;
-        $as_sign = isset($request->is_sign) ? $request->is_sign : 0;
+        $pers_message = isset($request->pers_message) ? $request->pers_message : 0;
         $published = isset($request->published) ? $request->published : 0;
         $review_rating = isset($request->review_rating) ? $request->review_rating : 0;
         $day_special = isset($request->day_special) ? $request->day_special : 0;
@@ -103,7 +103,7 @@ class ItemsController extends Controller
             $item->order_key = $item_order;
             $item->options = $options;
             $item->is_new = $is_new;
-            $item->as_sign = $as_sign;
+            $item->pers_message = $pers_message;
             $item->review = $review_rating;
             $item->day_special = $day_special;
 
@@ -441,7 +441,7 @@ class ItemsController extends Controller
             $item_published = (isset($item['published']) && $item['published'] == 1) ? 'checked' : '';
             $review_rating = (isset($item['review']) && $item['review'] == 1) ? 'checked' : '';
             $item_is_new = (isset($item['is_new']) && $item['is_new'] == 1) ? 'checked' : '';
-            $item_as_sign = (isset($item['as_sign']) && $item['as_sign'] == 1) ? 'checked' : '';
+            $item_pers_message = (isset($item['pers_message']) && $item['pers_message'] == 1) ? 'checked' : '';
             $item_day_special = (isset($item['day_special']) && $item['day_special'] == 1) ? 'checked' : '';
             $discount = (isset($item['discount']) && !empty($item['discount'])) ? $item['discount'] : 0;
 
@@ -727,15 +727,15 @@ class ItemsController extends Controller
                                             $html .= '<label for="mark_new" class="form-label">'.__('New').'</label>';
                                         $html .= '</div>';
 
-                                        $html .= '<div class="col-md-6 mark_sign mb-3">';
+                                        $html .= '<div class="col-md-6 pers_message mb-3">';
                                             $html .= '<label class="switch me-2">';
-                                                $html .= '<input type="checkbox" id="mark_sign" name="is_sign" value="1" '.$item_as_sign.'>';
+                                                $html .= '<input type="checkbox" id="pers_message" name="pers_message" value="1" '.$item_pers_message.'>';
                                                 $html .= '<span class="slider round">';
                                                     $html .= '<i class="fa-solid fa-circle-check check_icon"></i>';
                                                     $html .= '<i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>';
                                                 $html .= '</span>';
                                             $html .= '</label>';
-                                            $html .= '<label for="mark_sign" class="form-label">'.__('Recommended').'</label>';
+                                            $html .= '<label for="pers_message" class="form-label">'.__('Personalized Message').'</label>';
                                         $html .= '</div>';
 
                                         $html .= '<div class="col-md-6 day_special mb-3">';
@@ -1042,15 +1042,15 @@ class ItemsController extends Controller
                                             $html .= '<label for="mark_new" class="form-label">'.__('New').'</label>';
                                         $html .= '</div>';
 
-                                        $html .= '<div class="col-md-6 mark_sign mb-3">';
+                                        $html .= '<div class="col-md-6 pers_message mb-3">';
                                             $html .= '<label class="switch me-2">';
-                                                $html .= '<input type="checkbox" id="mark_sign" name="is_sign" value="1" '.$item_as_sign.'>';
+                                                $html .= '<input type="checkbox" id="pers_message" name="pers_message" value="1" '.$item_pers_message.'>';
                                                 $html .= '<span class="slider round">';
                                                     $html .= '<i class="fa-solid fa-circle-check check_icon"></i>';
                                                     $html .= '<i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>';
                                                 $html .= '</span>';
                                             $html .= '</label>';
-                                            $html .= '<label for="mark_sign" class="form-label">'.__('Recommended').'</label>';
+                                            $html .= '<label for="pers_message" class="form-label">'.__('Personalized Message').'</label>';
                                         $html .= '</div>';
 
                                         $html .= '<div class="col-md-6 day_special mb-3">';
@@ -1166,7 +1166,7 @@ class ItemsController extends Controller
         $discount = $request->discount;
         $item_description = $request->item_description;
         $is_new = isset($request->is_new) ? $request->is_new : 0;
-        $is_sign = isset($request->is_sign) ? $request->is_sign : 0;
+        $pers_message = isset($request->pers_message) ? $request->pers_message : 0;
         $day_special = isset($request->day_special) ? $request->day_special : 0;
         $published = isset($request->published) ? $request->published : 0;
         $review_rating = isset($request->review_rating) ? $request->review_rating : 0;
@@ -1203,7 +1203,7 @@ class ItemsController extends Controller
                 $item->category_id = $category;
                 $item->published = $published;
                 $item->is_new = $is_new;
-                $item->as_sign = $is_sign;
+                $item->pers_message = $pers_message;
                 $item->day_special = $day_special;
                 $item->review = $review_rating;
                 $item->options = $options;
@@ -1350,7 +1350,7 @@ class ItemsController extends Controller
         $discount_type = $request->discount_type;
         $discount = $request->discount;
         $is_new = isset($request->is_new) ? $request->is_new : 0;
-        $is_sign = isset($request->is_sign) ? $request->is_sign : 0;
+        $pers_message = isset($request->pers_message) ? $request->pers_message : 0;
         $day_special = isset($request->day_special) ? $request->day_special : 0;
         $published = isset($request->published) ? $request->published : 0;
         $review_rating = isset($request->review_rating) ? $request->review_rating : 0;
@@ -1392,7 +1392,7 @@ class ItemsController extends Controller
                 $item->category_id = $category;
                 $item->published = $published;
                 $item->is_new = $is_new;
-                $item->as_sign = $is_sign;
+                $item->pers_message = $pers_message;
                 $item->day_special = $day_special;
                 $item->review = $review_rating;
                 $item->options = $options;
@@ -1585,7 +1585,7 @@ class ItemsController extends Controller
         $item_published = (isset($item['published']) && $item['published'] == 1) ? 'checked' : '';
         $review_rating = (isset($item['review']) && $item['review'] == 1) ? 'checked' : '';
         $item_is_new = (isset($item['is_new']) && $item['is_new'] == 1) ? 'checked' : '';
-        $item_as_sign = (isset($item['as_sign']) && $item['as_sign'] == 1) ? 'checked' : '';
+        $item_pers_message = (isset($item['pers_message']) && $item['pers_message'] == 1) ? 'checked' : '';
         $item_day_special = (isset($item['day_special']) && $item['day_special'] == 1) ? 'checked' : '';
         $discount = (isset($item['discount']) && !empty($item['discount'])) ? $item['discount'] : 0;
 
@@ -1875,15 +1875,15 @@ class ItemsController extends Controller
                                         $html .= '<label for="mark_new" class="form-label">'.__('New').'</label>';
                                     $html .= '</div>';
 
-                                    $html .= '<div class="col-md-6 mark_sign mb-3">';
+                                    $html .= '<div class="col-md-6 pers_message mb-3">';
                                         $html .= '<label class="switch me-2">';
-                                            $html .= '<input type="checkbox" id="mark_sign" name="is_sign" value="1" '.$item_as_sign.'>';
+                                            $html .= '<input type="checkbox" id="pers_message" name="pers_message" value="1" '.$item_pers_message.'>';
                                             $html .= '<span class="slider round">';
                                                 $html .= '<i class="fa-solid fa-circle-check check_icon"></i>';
                                                 $html .= '<i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>';
                                             $html .= '</span>';
                                         $html .= '</label>';
-                                        $html .= '<label for="mark_sign" class="form-label">'.__('Recommended').'</label>';
+                                        $html .= '<label for="pers_message" class="form-label">'.__('Personalized Message').'</label>';
                                     $html .= '</div>';
 
                                     $html .= '<div class="col-md-6 day_special mb-3">';
@@ -2184,15 +2184,15 @@ class ItemsController extends Controller
                                         $html .= '<label for="mark_new" class="form-label">'.__('New').'</label>';
                                     $html .= '</div>';
 
-                                    $html .= '<div class="col-md-6 mark_sign mb-3">';
+                                    $html .= '<div class="col-md-6 pers_message mb-3">';
                                         $html .= '<label class="switch me-2">';
-                                            $html .= '<input type="checkbox" id="mark_sign" name="is_sign" value="1" '.$item_as_sign.'>';
+                                            $html .= '<input type="checkbox" id="pers_message" name="pers_message" value="1" '.$item_pers_message.'>';
                                             $html .= '<span class="slider round">';
                                                 $html .= '<i class="fa-solid fa-circle-check check_icon"></i>';
                                                 $html .= '<i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>';
                                             $html .= '</span>';
                                         $html .= '</label>';
-                                        $html .= '<label for="mark_sign" class="form-label">'.__('Recommended').'</label>';
+                                        $html .= '<label for="pers_message" class="form-label">'.__('Personalized Message').'</label>';
                                     $html .= '</div>';
 
                                     $html .= '<div class="col-md-6 day_special mb-3">';

@@ -200,7 +200,12 @@ class OrderController extends Controller
                                             $html .= '<tr>';
                                                 $html .= '<td>';
                                                     $html .= '<b>'.$ord_item['item_qty'].' x '.$ord_item['item_name'].'</b>';
-                                                    $html .= '<p class="m-0 text-muted">Personalised Message : '.$ord_item['personalised_message'].'</p>';
+
+                                                    if(isset($ord_item['personalised_message']) && !empty($ord_item['personalised_message']))
+                                                    {
+                                                        $html .= '<p class="m-0 text-muted">Personalised Message : '.$ord_item['personalised_message'].'</p>';
+                                                    }
+
                                                     if(count($options) > 0)
                                                     {
                                                         foreach ($options as $option)

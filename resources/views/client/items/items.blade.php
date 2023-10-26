@@ -207,16 +207,16 @@
                                         <label for="mark_new" class="form-label">{{ __('New')}}</label>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mark_sign">
+                                <div class="col-md-6 pers_message">
                                     <div class="form-group">
                                         <label class="switch me-2">
-                                            <input type="checkbox" id="mark_sign" name="is_sign" value="1">
+                                            <input type="checkbox" id="pers_message" name="pers_message" value="1">
                                             <span class="slider round">
                                                 <i class="fa-solid fa-circle-check check_icon"></i>
                                                 <i class="fa-sharp fa-solid fa-circle-xmark uncheck_icon"></i>
                                             </span>
                                         </label>
-                                        <label for="mark_sign" class="form-label">{{ __('Recommended')}}</label>
+                                        <label for="pers_message" class="form-label">{{ __('Personalized Message')}}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mt-2 day_special">
@@ -985,7 +985,7 @@
                             $('#editItemModal .price_div').hide();
                             $('#editItemModal .calories_div').hide();
                             $('#editItemModal .day_special').hide();
-                            $('#editItemModal .mark_sign').hide();
+                            $('#editItemModal .pers_message').hide();
                             $('#editItemModal .mark_new').hide();
                             $('#editItemModal .review_rating').hide();
                         }
@@ -994,7 +994,7 @@
                             $('#editItemModal .price_div').show();
                             $('#editItemModal .calories_div').show();
                             $('#editItemModal .day_special').show();
-                            $('#editItemModal .mark_sign').show();
+                            $('#editItemModal .pers_message').show();
                             $('#editItemModal .mark_new').show();
                             $('#editItemModal .review_rating').show();
                         }
@@ -1154,7 +1154,7 @@
                             $('#editItemModal .price_div').hide();
                             $('#editItemModal .calories_div').hide();
                             $('#editItemModal .day_special').hide();
-                            $('#editItemModal .mark_sign').hide();
+                            $('#editItemModal .pers_message').hide();
                             $('#editItemModal .mark_new').hide();
                             $('#editItemModal .review_rating').hide();
                         }
@@ -1163,7 +1163,7 @@
                             $('#editItemModal .price_div').show();
                             $('#editItemModal .calories_div').show();
                             $('#editItemModal .day_special').show();
-                            $('#editItemModal .mark_sign').show();
+                            $('#editItemModal .pers_message').show();
                             $('#editItemModal .mark_new').show();
                             $('#editItemModal .review_rating').show();
                         }
@@ -1375,7 +1375,7 @@
                 $("#"+ModalName+" .price_div").hide();
                 $("#"+ModalName+" .calories_div").hide();
                 $("#"+ModalName+" .day_special").hide();
-                $("#"+ModalName+" .mark_sign").hide();
+                $("#"+ModalName+" .pers_message").hide();
                 $("#"+ModalName+" .mark_new").hide();
                 $("#"+ModalName+" .review_rating").hide();
             }
@@ -1384,7 +1384,7 @@
                 $("#"+ModalName+" .price_div").show();
                 $("#"+ModalName+" .calories_div").show();
                 $("#"+ModalName+" .day_special").show();
-                $("#"+ModalName+" .mark_sign").show();
+                $("#"+ModalName+" .pers_message").show();
                 $("#"+ModalName+" .mark_new").show();
                 $("#"+ModalName+" .review_rating").show();
             }

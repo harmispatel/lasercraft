@@ -123,12 +123,15 @@
                                     </div>
                                 @endforeach
                             @endif
-                            <div class="add_design_text mb-3">
-                                <div class="from-group">
-                                    <label class="mb-2">Personalised Message</label>
-                                    <textarea class="form-control" name="personalised_message" placeholder="Add your Text" rows="3"></textarea>
+
+                            @if(isset($item_details['pers_message']) && $item_details['pers_message'] == 1)
+                                <div class="add_design_text mb-3">
+                                    <div class="from-group">
+                                        <label class="mb-2">Personalised Message</label>
+                                        <textarea class="form-control" name="personalised_message" placeholder="Add your Text" rows="3"></textarea>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                             <div class="add_cart_group">
                                 <div class="quantity">
                                     <button type="button" class="btn btn-danger quantity-left-minus"><i class="fa-solid fa-minus"></i></button>

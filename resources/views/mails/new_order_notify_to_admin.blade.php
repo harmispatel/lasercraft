@@ -93,7 +93,10 @@
                                             }
                                         }
 
-                                        $order_html .= '<div style="color: #a19e9e;display: block;"><strong>Personalised Message : </strong>'.$order_item['personalised_message'].'</div>';
+                                        if(isset($order_item['personalised_message']) && !empty($order_item['personalised_message']))
+                                        {
+                                            $order_html .= '<div style="color: #a19e9e;display: block;"><strong>Personalised Message : </strong>'.$order_item['personalised_message'].'</div>';
+                                        }
 
                                     $order_html .= '</div>';
                                 $order_html .= '</div>';
