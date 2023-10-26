@@ -1,4 +1,6 @@
 @php
+
+
     $client_settings = getClientSettings();
     $top_logo = (isset($client_settings['shop_view_header_logo'])) ? $client_settings['shop_view_header_logo'] : '';
     $top_logo = (!empty($top_logo) && file_exists('public/client_uploads/top_logos/'.$top_logo)) ? base64_encode(file_get_contents(public_path('client_uploads/top_logos/'.$top_logo))) : base64_encode(file_get_contents(public_path('client_images/not-found/no_image_1.jpg')));
@@ -10,7 +12,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Quotation PDF</title>
+
+    <title>{{ $doc_name }} PDF</title>
+
     <link rel="stylesheet" type="text/css" href="{{asset('public/frontend/css/font-family.css')}}">
 </head>
 <body style="width: 100%; margin:0;font-family: 'Outfit';">
@@ -56,7 +60,7 @@
                                             <p>Date of issue : {{ date('M d, Y') }}</p>
                                         </td>
                                         <td align="right">
-                                            <h3 style="font-size: 20px;margin:0;">INVOICE : #{{ isset($latestReplyId) ? $latestReplyId : '' }}</h3>
+                                            <h3 style="font-size: 20px;margin:0;">{{ strtoupper($doc_name) }} : #{{ isset($latestReplyId) ? $latestReplyId : '' }}</h3>
                                         </td>
                                     </tr>
                                 </tbody>

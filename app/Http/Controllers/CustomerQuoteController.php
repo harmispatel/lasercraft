@@ -28,6 +28,7 @@ class CustomerQuoteController extends Controller
             $quote_details = CustomerQuote::with(['quotes_replys'])->where('id',$quote_id)->first();
             $full_name = $quote_details['firstname'] . " ". $quote_details['lastname'];
 
+
             $default_message = '<p><strong>Dear [customer_name],</strong></p><p>We trust this message finds you well and that you\'re having a great day. Thank you for considering Mahantam Laser Crafts for your upcoming project. We are pleased to provide you with a customized quote based on your requirements.</p><p>Please review the attached quote for a detailed breakdown of the costs and specifications. If you have any questions or need further clarification on any aspect of the quote, our team is here to assist you.</p><p>If you have any additional requirements or would like to discuss any specific details, please do not hesitate to get in touch with us.</p><p>Thank you for considering Mahantam Laser Crafts for your project needs. We value your interest in our products and services.</p><p>Best regards,</p><p>Ronak Vaidh<br>Mahantam Laser Crafts<br>📧 admin@mahantamlasercrafts.com.au<br>🌐 www.mahantamlasercrafts.com.au&nbsp;</p>';
 
             $html .= '<div class="container">';
@@ -112,11 +113,12 @@ class CustomerQuoteController extends Controller
                             {
                                 foreach ($quote_details->quotes_replys as $qt_rep)
                                 {
-                                    $file_path = asset('public/admin_uploads/quote_replies_docs/'.$qt_rep['file']);
+                                    $quote_path = asset('public/admin_uploads/quote_replies_docs/'.$qt_rep['quote_file']);
                                     $html .= '<div class="col-md-4 text-center mb-2">';
                                         $html .= '<div class="position-relative pdf-btn">';
                                             $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')"><i class="bi bi-pencil"></i></a>';
-                                            $html .= '<a target="_blank" href="'.$file_path.'"  class="btn btn-sm" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['file'].'</a>';
+                                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 45px;" onclick="sentInvoice('.$qt_rep['id'].')"><i class="bi bi-receipt"></i></a>';
+                                            $html .= '<a target="_blank" href="'.$quote_path.'"  class="btn btn-sm d-block" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['quote_file'].'</a>';
                                         $html .= '</div>';
                                     $html .= '</div>';
                                 }
@@ -202,6 +204,8 @@ class CustomerQuoteController extends Controller
             ]);
 
         } catch (\Throwable $th) {
+
+            dd($th->getMessage());
             return response()->json([
                 'success' => 0,
                 'message' => 'Internal Server Error!',
@@ -209,6 +213,80 @@ class CustomerQuoteController extends Controller
         }
     }
 
+    function invoiceSent(Request $request){
+
+        try{
+
+            $invoiceID = $request->id;
+            $quote_id = $request->quote_id;
+            $products = $request->price;
+            $message = $request->message;
+            $invoice_sent_id = $request->invoice_sent_id;
+            $quote_reply_id = (isset($request->reply_id) && !empty($request->reply_id)) ? $request->reply_id : '';
+
+            $details['latestReplyId'] = CustomerQuoteReply::max('id') + 1;
+            $customer_invoice_reply = CustomerQuoteReply::find($invoice_sent_id);
+
+            $quote_details = CustomerQuote::find($invoiceID);
+            $details['latestReplyId'] = CustomerQuoteReply::max('id') + 1;
+            $to_email = (isset($quote_details['email'])) ? $quote_details['email'] : '';
+
+            $user_details = User::where('id',1)->where('user_type',1)->first();
+            $contact_emails = (isset($user_details['contact_emails']) && !empty($user_details['contact_emails'])) ? unserialize($user_details['contact_emails']) : [];
+            $from_email = (count($contact_emails) > 0 && isset($contact_emails[0])) ? $contact_emails[0] : '';
+
+            $shop_settings = getClientSettings();
+            $currency = (isset($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'USD';
+
+
+            $details['user_details'] = $user_details;
+            $details['quote_details'] = $quote_details;
+            $details['products'] = $products;
+            $details['message'] = $message;
+            $details['currency'] = $currency;
+            $details['to_email'] = $to_email;
+
+
+            $upload_path = public_path('admin_uploads/quote_replies_docs');
+
+            $new_docs['invoice_file'] = 'INVOICE_'.time().'_'.$details['latestReplyId'].'.pdf';
+            $new_doc_type['invoice_file'] = 'Invoice';
+
+            if(count($new_docs) > 0){
+                foreach($new_docs as $key=> $new_doc){
+                    $details['file_name'] = $new_doc;
+                    $details['doc_name'] = (isset($new_doc_type[$key])) ? $new_doc_type[$key] : '';
+
+                    $file_path = $upload_path. '/' . $details['file_name'];
+
+                    $pdf = Pdf::loadView('pdf.quote_reply_pdf', $details)->setOptions(['defaultFont' => 'sans-serif'])->save($file_path)->stream();
+                }
+            }
+
+            if(!empty($from_email) && !empty($to_email))
+            {
+                // Notify to Customer
+                \Mail::to($to_email)->send(new \App\Mail\QuoteReplyMail($details['invoice_file']));
+                // Notify to Admin
+                \Mail::to(env('MAIL_USERNAME'))->send(new \App\Mail\QuoteReplyToAdmin($details['invoice_file']));
+            }
+
+            $upload_path = public_path('admin_uploads/quote_replies_docs');
+
+                $customer_invoice_reply->message = $message;
+
+
+
+        }catch (\Throwable $th) {
+            dd($th->getMessage());
+            return response()->json([
+                'success' => 0,
+                'message' => 'Internal Server Error!',
+            ]);
+        }
+
+
+    }
     // Function for Quote Reply
     function quoteReply(Request $request)
     {
@@ -276,31 +354,52 @@ class CustomerQuoteController extends Controller
             $details['products'] = $products;
             $details['message'] = $message;
             $details['currency'] = $currency;
+            $details['to_email'] = $to_email;
 
-            $path = public_path('admin_uploads/quote_replies_docs');
-            $details['file_name'] = 'INVOICE_'.time().'_'.$details['latestReplyId'].'.pdf';
+            $upload_path = public_path('admin_uploads/quote_replies_docs');
 
-            $pdfFilePath = $path . '/' . $details['file_name'];
+            $new_docs['invoice_file'] = 'INVOICE_'.time().'_'.$details['latestReplyId'].'.pdf';
+            $new_docs['quote_file'] = 'QUOTE_'.time().'_'.$details['latestReplyId'].'.pdf';
+            $new_doc_type['invoice_file'] = 'Invoice';
+            $new_doc_type['quote_file'] = 'Quote';
 
-            $pdf = Pdf::loadView('pdf.quote_reply_pdf', $details)->setOptions(['defaultFont' => 'sans-serif'])->save($pdfFilePath)->stream();
+            if(count($new_docs) > 0){
+                foreach($new_docs as $key=> $new_doc){
+                    $details['file_name'] = $new_doc;
+                    $details['doc_name'] = (isset($new_doc_type[$key])) ? $new_doc_type[$key] : '';
+
+                    $file_path = $upload_path. '/' . $details['file_name'];
+
+                    $pdf = Pdf::loadView('pdf.quote_reply_pdf', $details)->setOptions(['defaultFont' => 'sans-serif'])->save($file_path)->stream();
+                }
+            }
 
             if(!empty($from_email) && !empty($to_email))
             {
+                // Notify to Customer
                 \Mail::to($to_email)->send(new \App\Mail\QuoteReplyMail($details));
+
+                // Notify to Admin
+                \Mail::to(env('MAIL_USERNAME'))->send(new \App\Mail\QuoteReplyToAdmin($details));
             }
 
             if(!empty($quote_reply_id)){
                 $customer_quote_reply = CustomerQuoteReply::find($quote_reply_id);
 
-                $old_pdf = (isset($customer_quote_reply['file'])) ? $customer_quote_reply['file'] : '';
+                $quote_pdf = (isset($customer_quote_reply['quote_file'])) ? $customer_quote_reply['quote_file'] : '';
+                $invoice_pdf = (isset($customer_quote_reply['invoice_file'])) ? $customer_quote_reply['invoice_file'] : '';
 
-                if(!empty($old_pdf) && file_exists('public/admin_uploads/quote_replies_docs/'.$old_pdf)){
-                    unlink('public/admin_uploads/quote_replies_docs/'.$old_pdf);
+                if(!empty($quote_pdf) && file_exists('public/admin_uploads/quote_replies_docs/'.$quote_pdf)){
+                    unlink('public/admin_uploads/quote_replies_docs/'.$quote_pdf);
+                }
+                if(!empty($invoice_pdf) && file_exists('public/admin_uploads/quote_replies_docs/'.$invoice_pdf)){
+                    unlink('public/admin_uploads/quote_replies_docs/'.$invoice_pdf);
                 }
 
                 $customer_quote_reply->price = serialize($products);
                 $customer_quote_reply->message = $message;
-                $customer_quote_reply->file =  $details['file_name'];
+                $customer_quote_reply->quote_file =  $new_docs['quote_file'];
+                $customer_quote_reply->invoice_file =  $new_docs['invoice_file'];
                 $customer_quote_reply->update();
 
             }else{
@@ -309,7 +408,8 @@ class CustomerQuoteController extends Controller
                 $customer_quote_reply->quote_id = $quote_id;
                 $customer_quote_reply->price = serialize($products);
                 $customer_quote_reply->message = $message;
-                $customer_quote_reply->file =  $details['file_name'];
+                $customer_quote_reply->quote_file = $new_docs['quote_file'];
+                $customer_quote_reply->invoice_file =  $new_docs['invoice_file'];
                 $customer_quote_reply->save();
             }
 
@@ -321,11 +421,12 @@ class CustomerQuoteController extends Controller
             {
                 foreach ($quotes_replys as $qt_rep)
                 {
-                    $file_path = asset('public/admin_uploads/quote_replies_docs/'.$qt_rep['file']);
+                    $quote_path = asset('public/admin_uploads/quote_replies_docs/'.$qt_rep['quote_file']);
                     $html .= '<div class="col-md-4 text-center mb-2">';
                         $html .= '<div class="position-relative pdf-btn">';
                             $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')"><i class="bi bi-pencil"></i></a>';
-                            $html .= '<a target="_blank" href="'.$file_path.'"  class="btn btn-sm" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['file'].'</a>';
+                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 45px;" onclick="sentInvoice('.$qt_rep['id'].')"><i class="bi bi-receipt"></i></a>';
+                            $html .= '<a target="_blank" href="'.$quote_path.'"  class="btn btn-sm" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['quote_file'].'</a>';
                         $html .= '</div>';
                     $html .= '</div>';
                 }
@@ -336,6 +437,7 @@ class CustomerQuoteController extends Controller
             }
 
             return response()->json([
+
                 'success' => 1,
                 'message' => 'Message has been Sent SuccessFully..',
                 'data' => $html,
@@ -431,6 +533,7 @@ class CustomerQuoteController extends Controller
         }
         catch (\Throwable $th)
         {
+            dd($th->getMessage());
             return response()->json([
                 'success' => 0,
                 'message' => 'Internal Server Error!',

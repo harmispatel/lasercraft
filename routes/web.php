@@ -233,6 +233,7 @@ Route::group(['prefix' => 'admin'], function()
         // Customer Quotes
         Route::get('/customer-quotes',[CustomerQuoteController::class,'index'])->name('customer.quotes');
         Route::post('/customer-quote-details',[CustomerQuoteController::class,'quoteDetails'])->name('customer.quote.details');
+        Route::post('/customer-invoice-reply',[CustomerQuoteController::class,'invoiceSent'])->name('customer.invoice.sent');
         Route::post('/customer-quote-reply',[CustomerQuoteController::class,'quoteReply'])->name('customer.quote.reply');
         Route::post('/customer-quote-reply-edit',[CustomerQuoteController::class,'quoteReplyEdit'])->name('customer.quote.reply.edit');
 
