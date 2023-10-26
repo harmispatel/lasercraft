@@ -65,8 +65,7 @@ $shop_settings['default_currency'] : 'USD';
                                     <td>{{ $customer_quote->email }}</td>
                                     <td>{{ $customer_quote->created_at->diffForHumans() }}</td>
                                     <td>
-                                        <a onclick="QuoteDetails({{ $customer_quote->id }})"
-                                            class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                                        <a onclick="QuoteDetails({{ $customer_quote->id }})" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -85,30 +84,31 @@ $shop_settings['default_currency'] : 'USD';
 
 {{-- Custom Script --}}
 @section('page-js')
-<script type="text/javascript">
-    $('#quotesTable').DataTable({
+    <script type="text/javascript">
+
+        // Data Table
+        $('#quotesTable').DataTable({
             "ordering": false
         });
 
+
+        // Toastr Message & Settings
         toastr.options = {
             "closeButton": true,
             "progressBar": true,
             "positionClass": "toast-top-right",
             "timeOut": 4000
         }
-
         @if (Session::has('success'))
             toastr.success('{{ Session::get('success') }}')
         @endif
-
         @if (Session::has('error'))
             toastr.error('{{ Session::get('error') }}')
         @endif
 
 
         // Function for get Quote Details
-        function QuoteDetails(quoteID)
-        {
+        function QuoteDetails(quoteID){
             $('#quoteDetailsModal .modal-body').html('');
 
             $.ajax({
@@ -220,13 +220,17 @@ $shop_settings['default_currency'] : 'USD';
             });
         }
 
+
         // Reset Modal when Close Quote Details Modal
         $('#quoteDetailsModal .btn-close').on('click',function(){
             $('#quoteDetailsModal .modal-body').html('');
         });
 
+
         // Function for Send Quote Reply
         function quoteReply(){
+
+            // Form Data
             var myFormData = new FormData(document.getElementById('quoteReplyForm'));
 
             // Clear all Toastr Messages
@@ -252,8 +256,7 @@ $shop_settings['default_currency'] : 'USD';
                         $('#quoteDetailsModal #quoteReplyForm .item_child').remove();
                         $('#quoteDetailsModal .invoices_div').html('');
                         $('#quoteDetailsModal .invoices_div').append(response.data);
-                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').html('');
-                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(response.reset_form);
+                        resetQuoteReplyForm();
                         toastr.success(response.message);
                     }else{
                         toastr.error(response.message);
@@ -261,8 +264,7 @@ $shop_settings['default_currency'] : 'USD';
                         $('#quoteDetailsModal').modal('hide');
                         $('#quoteDetailsModal #quoteReplyForm').trigger("reset");
                         $('#quoteDetailsModal #quoteReplyForm .item_child').remove();
-                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').html('');
-                        $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(response.reset_form);
+                        resetQuoteReplyForm();
                     }
                 },
                 error: function(response){
@@ -277,6 +279,7 @@ $shop_settings['default_currency'] : 'USD';
                 }
             });
         };
+
 
         // Function for Add New Item & Price
         function AddItemPrice(){
@@ -305,25 +308,7 @@ $shop_settings['default_currency'] : 'USD';
             $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(html);
         }
 
-       function sentInvoice(invoiceSentId){
 
-         $.ajax({
-             type:"POST",
-             url:"{{ route('customer.invoice.sent') }}",
-             data:{
-                "_token" : "{{ csrf_token() }}",
-                "invoice_sent_id" : invoiceSentId,
-             },
-             dataType: "JSON",
-             success: function (response) {
-                if(response.success == 1){
-                    toastr.success(response.message);
-                    }else{
-                        toastr.error(response.message);
-                    }
-             }
-        });
-      }
         // Function for Edit Quote Reply
         function editQuoteReply(quoteReplyID){
             $.ajax({
@@ -385,5 +370,26 @@ $shop_settings['default_currency'] : 'USD';
             $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(reset_form);
         }
 
-</script>
+
+        // Function for Send Invoice
+        function sendInvoice(quoteReplyID){
+            $.ajax({
+                type:"POST",
+                url:"{{ route('customer.send.invoice') }}",
+                data:{
+                    "_token" : "{{ csrf_token() }}",
+                    "quote_reply_id" : quoteReplyID,
+                },
+                dataType: "JSON",
+                success: function (response) {
+                    if(response.success == 1){
+                        toastr.success(response.message);
+                    }else{
+                        toastr.error(response.message);
+                    }
+                }
+            });
+        }
+
+    </script>
 @endsection

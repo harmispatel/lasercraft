@@ -1,6 +1,4 @@
 @php
-
-
     $client_settings = getClientSettings();
     $top_logo = (isset($client_settings['shop_view_header_logo'])) ? $client_settings['shop_view_header_logo'] : '';
     $top_logo = (!empty($top_logo) && file_exists('public/client_uploads/top_logos/'.$top_logo)) ? base64_encode(file_get_contents(public_path('client_uploads/top_logos/'.$top_logo))) : base64_encode(file_get_contents(public_path('client_images/not-found/no_image_1.jpg')));
