@@ -17,6 +17,9 @@ $shop_settings['default_currency'] : 'USD';
     aria-labelledby="quoteDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
+            <div class="invoice-sent-loader" style="display: none;">
+                <img src="{{ asset('public/client_images/loader/loader1.gif') }}" width="120">
+            </div>
             <div class="modal-header">
                 <h5 class="modal-title" id="quoteDetailsModalLabel">Customer Quote Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -376,6 +379,9 @@ $shop_settings['default_currency'] : 'USD';
             $.ajax({
                 type:"POST",
                 url:"{{ route('customer.send.invoice') }}",
+                beforeSend: function (){
+                    $('.invoice-sent-loader').show();
+                },
                 data:{
                     "_token" : "{{ csrf_token() }}",
                     "quote_reply_id" : quoteReplyID,
@@ -383,6 +389,7 @@ $shop_settings['default_currency'] : 'USD';
                 dataType: "JSON",
                 success: function (response) {
                     if(response.success == 1){
+                        $('.invoice-sent-loader').hide();
                         toastr.success(response.message);
                     }else{
                         toastr.error(response.message);
