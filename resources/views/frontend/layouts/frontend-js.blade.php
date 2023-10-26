@@ -85,7 +85,7 @@
                 {
                     $('#item_preview_div').html('');
                     $('#item_preview_div').append(response.data);
-                    $('#globalSearchModal #search').blur();
+                    // $('#globalSearchModal #search').blur();
                 }
                 else
                 {
