@@ -17,7 +17,8 @@ class CreateCustomerQuoteRepliesTable extends Migration
             $table->id();
             $table->integer('quote_id');
             $table->longText('price')->nullable();
-            $table->string('file')->nullable();
+            $table->string('quote_file')->nullable();
+            $table->string('invoice_file')->nullable();
             $table->text('message')->nullable();
             $table->timestamps();
         });

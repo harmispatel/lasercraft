@@ -16,6 +16,7 @@
         <div style="max-width: 500px; margin: 0 auto; background: #fff;">
             <p>{!! $message !!}</p>
         </div>
+        
         {{-- <div style="max-width: 500px; margin: 0 auto; background: #fff;">
             <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
                 <tr>

@@ -1,8 +1,9 @@
 @php
-    $shop_settings = getClientSettings();
+$shop_settings = getClientSettings();
 
-    // Shop Currency
-    $currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ? $shop_settings['default_currency'] : 'USD';
+// Shop Currency
+$currency = (isset($shop_settings['default_currency']) && !empty($shop_settings['default_currency'])) ?
+$shop_settings['default_currency'] : 'USD';
 @endphp
 
 @extends('client.layouts.client-layout')
@@ -11,80 +12,81 @@
 
 @section('content')
 
-    {{-- Quote Details Modal --}}
-    <div class="modal fade" id="quoteDetailsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="quoteDetailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="quoteDetailsModalLabel">Customer Quote Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                </div>
+{{-- Quote Details Modal --}}
+<div class="modal fade" id="quoteDetailsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="quoteDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quoteDetailsModalLabel">Customer Quote Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
             </div>
         </div>
     </div>
+</div>
 
-    {{-- Page Title --}}
-    <div class="pagetitle">
-        <h1>{{ __('Customer Quotes')}}</h1>
-        <div class="row">
-            <div class="col-md-8">
-                <nav>
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('client.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('Customer Quotes') }}</li>
-                    </ol>
-                </nav>
-            </div>
+{{-- Page Title --}}
+<div class="pagetitle">
+    <h1>{{ __('Customer Quotes')}}</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('client.dashboard') }}">{{ __('Dashboard') }}</a></li>
+                    <li class="breadcrumb-item active">{{ __('Customer Quotes') }}</li>
+                </ol>
+            </nav>
         </div>
     </div>
+</div>
 
-    {{-- Customer Quotes Section --}}
-    <section class="section dashboard">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="quotesTable">
-                                <thead>
-                                    <tr>
-                                        <th>{{ __('Name') }}</th>
-                                        <th>{{ __('Email') }}</th>
-                                        <th>{{ __('Time') }}</th>
-                                        <th>{{ __('Actions') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($customer_quotes as $customer_quote)
-                                        <tr>
-                                            <td>{{ $customer_quote->firstname; }} {{ $customer_quote->lastname; }}</td>
-                                            <td>{{ $customer_quote->email; }}</td>
-                                            <td>{{ $customer_quote->created_at->diffForHumans() }}</td>
-                                            <td>
-                                                <a onclick="QuoteDetails({{ $customer_quote->id }})" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+{{-- Customer Quotes Section --}}
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="quotesTable">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('Name') }}</th>
+                                    <th>{{ __('Email') }}</th>
+                                    <th>{{ __('Time') }}</th>
+                                    <th>{{ __('Actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($customer_quotes as $customer_quote)
+                                <tr>
+                                    <td>{{ $customer_quote->firstname }} {{ $customer_quote->lastname }}</td>
+                                    <td>{{ $customer_quote->email }}</td>
+                                    <td>{{ $customer_quote->created_at->diffForHumans() }}</td>
+                                    <td>
+                                        <a onclick="QuoteDetails({{ $customer_quote->id }})"
+                                            class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
         </div>
-    </section>
+
+    </div>
+</section>
 
 @endsection
 
 
 {{-- Custom Script --}}
 @section('page-js')
-    <script type="text/javascript">
-
-        $('#quotesTable').DataTable({
+<script type="text/javascript">
+    $('#quotesTable').DataTable({
             "ordering": false
         });
 
@@ -303,6 +305,25 @@
             $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(html);
         }
 
+       function sentInvoice(invoiceSentId){
+
+         $.ajax({
+             type:"POST",
+             url:"{{ route('customer.invoice.sent') }}",
+             data:{
+                "_token" : "{{ csrf_token() }}",
+                "invoice_sent_id" : invoiceSentId,
+             },
+             dataType: "JSON",
+             success: function (response) {
+                if(response.success == 1){
+                    toastr.success(response.message);
+                    }else{
+                        toastr.error(response.message);
+                    }
+             }
+        });
+      }
         // Function for Edit Quote Reply
         function editQuoteReply(quoteReplyID){
             $.ajax({
@@ -323,6 +344,7 @@
                 }
             });
         }
+
 
         // Reset Customer Quote Reply Form
         function resetQuoteReplyForm(){
@@ -363,5 +385,5 @@
             $('#quoteDetailsModal #quoteReplyForm .main_item_price_div').append(reset_form);
         }
 
-    </script>
+</script>
 @endsection

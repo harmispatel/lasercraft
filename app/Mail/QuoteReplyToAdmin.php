@@ -7,12 +7,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class QuoteReplyMail extends Mailable
+class QuoteReplyToAdmin extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $details;
-
     /**
      * Create a new message instance.
      *
@@ -30,10 +29,7 @@ class QuoteReplyMail extends Mailable
      */
     public function build()
     {
-        return $this->from(env('MAIL_USERNAME'), 'Mahantam Laser Crafts')
-              ->attach(public_path('admin_uploads/quote_replies_docs/'.$this->details['file_name']), [
-            'as' => $this->details['file_name'], // Attachment file name
-            'mime' => 'application/pdf', // MIME type
-        ])->subject('Your '.$this->details['doc_name'].' from Mahantam Laser Crafts')->view('mails.customer_quote_reply');
+         return $this->from($this->details['to_email'])
+         ->subject($this->details['doc_name'].' Sent Confirmation')->view('mails.quote_reply_to_admin');
     }
 }
