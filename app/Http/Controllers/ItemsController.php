@@ -110,20 +110,36 @@ class ItemsController extends Controller
             $item->save();
 
             // Multiple Images
-            $all_images = (isset($request->og_image)) ? $request->og_image : [];
-            if(count($all_images) > 0)
-            {
-                foreach($all_images as $image)
-                {
-                    $image_token = genratetoken(10);
-                    $og_image = $image;
-                    $image_arr = explode(";base64,", $og_image);
-                    $image_type_ext = explode("image/", $image_arr[0]);
-                    $image_base64 = base64_decode($image_arr[1]);
+            $all_crp_images = (isset($request->crp_image)) ? $request->crp_image : [];
+            $all_og_images = (isset($request->og_image)) ? $request->og_image : [];
 
+            if(count($all_crp_images) > 0)
+            {
+                foreach($all_crp_images as $img_key => $crp_image)
+                {
+                    $og_image = (isset($all_og_images[$img_key])) ? $all_og_images[$img_key] : '';
+
+                    $image_token = genratetoken(10);
+
+                    // Both Image Array
+                    $crp_image_arr = explode(";base64,", $crp_image);
+                    $og_image_arr = explode(";base64,", $og_image);
+
+                    // Extension
+                    $image_type_ext = explode("image/", $crp_image_arr[0]);
+
+                    // Both Image Name
                     $imgname = "item_".$image_token.".".$image_type_ext[1];
-                    $img_path = public_path('client_uploads/items/'.$imgname);
-                    file_put_contents($img_path,$image_base64);
+
+                    // Crop Image
+                    $crp_image_base64 = base64_decode($crp_image_arr[1]);
+                    $crp_img_path = public_path('client_uploads/items/'.$imgname);
+                    file_put_contents($crp_img_path,$crp_image_base64);
+
+                    // Og Image
+                    $og_image_base64 = base64_decode($og_image_arr[1]);
+                    $og_img_path = public_path('client_uploads/items/og_images/'.$imgname);
+                    file_put_contents($og_img_path,$og_image_base64);
 
                     // Insert Image
                     $new_img = new ItemImages();
@@ -245,10 +261,18 @@ class ItemsController extends Controller
                 {
                     $image = (isset($item_img['image'])) ? $item_img['image'] : '';
 
+                    // Delete Crop Image
                     if(!empty($image) && file_exists('public/client_uploads/items/'.$image))
                     {
                         unlink('public/client_uploads/items/'.$image);
                     }
+
+                    // Delete Original Image
+                    if(!empty($image) && file_exists('public/client_uploads/items/og_images/'.$image))
+                    {
+                        unlink('public/client_uploads/items/og_images/'.$image);
+                    }
+
                     ItemImages::where('id',$item_img['id'])->delete();
                 }
             }
@@ -1218,24 +1242,39 @@ class ItemsController extends Controller
                 $item->$description_key = $item_description;
 
                 // Multiple Images
-                $all_images = (isset($request->og_image)) ? $request->og_image : [];
-                if(count($all_images) > 0)
+                $all_crp_images = (isset($request->crp_image)) ? $request->crp_image : [];
+                $all_og_images = (isset($request->og_image)) ? $request->og_image : [];
+                if(count($all_crp_images) > 0)
                 {
-                    foreach($all_images as $image)
+                    foreach($all_crp_images as $img_key => $crp_image)
                     {
-                        $image_token = genratetoken(10);
-                        $og_image = $image;
-                        $image_arr = explode(";base64,", $og_image);
-                        $image_type_ext = explode("image/", $image_arr[0]);
-                        $image_base64 = base64_decode($image_arr[1]);
+                        $og_image = (isset($all_og_images[$img_key])) ? $all_og_images[$img_key] : '';
 
+                        $image_token = genratetoken(10);
+
+                        // Both Image Array
+                        $crp_image_arr = explode(";base64,", $crp_image);
+                        $og_image_arr = explode(";base64,", $og_image);
+
+                        // Extension
+                        $image_type_ext = explode("image/", $crp_image_arr[0]);
+
+                        // Both Image Name
                         $imgname = "item_".$image_token.".".$image_type_ext[1];
-                        $img_path = public_path('client_uploads/items/'.$imgname);
-                        file_put_contents($img_path,$image_base64);
+
+                        // Crop Image
+                        $crp_image_base64 = base64_decode($crp_image_arr[1]);
+                        $crp_img_path = public_path('client_uploads/items/'.$imgname);
+                        file_put_contents($crp_img_path,$crp_image_base64);
+
+                        // Og Image
+                        $og_image_base64 = base64_decode($og_image_arr[1]);
+                        $og_img_path = public_path('client_uploads/items/og_images/'.$imgname);
+                        file_put_contents($og_img_path,$og_image_base64);
 
                         // Insert Image
                         $new_img = new ItemImages();
-                        $new_img->item_id = $item_id;
+                        $new_img->item_id = $item->id;
                         $new_img->image = $imgname;
                         $new_img->save();
                     }
@@ -1407,24 +1446,40 @@ class ItemsController extends Controller
                 $item->$act_lang_description_key = $item_description;
 
                 // Multiple Images
-                $all_images = (isset($request->og_image)) ? $request->og_image : [];
-                if(count($all_images) > 0)
-                {
-                    foreach($all_images as $image)
-                    {
-                        $image_token = genratetoken(10);
-                        $og_image = $image;
-                        $image_arr = explode(";base64,", $og_image);
-                        $image_type_ext = explode("image/", $image_arr[0]);
-                        $image_base64 = base64_decode($image_arr[1]);
+                $all_crp_images = (isset($request->crp_image)) ? $request->crp_image : [];
+                $all_og_images = (isset($request->og_image)) ? $request->og_image : [];
 
+                if(count($all_crp_images) > 0)
+                {
+                    foreach($all_crp_images as $img_key => $crp_image)
+                    {
+                        $og_image = (isset($all_og_images[$img_key])) ? $all_og_images[$img_key] : '';
+
+                        $image_token = genratetoken(10);
+
+                        // Both Image Array
+                        $crp_image_arr = explode(";base64,", $crp_image);
+                        $og_image_arr = explode(";base64,", $og_image);
+
+                        // Extension
+                        $image_type_ext = explode("image/", $crp_image_arr[0]);
+
+                        // Both Image Name
                         $imgname = "item_".$image_token.".".$image_type_ext[1];
-                        $img_path = public_path('client_uploads/items/'.$imgname);
-                        file_put_contents($img_path,$image_base64);
+
+                        // Crop Image
+                        $crp_image_base64 = base64_decode($crp_image_arr[1]);
+                        $crp_img_path = public_path('client_uploads/items/'.$imgname);
+                        file_put_contents($crp_img_path,$crp_image_base64);
+
+                        // Og Image
+                        $og_image_base64 = base64_decode($og_image_arr[1]);
+                        $og_img_path = public_path('client_uploads/items/og_images/'.$imgname);
+                        file_put_contents($og_img_path,$og_image_base64);
 
                         // Insert Image
                         $new_img = new ItemImages();
-                        $new_img->item_id = $item_id;
+                        $new_img->item_id = $item->id;
                         $new_img->image = $imgname;
                         $new_img->save();
                     }
@@ -2256,9 +2311,16 @@ class ItemsController extends Controller
 
             $image = isset($item_image['image']) ? $item_image['image'] : '';
 
+            // Delete Crop Image
             if(!empty($image) && file_exists('public/client_uploads/items/'.$image))
             {
                 unlink('public/client_uploads/items/'.$image);
+            }
+
+            // Delete Original Image
+            if(!empty($image) && file_exists('public/client_uploads/items/og_images/'.$image))
+            {
+                unlink('public/client_uploads/items/og_images/'.$image);
             }
 
             ItemImages::where('id',$image_id)->delete();

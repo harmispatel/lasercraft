@@ -62,8 +62,8 @@
                                             @if(count($item_details->itemImages) > 0)
                                                 @foreach ($item_details->itemImages as $item_image)
                                                     <div class="swiper-slide">
-                                                        @if(!empty($item_image['image']) && file_exists('public/client_uploads/items/'.$item_image['image']))
-                                                            <img src="{{ asset('public/client_uploads/items/'.$item_image['image']) }}" class="w-100" />
+                                                        @if(!empty($item_image['image']) && file_exists('public/client_uploads/items/og_images/'.$item_image['image']))
+                                                            <img src="{{ asset('public/client_uploads/items/og_images/'.$item_image['image']) }}" class="w-100" />
                                                         @else
                                                             <img src="{{ asset('public/client_images/not-found/no_image_1.jpg') }}" class="w-100" />
                                                         @endif

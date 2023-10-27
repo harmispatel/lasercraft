@@ -473,6 +473,7 @@
         var addItemEditor;
         var editItemEditor;
         var addKey=0;
+        var og_img = '';
 
         // Reset AddItem Modal & Form
         $('#NewItemBtn').on('click',function()
@@ -833,7 +834,6 @@
                 }
             });
         }
-
 
 
         // Function for Delete Item
@@ -1652,12 +1652,20 @@
         // Image Cropper Functionality for Add Model
         $('#addItemModal #image').on('change',function()
         {
+            og_img = '';
             const myFormID = this.form.id;
             const currentFile = this.files[0];
             var fitPreview = 0;
 
             if (currentFile)
             {
+                // Og Image base64encode
+                var og_rader = new FileReader();
+                og_rader.onloadend = function() {
+                    og_img = og_rader.result;
+                }
+                og_rader.readAsDataURL(currentFile);
+
                 var catImage = new Image();
                 catImage.src = URL.createObjectURL(currentFile);
                 catImage.onload = function()
@@ -1714,12 +1722,20 @@
         // Image Cropper Functionality for Edit Modal
         function imageCropper(formID,ele)
         {
+            og_img = '';
             var currentFile = ele.files[0];
             var myFormID = formID;
             var fitPreview = 0;
 
             if (currentFile)
             {
+                // Og Image base64encode
+                var og_rader = new FileReader();
+                og_rader.onloadend = function() {
+                    og_img = og_rader.result;
+                }
+                og_rader.readAsDataURL(currentFile);
+
                 var catImage = new Image();
                 catImage.src = URL.createObjectURL(currentFile);
                 catImage.onload = function()
@@ -1790,7 +1806,7 @@
             $('#'+formID+' .img-crop-sec').hide();
             $('#'+formID+' #image').val('');
             $('#'+formID+' #item_image').val('');
-            $('#'+formID+' #og_image').val('');
+            $('#'+formID+' #crp_image').val('');
         }
 
 
@@ -1810,17 +1826,19 @@
                 var image = URL.createObjectURL(blob);
                 html += '<div class="inner-img img_'+addKey+'">'
                     html += '<img src="'+image+'" class="w-100 h-100">';
-                    html += '<a class="btn btn-sm btn-danger del-pre-btn" onclick="$(\'#'+formID+' .img_'+addKey+', #'+formID+' #img_inp_'+addKey+'\').remove()"><i class="fa fa-trash"></a>';
+                    html += '<a class="btn btn-sm btn-danger del-pre-btn" onclick="$(\'#'+formID+' .img_'+addKey+', #'+formID+' .img_inp_'+addKey+'\').remove()"><i class="fa fa-trash"></a>';
                 html += '</div>';
-
                 $('#'+formID+" #images_div").append(html);
+
+                // Crop Image
                 url = URL.createObjectURL(blob);
                 var reader = new FileReader(url);
                 reader.readAsDataURL(blob);
                 reader.onloadend = function()
                 {
                     var base64data = reader.result;
-                    $('#'+formID+' #img-val').append('<input type="hidden" name="og_image[]" value="'+base64data+'" id="img_inp_'+addKey+'">');
+                    $('#'+formID+' #img-val').append('<input type="hidden" name="crp_image[]" value="'+base64data+'" class="img_inp_'+addKey+'">');
+                    $('#'+formID+' #img-val').append('<input type="hidden" name="og_image[]" value="'+og_img+'" class="img_inp_'+addKey+'">');
                 };
 
                 // $('#'+formID+" #crp-img-prw").attr('src',URL.createObjectURL(blob));
@@ -1830,7 +1848,7 @@
                 // reader.onloadend = function()
                 // {
                 //     var base64data = reader.result;
-                //     $('#'+formID+' #og_image').val(base64data);
+                //     $('#'+formID+' #crp_image').val(base64data);
                 // };
             });
 
@@ -1853,7 +1871,7 @@
 
             $('#'+formID+' #resize-image').attr('src',"");
             $('#'+formID+' .img-crop-sec').hide();
-            $('#'+formID+' #og_image').val('');
+            $('#'+formID+' #crp_image').val('');
             $('#'+formID+" #del-img").remove();
 
             if(formID == 'addItemForm')

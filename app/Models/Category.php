@@ -19,6 +19,11 @@ class Category extends Model
         return $this->hasMany(CategoryImages::class,'category_id','id');
     }
 
+    public function parentCategory()
+    {
+        return $this->hasOne(Category::class,'id','parent_id');
+    }
+
     // Get SubCategories
     public function subcategories()
     {

@@ -18,6 +18,9 @@
     $dynamic_pages = \App\Models\Category::where('category_type','page')->where('published',1)->get();
 
     $client_settings = getClientSettings();
+
+    $current_route_name = Route::currentRouteName();
+    $current_route_params =Route::current()->parameters();
 @endphp
 
 
@@ -45,7 +48,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{{ route('home') }}">Home</a>
+                            <a class="nav-link {{ ($current_route_name == 'home') ? 'active' : '' }}" aria-current="page" href="{{ route('home') }}">Home</a>
                         </li>
 
                         @if(count($parent_categories) > 0)
@@ -54,7 +57,7 @@
                                     @php
                                         $menu_count = 1;
                                     @endphp
-                                    <a class="nav-link dropdown-toggle" href="{{ route('categories.collections',$parent_cat['id']) }}" data-bs-toggle="dropdown">{{ $parent_cat[$name_key] }}</a>
+                                    <a class="nav-link dropdown-toggle {{ (($current_route_name == 'categories.collections' && isset($cat_details['parent_id']) && $cat_details['parent_id'] == $parent_cat['id']) || ($current_route_name == 'categories.collections' && isset($cat_details->parentCategory['parent_id']) && $cat_details->parentCategory['parent_id'] == $parent_cat['id'])) ? 'active' : '' }}" href="{{ route('categories.collections',$parent_cat['id']) }}" data-bs-toggle="dropdown">{{ $parent_cat[$name_key] }}</a>
 
                                     @if(count($parent_cat->subcategories) > 0)
                                         @include('frontend.child_categories_menu',['subcategories' => $parent_cat->subcategories,'parent_key'=>$menu_count])
@@ -64,11 +67,11 @@
                         @endif
 
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="" data-bs-toggle="dropdown">Custom PRINTS</a>
+                            <a class="nav-link dropdown-toggle {{ (($current_route_name == 'prints.page')) ? 'active' : '' }}" href="" data-bs-toggle="dropdown">Custom PRINTS</a>
                             <ul class="dropdown-menu">
                                 @if(count($dynamic_pages) > 0)
                                     @foreach ($dynamic_pages as $dpage)
-                                        <li><a class="dropdown-item" href="{{ route('prints.page',encrypt($dpage['id'])) }}">{{ $dpage[$name_key] }}</a></li>
+                                        <li><a class="dropdown-item {{ (($current_route_name == 'prints.page') && (isset($page_details['id'])) && ($page_details['id'] == $dpage['id'])) ? 'sub-active' : '' }}" href="{{ route('prints.page',encrypt($dpage['id'])) }}">{{ $dpage[$name_key] }}</a></li>
                                     @endforeach
                                 @endif
                             </ul>
