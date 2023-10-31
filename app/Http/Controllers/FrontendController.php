@@ -27,7 +27,7 @@ class FrontendController extends Controller
         $current_date = Carbon::now()->format('Y-m-d');
 
         $cat_details = Category::where('id',$catID)->first();
-        $items = Items::with(['itemImages','itemPrices'])->where('category_id',$catID)->where('published',1)->get();
+        $items = Items::with(['itemImages','itemPrices'])->where('category_id',$catID)->where('published',1)->orderBy('order_key','ASC')->get();
         $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
         $sub_categories = Category::where('parent_id',$catID)->orderBy('order_key')->where('published',1)->get();
 
@@ -93,7 +93,7 @@ class FrontendController extends Controller
         $cat_id = (isset($item_details['category_id'])) ? $item_details['category_id'] : '';
 
         // Related Items
-        $related_items = Items::with(['itemImages','itemPrices'])->where('id','!=',$itemID)->where('category_id',$cat_id)->where('published',1)->get();
+        $related_items = Items::with(['itemImages','itemPrices'])->where('id','!=',$itemID)->where('category_id',$cat_id)->where('published',1)->orderBy('order_key','asc')->get();
 
         // Child Categories
         $child_categories = Category::where('parent_id','!=',NULL)->orderBy('order_key')->where('published',1)->get();
@@ -229,7 +229,7 @@ class FrontendController extends Controller
         try
         {
             $items_count = Items::where("$name_key",'LIKE','%'.$keyword.'%')->where('published',1)->count();
-            $items = Items::with(['itemImages','itemPrices'])->where("$name_key",'LIKE','%'.$keyword.'%')->where('published',1)->get();
+            $items = Items::with(['itemImages','itemPrices'])->where("$name_key",'LIKE','%'.$keyword.'%')->where('published',1)->orderBy('order_key','ASC')->get();
 
             if(!empty($keyword) && $items_count > 0)
             {
