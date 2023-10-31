@@ -14,7 +14,7 @@ class CustomerQuoteController extends Controller
     // Function for Get All Customer Quotes
     function index()
     {
-        $data['customer_quotes'] = CustomerQuote::oldest()->get();
+        $data['customer_quotes'] = CustomerQuote::latest()->get();
         return view('client.customer_quotes.customer_quotes',$data);
     }
 
