@@ -53,7 +53,7 @@
 
                         @if(count($parent_categories) > 0)
                             @foreach ($parent_categories as $parent_cat)
-                                <li class="nav-item dropdown">
+                                <li class="nav-item mainmenu">
                                     @php
                                         $menu_count = 1;
                                     @endphp
@@ -66,12 +66,12 @@
                             @endforeach
                         @endif
 
-                        <li class="nav-item dropdown">
+                        <li class="nav-item mainmenu">
                             <a class="nav-link dropdown-toggle {{ (($current_route_name == 'prints.page')) ? 'active' : '' }}" href="" data-bs-toggle="dropdown">Custom PRINTS</a>
                             <ul class="dropdown-menu">
                                 @if(count($dynamic_pages) > 0)
                                     @foreach ($dynamic_pages as $dpage)
-                                        <li><a class="dropdown-item {{ (($current_route_name == 'prints.page') && (isset($page_details['id'])) && ($page_details['id'] == $dpage['id'])) ? 'sub-active' : '' }}" href="{{ route('prints.page',encrypt($dpage['id'])) }}">{{ $dpage[$name_key] }}</a></li>
+                                        <li class="mainmenu_inr"><a class="dropdown-item {{ (($current_route_name == 'prints.page') && (isset($page_details['id'])) && ($page_details['id'] == $dpage['id'])) ? 'sub-active' : '' }}" href="{{ route('prints.page',encrypt($dpage['id'])) }}">{{ $dpage[$name_key] }}</a></li>
                                     @endforeach
                                 @endif
                             </ul>

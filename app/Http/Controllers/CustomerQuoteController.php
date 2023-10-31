@@ -255,6 +255,13 @@ class CustomerQuoteController extends Controller
             $details['file_name'] = (isset($quote_reply_details['invoice_file'])) ? $quote_reply_details['invoice_file'] : '';
             $details['doc_name'] = 'Invoice';
 
+            if(empty($details['file_name']) || $details['file_name'] == null)
+            {
+                return response()->json([
+                    'success' => 0,
+                    'message' => 'Invoice not Found!',
+                ]);
+            }
 
             if(!empty($from_email) && !empty($to_email))
             {
