@@ -398,5 +398,12 @@ $shop_settings['default_currency'] : 'USD';
             });
         }
 
+        $('#quoteDetailsModal').on('shown.bs.modal', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+
     </script>
 @endsection

@@ -81,7 +81,7 @@
                                                 @endif
                                             </div>
                                             <div class="col-md-6 mb-2">
-                                                <label for="company_name" class="form-label" style="color: {{ isset($styles['font_color']) ? $styles['font_color'] : '' }}">Company Name <span class="text-danger">*</span></label>
+                                                <label for="company_name" class="form-label" style="color: {{ isset($styles['font_color']) ? $styles['font_color'] : '' }}">Company Name</label>
                                                 <input type="text" name="company_name" id="company_name" placeholder="Enter Your Company Name." class="form-control {{ ($errors->has('company_name')) ? 'is-invalid' : '' }}" value="{{ old('company_name') }}">
                                                 @if($errors->has('company_name'))
                                                     <div class="invalid-feedback">
@@ -99,7 +99,7 @@
                                                 @endif
                                             </div>
                                             <div class="col-md-12 mb-2">
-                                                <label for="message" class="form-label" style="color: {{ isset($styles['font_color']) ? $styles['font_color'] : '' }}">Message <span class="text-danger">*</span></label>
+                                                <label for="message" class="form-label" style="color: {{ isset($styles['font_color']) ? $styles['font_color'] : '' }}">Message (Minimum of 50 characters): <span class="text-danger">*</span></label>
                                                 <textarea name="message" id="message" rows="5" class="w-100 form-control {{ ($errors->has('message')) ? 'is-invalid' : '' }}" placeholder="Write Your Message here...">{{ old('message') }}</textarea>
                                                 @if($errors->has('message'))
                                                     <div class="invalid-feedback">

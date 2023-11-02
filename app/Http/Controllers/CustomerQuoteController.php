@@ -62,15 +62,18 @@ class CustomerQuoteController extends Controller
                                         $html .= '<p class="text-muted mb-0">'.$quote_details['phone'].'</p>';
                                     $html .= '</div>';
                                 $html .= '</div>';
-                                $html .= '<hr>';
-                                $html .= '<div class="row">';
-                                    $html .= '<div class="col-sm-3">';
-                                        $html .= '<p class="mb-0">Company</p>';
+                                if(isset($quote_details['company_name']) && !empty($quote_details['company_name']))
+                                {
+                                    $html .= '<hr>';
+                                    $html .= '<div class="row">';
+                                        $html .= '<div class="col-sm-3">';
+                                            $html .= '<p class="mb-0">Company</p>';
+                                        $html .= '</div>';
+                                        $html .= '<div class="col-sm-9">';
+                                            $html .= '<p class="text-muted mb-0">'.$quote_details['company_name'].'</p>';
+                                        $html .= '</div>';
                                     $html .= '</div>';
-                                    $html .= '<div class="col-sm-9">';
-                                        $html .= '<p class="text-muted mb-0">'.$quote_details['company_name'].'</p>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
+                                }
                                 $html .= '<hr>';
                                 $html .= '<div class="row">';
                                     $html .= '<div class="col-sm-3">';
@@ -118,9 +121,9 @@ class CustomerQuoteController extends Controller
                                     $html .= '<div class="col-md-4 text-center mb-2">';
                                         $html .= '<div class="position-relative pdf-btn">';
 
-                                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')"><i class="bi bi-pencil"></i></a>';
+                                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')" data-bs-toggle="tooltip" title="Edit Quote"><i class="bi bi-pencil"></i></a>';
 
-                                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 45px;" onclick="sendInvoice('.$qt_rep['id'].')"><i class="bi bi-receipt"></i></a>';
+                                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 45px;" onclick="sendInvoice('.$qt_rep['id'].')" data-bs-toggle="tooltip" title="Send Invoice"><i class="bi bi-receipt"></i></a>';
 
                                             $html .= '<a target="_blank" href="'.$quote_path.'"  class="btn btn-sm d-block" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['quote_file'].'</a>';
 
@@ -226,6 +229,15 @@ class CustomerQuoteController extends Controller
     }
 
 
+    // Function for Default Invoice Mail Message
+    function defaultInvoiceMailMessage()
+    {
+        $default_message = '<p><strong>Dear [customer_name],</strong></p><p>We hope this message finds you well. We are writing to provide you with the details of your recent invoice.</p><p><strong>Invoice Number:</strong> [invoice_number]</p><p><strong>Invoice Date:</strong> [invoice_date]</p><p><strong>Amount Due:</strong> [amount_due]</p><p>Please find attached the complete invoice for your reference. Should you have any questions or concerns regarding this invoice, please do not hesitate to contact us by replying to this email.</p><p>Thank you for your continued business and prompt attention to this matter. We appreciate your timely payment.</p><p>Best regards,<br>Ronak Vaidh<br>Mahantam Laser Crafts<br>📧 admin@mahantamlasercrafts.com.au<br>🌐 www.mahantamlasercrafts.com.au&nbsp;</p>';
+
+        return $default_message;
+    }
+
+
     // Function for Send Invoice to Customer
     function sendInvoice(Request $request)
     {
@@ -249,10 +261,11 @@ class CustomerQuoteController extends Controller
             $details['user_details'] = $user_details;
             $details['quote_details'] = $quote_details;
             $details['products'] = (isset($quote_reply_details['price']) && !empty($quote_reply_details['price'])) ? unserialize($quote_reply_details['price']) : [];
-            $details['message'] = (isset($quote_reply_details['message'])) ? $quote_reply_details['message'] : '';
+            $details['message'] = $this->defaultInvoiceMailMessage();
             $details['currency'] = $currency;
             $details['to_email'] = $to_email;
             $details['file_name'] = (isset($quote_reply_details['invoice_file'])) ? $quote_reply_details['invoice_file'] : '';
+            $details['invoice_id'] = (isset($quote_reply_details['id'])) ? $quote_reply_details['id'] : '';
             $details['doc_name'] = 'Invoice';
 
             if(empty($details['file_name']) || $details['file_name'] == null)
@@ -278,6 +291,7 @@ class CustomerQuoteController extends Controller
             ]);
 
         }catch (\Throwable $th) {
+            dd($th->getMessage());
             return response()->json([
                 'success' => 0,
                 'message' => 'Internal Server Error!',
@@ -392,9 +406,9 @@ class CustomerQuoteController extends Controller
                     $html .= '<div class="col-md-4 text-center mb-2">';
                         $html .= '<div class="position-relative pdf-btn">';
 
-                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')"><i class="bi bi-pencil"></i></a>';
+                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 5px;" onclick="editQuoteReply('.$qt_rep['id'].')" data-bs-toggle="tooltip" title="Edit Quote"><i class="bi bi-pencil"></i></a>';
 
-                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 45px;" onclick="sendInvoice('.$qt_rep['id'].')"><i class="bi bi-receipt"></i></a>';
+                            $html .= '<a class="btn btn-sm btn-primary" style="position: absolute;top: 5px; left: 45px;" onclick="sendInvoice('.$qt_rep['id'].')" data-bs-toggle="tooltip" title="Send Invoice"><i class="bi bi-receipt"></i></a>';
 
                             $html .= '<a target="_blank" href="'.$quote_path.'"  class="btn btn-sm" style="background: #ccc;color: red; padding:15px;"><i class="bi bi-file-pdf"></i> '.$qt_rep['quote_file'].'</a>';
 
@@ -415,6 +429,7 @@ class CustomerQuoteController extends Controller
             ]);
 
         } catch (\Throwable $th) {
+            dd($th->getMessage());
             return response()->json([
                 'success' => 0,
                 'message' => 'Internal Server Error!',

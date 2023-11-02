@@ -1,7 +1,53 @@
 @php
+    $user_details = (isset($details['user_details'])) ? $details['user_details'] : '';
     $cust_name =  $details['quote_details']['firstname']." ".$details['quote_details']['lastname'];
     $message = $details['message'];
     $message = str_replace('[customer_name]', $cust_name, $message);
+    $products = $details['products'];
+    $currancy = $details['currency'];
+    $cgst = (isset($user_details['cgst'])) ? $user_details['cgst'] : 0;
+    $sgst = (isset($user_details['sgst'])) ? $user_details['sgst'] : 0;
+
+    $total = 0;
+
+    // Get Product Total
+    if(isset($products) && count($products) > 0)
+    {
+        $items = (isset($products['item'])) ? $products['item'] : '';
+        $prices = (isset($products['price'])) ? $products['price'] : '';
+        $quantities = (isset($products['qty'])) ? $products['qty'] : '';
+        $discounts = (isset($products['discount'])) ? $products['discount'] : '';
+
+        if(count($items) > 0)
+        {
+            foreach ($items as $key => $item)
+            {
+                $price = (isset($prices[$key])) ? $prices[$key] : 0;
+                $discount = (isset($discounts[$key])) ? $discounts[$key] : 0;
+                $quantity = (isset($quantities[$key])) ? $quantities[$key] : 0;
+                $discount_val = $price * $quantity;
+                $discount_val =($discount_val ) * $discount / 100;
+                $item_total = ($price * $quantity);
+                $item_total = $item_total - $discount_val;
+                $total += $item_total;
+            }
+        }
+
+        if($cgst > 0 && $sgst > 0)
+        {
+            $cgst_amount = ($total * $cgst) / 100;
+            $sgst_amount = ($total * $sgst) / 100;
+            $total = $total + $sgst_amount + $cgst_amount;
+        }
+    }
+
+    if($details['doc_name'] == 'Invoice'){
+        $invoice_id =  $details['invoice_id'];
+        $message = str_replace('[invoice_number]', $invoice_id, $message);
+        $message = str_replace('[invoice_date]', date('M d, Y'), $message);
+        $message = str_replace('[amount_due]', Currency::currency($currancy)->format($total), $message);
+    }
+
 @endphp
 
 <!DOCTYPE html>

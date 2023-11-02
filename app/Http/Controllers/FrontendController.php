@@ -311,7 +311,6 @@ class FrontendController extends Controller
             'lastname' => 'required',
             'email' => 'required|email',
             'phone' => 'required|min:10',
-            'company_name' => 'required',
             'message' => 'required|min:50',
             'document' => 'mimes:pdf,xls,csv,xlsx,jpg,jpeg,png,psd',
         ]);
@@ -326,7 +325,7 @@ class FrontendController extends Controller
         $customer_mail = $request->email;
         $phone = $request->phone;
         $message = $request->message;
-        $company_name = $request->company_name;
+        $company_name = (isset($request->company_name)) ? $request->company_name : '';
 
         $from_mail = $customer_mail;
         $subject = "New Customer Quote";

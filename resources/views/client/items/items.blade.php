@@ -262,6 +262,10 @@
                 <div class="modal-footer">
                     <button type="button" class="btn close-btn btn-secondary" data-bs-dismiss="modal">{{ __('Close')}}</button>
                     <a class="btn btn-primary" id="saveItem" onclick="saveItem()">{{ __('Save')}}</a>
+                    <button class="btn btn-primary" id="saveItemLoader" type="button" disabled style="display: none;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </button>
                 </div>
             </div>
         </div>
@@ -278,7 +282,11 @@
                 <div class="modal-body" id="item_lang_div">
                 </div>
                 <div class="modal-footer">
-                    <a class="btn btn-sm btn-success" onclick="updateItem()">{{ __('Update') }}</a>
+                    <a class="btn btn-sm btn-success" id="updateBtn" onclick="updateItem()">{{ __('Update') }}</a>
+                    <button class="btn btn-sm btn-success" id="updateBtnLoader" type="button" disabled style="display: none;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </button>
                 </div>
             </div>
         </div>
@@ -777,6 +785,10 @@
             $.ajax({
                 type: "POST",
                 url: "{{ route('items.store') }}",
+                beforeSend: function(){
+                    $('#saveItem').hide();
+                    $('#saveItemLoader').show();
+                },
                 data: myFormData,
                 dataType: "JSON",
                 contentType: false,
@@ -786,6 +798,8 @@
                 {
                     if(response.success == 1)
                     {
+                        $('#saveItem').show();
+                        $('#saveItemLoader').hide();
                         $('#addItemForm').trigger('reset');
                         $('#addItemModal').modal('hide');
                         toastr.success(response.message);
@@ -795,6 +809,8 @@
                     }
                     else
                     {
+                        $('#saveItem').show();
+                        $('#saveItemLoader').hide();
                         $('#addItemForm').trigger('reset');
                         $('#addItemModal').modal('hide');
                         toastr.error(response.message);
@@ -802,6 +818,9 @@
                 },
                 error: function(response)
                 {
+                    $('#saveItem').show();
+                    $('#saveItemLoader').hide();
+
                     // All Validation Errors
                     const validationErrors = (response?.responseJSON?.errors) ? response.responseJSON.errors : '';
 
@@ -1133,6 +1152,10 @@
             $.ajax({
                 type: "POST",
                 url: "{{ route('items.update.by.lang') }}",
+                beforeSend: function(){
+                    $('#updateBtn').hide();
+                    $('#updateBtnLoader').show();
+                },
                 data: myFormData,
                 dataType: "JSON",
                 contentType: false,
@@ -1142,6 +1165,9 @@
                 {
                     if(response.success == 1)
                     {
+                        $('#updateBtn').show();
+                        $('#updateBtnLoader').hide();
+
                         $('#editItemModal #item_lang_div').html('');
                         $('#editItemModal #item_lang_div').append(response.data);
 
@@ -1286,6 +1312,8 @@
                     }
                     else
                     {
+                        $('#updateBtn').show();
+                        $('#updateBtnLoader').hide();
                         $('#editItemModal').modal('hide');
                         $('#editItemModal #item_lang_div').html('');
                         toastr.error(response.message);
@@ -1293,6 +1321,8 @@
                 },
                 error: function(response)
                 {
+                    $('#updateBtn').show();
+                    $('#updateBtnLoader').hide();
                     if(response.responseJSON.errors)
                     {
                         $.each(response.responseJSON.errors, function (i, error) {
@@ -1317,6 +1347,10 @@
             $.ajax({
                 type: "POST",
                 url: "{{ route('items.update') }}",
+                beforeSend: function(){
+                    $('#updateBtn').hide();
+                    $('#updateBtnLoader').show();
+                },
                 data: myFormData,
                 dataType: "JSON",
                 contentType: false,
@@ -1326,6 +1360,8 @@
                 {
                     if(response.success == 1)
                     {
+                        $('#updateBtn').show();
+                        $('#updateBtnLoader').hide();
                         // $('#editItemModal').modal('hide');
                         toastr.success(response.message);
 
@@ -1343,6 +1379,8 @@
                     }
                     else
                     {
+                        $('#updateBtn').show();
+                        $('#updateBtnLoader').hide();
                         $('#editItemModal').modal('hide');
                         toastr.error(response.message);
                         setTimeout(() => {
@@ -1352,6 +1390,9 @@
                 },
                 error: function(response)
                 {
+                    $('#updateBtn').show();
+                    $('#updateBtnLoader').hide();
+
                     if(response.responseJSON.errors)
                     {
                         $.each(response.responseJSON.errors, function (i, error) {

@@ -40,7 +40,9 @@
                                     </td>
                                     <td>
                                         <label>To</label>
-                                        <h3 style="font-size: 20px;margin:0;">{{ isset($quote_details['company_name']) ? $quote_details['company_name'] : '' }}</h3>
+                                        @if(isset($quote_details['company_name']) && !empty($quote_details['company_name']))
+                                            <h3 style="font-size: 20px;margin:0;">{{ isset($quote_details['company_name']) ? $quote_details['company_name'] : '' }}</h3>
+                                        @endif
                                         <p style="font-size: 16px;margin:0;"><strong>Customer :</strong> {{ isset($quote_details['firstname']) ? $quote_details['firstname'] : '' }} {{ isset($quote_details['lastname']) ? $quote_details['lastname'] : '' }} </p>
                                         <p style="font-size: 16px;margin:0;"><strong>Email :</strong> {{ isset($quote_details['email']) ? $quote_details['email'] : '' }}</p>
                                         <p style="font-size: 16px;margin:0;"><strong>Phone :</strong> {{ isset($quote_details['phone']) ? $quote_details['phone'] : '' }}</p>
@@ -107,7 +109,11 @@
                                                     <td align="left" style="padding: 2px 5px 2px">{{ $item }}</td>
                                                     <td align="left" style="padding: 2px 5px 2px">{{ $quantity }}</td>
                                                     <td align="left" style="padding: 2px 5px 2px">{{ Currency::currency($currency)->format($price) }}</td>
-                                                    <td align="left" style="padding: 2px 5px 2px">- {{ $discount }}%</td>
+                                                    @if($discount > 0)
+                                                        <td align="left" style="padding: 2px 5px 2px">- {{ $discount }}%</td>
+                                                    @else
+                                                        <td align="left" style="padding: 2px 5px 2px">-</td>
+                                                    @endif
                                                     <td align="right" style="padding: 2px 5px 2px">{{ Currency::currency($currency)->format($item_total) }}</td>
                                                 </tr>
                                             @endforeach
