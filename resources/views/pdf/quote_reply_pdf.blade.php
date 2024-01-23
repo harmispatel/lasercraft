@@ -37,6 +37,7 @@
                                         <address class="text-muted">{{ isset($user_details['address']) ? $user_details['address'] : '{shop_address}' }}</address>
                                         <p style="font-size: 16px;margin:0;"><strong>Email :</strong> {{ env('MAIL_USERNAME') }}</p>
                                         {{-- <p style="font-size: 16px;margin:0;"><strong>Phone :</strong> {{ isset($user_details['mobile']) ? $user_details['mobile'] : '' }}</p> --}}
+                                        <p style="font-size: 16px; margin: 0"><strong>ABN: 33163422074</strong></p>
                                     </td>
                                     <td>
                                         <label>To</label>
